@@ -101,6 +101,13 @@ module.exports = async (req, res) => {
       }
       return send(res, 200, { ok: true, n: k });
     }
+    if (op === 'snapback') {   // bring back the safety copy of the student's progress (the current version becomes the new safety copy)
+      const [snap, bk, rv] = await redis(['HMGET', 'mf:acc:' + aid, 'snap', 'bk', 'rv']);
+      if (!bk) return send(res, 404, { error: 'no_backup' });
+      let ts = 0; try { ts = +JSON.parse(bk).ts || 0; } catch (e) { ts = 0; }
+      await redis(['HSET', 'mf:acc:' + aid, 'snap', bk, 'bk', snap || '', 'bkt', String(Date.now()), 'ts', String(Math.max(ts, Date.now())), 'rv', String((+rv || 0) + 1)]);
+      return send(res, 200, { ok: true });
+    }
     return send(res, 400, { error: 'bad_op' });
   } catch (e) { const x = err(e); return send(res, x.code, x.o); }
 };

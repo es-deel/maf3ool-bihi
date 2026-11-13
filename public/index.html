@@ -1762,6 +1762,16 @@ const store=(()=>{
  const flush=()=>{clearTimeout(tm);tm=0;if(!idbOk||!dirty)return;dirty=false;req('readwrite',s=>s.put(JSON.stringify(snap()),'snap'))};
  const sched=()=>{dirty=true;if(!tm&&idbOk)tm=setTimeout(flush,600)};
  const hasData=d=>!!(d&&(d.name||(d.st&&d.st.n)||(d.done&&Object.keys(d.done).length)||(d.led&&Object.keys(d.led).length)||(d.gb&&Object.keys(d.gb).length)||(d.ps&&d.ps.some&&d.ps.some(x=>x))));
+ /* two versions of the same student's progress (this device + the saved one) become one that has everything of both: numbers take the higher value, medals/gifts/days are united, the newer side wins only for single settings */
+ const LAST=['pos','name','bkt','snd','zoom'];
+ const mg=(x,y,xn)=>{if(x===undefined||x===null)return y===undefined?x:y;if(y===undefined||y===null)return x;
+  const t=typeof x;if(t!==typeof y)return xn?x:y;
+  if(t==='number')return Math.max(x,y);if(t==='boolean')return x||y;if(t==='string')return xn?x:y;
+  if(Array.isArray(x)||Array.isArray(y)){if(Array.isArray(x)&&Array.isArray(y)&&x.every(n=>typeof n==='number')&&y.every(n=>typeof n==='number')){const o=[];for(let i=0;i<Math.max(x.length,y.length);i++)o.push(Math.max(x[i]||0,y[i]||0));return o}return xn?x:y}
+  if(t==='object'){const o={};new Set(Object.keys(x).concat(Object.keys(y))).forEach(k=>{o[k]=mg(x[k],y[k],xn)});return o}return xn?x:y};
+ const merge=(a,b)=>{a=a||{d:{}};b=b||{d:{}};const xn=(+a.ts||0)>=(+b.ts||0),da=a.d||{},db=b.d||{},d={};
+  new Set(Object.keys(da).concat(Object.keys(db))).forEach(k=>{if(k==='_ts'||k==='t'||k.indexOf('x_')===0)return;d[k]=LAST.indexOf(k)>=0?(xn?(da[k]!==undefined?da[k]:db[k]):(db[k]!==undefined?db[k]:da[k])):mg(da[k],db[k],xn)});
+  return{v:1,ts:Date.now(),d}};
  const touch=()=>{mem._ts=Date.now();if(ls)try{ls.setItem(P+'_ts',String(mem._ts))}catch(e){}};
  const api={
   ok:!!ls,hasData,
@@ -1769,7 +1779,7 @@ const store=(()=>{
   get(k,d){return Object.prototype.hasOwnProperty.call(mem,k)?mem[k]:d},
   set(k,v){mem[k]=v;if(ls)try{ls.setItem(P+k,JSON.stringify(v))}catch(e){}touch();sched();hooks.forEach(f=>{try{f()}catch(e){}})},
   del(k){delete mem[k];if(ls)try{ls.removeItem(P+k)}catch(e){}touch();sched()},
-  snapshot:snap,flush,onSave(f){hooks.push(f)},
+  snapshot:snap,merge,flush,onSave(f){hooks.push(f)},
   /* put a whole snapshot in place of the student's data (a restore); text size and sound are kept unless the snapshot has them */
   load(s){KEYS.forEach(k=>{delete mem[k];if(ls)try{ls.removeItem(P+k)}catch(e){}});
    Object.keys(s.d||{}).forEach(k=>{if(k==='_ts'||k==='t')return;mem[k]=s.d[k];if(ls)try{ls.setItem(P+k,JSON.stringify(s.d[k]))}catch(e){}});touch();dirty=true;flush();hooks.forEach(f=>{try{f()}catch(e){}})},
@@ -5045,7 +5055,10 @@ const Dash={
     <p class="dh-sub">آخر ١٤ يومًا (الرقم = الإجابات الصحيحة في تحدّي اليوم):</p><div class="dh-days">${days.join('')}</div>
     <p class="dh-sub">نجوم الألعاب:</p><div class="dh-chips">${GAMES.map(g=>{const s=gb[g.id]|0;return`<span class="dh-chip${s?' on':''}">${em(g.ic||'joystick')} ${esc(g.t)} ${'★'.repeat(s)}${'☆'.repeat(Math.max(0,3-s))}</span>`}).join('')}</div></section>`;
   const aws=`<section class="dh-card"><h3>${em('trophy')} جوائز المعلم (${AR(aw.length)})</h3>${aw.length?`<div class="dh-chips">${aw.map(a=>`<span class="dh-chip on" title="${esc(a.n||'')}">${em(IMG[a.ic]?a.ic:'trophy')} ${esc(a.t)} <small>${dt(a.at)}</small> <button type="button" class="dh-x" data-ua="${esc(a.id)}" aria-label="احذف الجائزة ${esc(a.t)}">×</button></span>`).join('')}</div>`:'<p class="dh-sub">لم تمنح هذا الطالب جوائز بعد.</p>'}<div class="row"><button class="btn gold sm" id="dhAw" type="button">${em('trophy')} امنح جائزة أو لقبًا</button></div></section>`;
-  box.innerHTML=perf+aws+rk+bd+ch;
+  const bkp=`<section class="dh-card"><h3>${em('shield')} حفظ التقدّم</h3><p class="dh-sub">آخر حفظ في قاعدة البيانات: ${j2.ts?new Date(j2.ts).toLocaleString('ar-EG',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'—'}. ${j2.bk?'توجد نسخة احتياطية سابقة يمكن استرجاعها إن ضاع شيء من تقدّم الطالب.':'لا توجد نسخة احتياطية بعد.'}</p>${j2.bk?`<div class="row"><button class="btn ghost sm" type="button" id="dhSb">${em('shield')} استرجع النسخة الاحتياطية</button><span class="dh-sub" id="dhSbm"></span></div>`:''}</section>`;
+  box.innerHTML=perf+aws+rk+bd+ch+bkp;
+  const sb=$('#dhSb',box);if(sb)sb.onclick=async()=>{if(!sb.dataset.s){sb.dataset.s=1;sb.textContent='اضغط مرة أخرى للتأكيد: يحلّ التقدّم الاحتياطي محلّ الحالي';return}
+   sb.disabled=true;const x=await Online.api('admin',{op:'snapback',aid:r.aid},S.key);if(x.ok){$('#dhSbm',box).textContent='تم الاسترجاع ✓ وسيظهر عند الطالب في دخوله القادم.';this.studentFile(r,box)}else{sb.disabled=false;$('#dhSbm',box).textContent='تعذّر الاسترجاع'}};
   $('#dhAw',box).onclick=()=>this.awardModal([r.aid],r.name,()=>this.studentFile(r,box));
   $$('[data-ua]',box).forEach(b=>b.onclick=async()=>{const x=await Online.api('admin',{op:'unaward',aid:r.aid,id:b.dataset.ua},S.key);if(x.ok)this.studentFile(r,box)})},
  /* give a title / medal to one or several students: they see it as a banner and in their cabinet */
@@ -5233,7 +5246,8 @@ const Online={
  K:'mf_acct',TK:'mf_tk',
  stat:{ok:null,at:0},lastSig:'',busy:0,
  acct(){try{const o=JSON.parse(localStorage.getItem(this.K)||'null');return o&&o.aid?o:null}catch(e){return null}},
- setAcct(o){try{if(o)localStorage.setItem(this.K,JSON.stringify(o));else localStorage.removeItem(this.K)}catch(e){}},
+ setAcct(o){try{if(o){localStorage.setItem(this.K,JSON.stringify(o));localStorage.setItem('mf_last',o.aid)}else localStorage.removeItem(this.K)}catch(e){}},
+ lastAid(){try{return localStorage.getItem('mf_last')||''}catch(e){return''}},
  why:{bad_name:'اكتب اسمك بحرفين على الأقل.',bad_phone:'اكتب رقم هاتف صحيحًا (أرقام فقط، ٨ إلى ١٥ رقمًا).',bad_class:'اختر الفصل من القائمة.',class_full:'اكتمل عدد طلاب هذا الفصل؛ أخبر معلمك.',
   no_db:'قاعدة البيانات لم تُربط بعد؛ أخبر معلمك.',no_account:'لا يوجد حساب بهذا الرقم. جرّب «طالب جديد».',net:'تعذّر الاتصال بالإنترنت. تأكد من الاتصال وحاول مرة أخرى.',server:'تعذّر الحفظ الآن، حاول لاحقًا.',
   bad_key:'مفتاح المعلم غير صحيح.',no_teacher_key:'لم يُضبط مفتاح المعلم على الخادم.'},
@@ -5242,7 +5256,8 @@ const Online={
    const j=await r.json().catch(()=>({}));return Object.assign({http:r.status},j)}catch(e){return{ok:false,error:'net'}}},
  err(r){return this.why[r.error]||this.why.server},
  /* ---------- what the teacher sees about this student ---------- */
- sig(){try{return[Score.total(),Bonus.pts(),Incomplete.answered(),NAME(),ST.n].join('|')}catch(e){return''}},
+ /* the fingerprint of everything saved for the student (medals, gifts, titles, games, challenges… not only the score), so ANY change is sent to the database */
+ sig(){try{const j=JSON.stringify(store.snapshot().d);let h=5381;for(let i=0;i<j.length;i++)h=((h<<5)+h+j.charCodeAt(i))|0;return j.length+':'+h+'|'+Score.total()+'|'+NAME()+'|'+ST.n}catch(e){return''}},
  where(){try{const t=TABS[S.tab];return t?t.title:''}catch(e){return''}},
  /* the detailed snapshot the teacher's page turns into a full report (the result code alone carries only the summary) */
  detail(){try{const R=REP(),A=Ach.get(),cut=(x,n)=>String(x==null?'':x).slice(0,n);
@@ -5251,22 +5266,28 @@ const Online={
    pl:R.planets.map(p=>p.ok?1:0),inc:R.inc.planets.map(p=>({id:p.id,t:cut(p.title,40),i:p.items.slice(0,8).map(i=>[cut(i.t,80),cut(i.note,60)])})),incN:[R.inc.count,R.inc.nQ],
    bc:R.bc,br:R.br,best:R.best,fixed:R.fixed,sec:Math.round(ST.sec),qa:R.qa,qt:R.qt,rank:A.rank,bd:A.badges.map(b=>cut(b.n,30)),pg:[A.pages,A.pagesT],won:A.won?1:0,dc:A.dc}}catch(e){return null}},
  /* ---------- saving + sending (one call: progress snapshot, result code, detailed report) ---------- */
- async sync(o){o=o||{};const a=this.acct();if(!a||this.busy)return{ok:false,error:'busy'};
+ async sync(o){o=o||{};const a=this.acct();if(!a)return{ok:false,error:'busy'};
+  if(this.busy){this.again=1;return{ok:false,error:'busy'}}
   const sg=this.sig();if(!o.force&&sg===this.lastSig)return{ok:true,status:'same'};
   this.busy=1;
   try{try{saveST()}catch(e){}
-   const snap=store.snapshot(),body={aid:a.aid,sk:a.sk,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),snap:JSON.stringify(snap),ts:snap.ts||0,code:Code.make(),detail:this.detail()};
+   const snap=store.snapshot(),body={aid:a.aid,sk:a.sk,bv:a.bv,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),snap:JSON.stringify(snap),ts:snap.ts||0,code:Code.make(),detail:this.detail()};
    const r=await this.api('sync',body,'',JSON.stringify(body).length<60000);
-   if(r.ok){this.lastSig=sg;this.stat={ok:true,at:Date.now()};if(r.cfg)Ctl.apply(r.cfg);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);
+   if(r.ok){const a2=this.acct()||a;if(r.rv!==undefined&&a2.bv!==r.rv){a2.bv=r.rv;this.setAcct(a2)}
+    if(r.status==='old'&&r.snap){   // another device saved in between: both versions are merged (nothing of either is lost) and the merged one is sent
+     try{store.load(store.merge(store.snapshot(),JSON.parse(r.snap)));Prof.rehydrate();toast(em('check_mark_button')+' جمعتُ تقدّمك من جهازك ومن حسابك معًا')}catch(e){}
+     this.lastSig='';this.again=1}
+    else this.lastSig=sg;
+    this.stat={ok:true,at:Date.now()};if(r.cfg)Ctl.apply(r.cfg);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);
     let fin=false;try{fin=Incomplete.list().count===0}catch(e){}
-    if(fin&&!a.fin){a.fin=1;this.setAcct(a);toast(em('trophy')+' أكملتَ الرحلة، ووصل تقريرك النهائي إلى معلمك ✓')}
-    else if(!a.first&&!o.quiet){a.first=1;this.setAcct(a);toast(em('check_mark_button')+' تقدّمك محفوظ في حسابك ويصل إلى معلمك تلقائيًا')}}
+    if(fin&&!a2.fin){a2.fin=1;this.setAcct(a2);toast(em('trophy')+' أكملتَ الرحلة، ووصل تقريرك النهائي إلى معلمك ✓')}
+    else if(!a2.first&&!o.quiet){a2.first=1;this.setAcct(a2);toast(em('check_mark_button')+' تقدّمك محفوظ في حسابك ويصل إلى معلمك تلقائيًا')}}
    else{this.stat={ok:false,at:Date.now(),err:r.error};if(r.error==='bad_session'||r.error==='no_account')this.expired()}
    this.paintSave();return r}
-  finally{this.busy=0}},
+  finally{this.busy=0;if(this.again){this.again=0;setTimeout(()=>this.sync({quiet:true}),400)}}},
  /* a few seconds after progress is saved on the device; when the whole journey is finished it goes at once */
  soon(){if(!this.acct())return;clearTimeout(this.tm);let fin=false;try{fin=Incomplete.list().count===0&&!this.acct().fin}catch(e){}
-  this.tm=setTimeout(()=>this.sync(),fin?300:15000)},
+  this.tm=setTimeout(()=>this.sync(),fin?300:6000)},
  async ping(){if(document.visibilityState!=='visible')return;const a=this.acct();
   if(!a){const r=await this.api('config');if(r.ok&&r.cfg)Ctl.apply(r.cfg);return}
   const r=await this.api('sync',{aid:a.aid,sk:a.sk,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where()});if(r.ok&&r.cfg){Ctl.apply(r.cfg);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw)}else if(r.error==='bad_session'||r.error==='no_account')this.expired()},
@@ -5425,13 +5446,13 @@ const Gate={
   const sel=$('#gtC',d),m=$('#gtM',d),m2=$('#gtM2',d),msg=(e,t,c='bad')=>{e.textContent=t;e.className='dlg-err bk-msg on '+c};
   const fill=async()=>{const l=await this.classList();if(!l){sel.innerHTML='<option value="">تعذّر تحميل الفصول</option>';msg(m,Online.why.net);return}
    sel.innerHTML='<option value="">اختر فصلك…</option>'+l.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')};fill();
-  const done=(r,name)=>{Prof.setName(r.name||name);Online.setAcct({aid:r.aid,phone:r.phone,name:r.name||name,cls:r.cls,sk:r.sk});Online.lastSig='';d.hidden=true;d.innerHTML='';sfx('level');FX.confetti(30);say(`أهلًا يا ${r.name||name}! هيّا نبدأ الرحلة.`);
+  const done=(r,name)=>{Prof.setName(r.name||name);Online.setAcct({aid:r.aid,phone:r.phone,name:r.name||name,cls:r.cls,sk:r.sk,bv:0});Online.lastSig='';d.hidden=true;d.innerHTML='';sfx('level');FX.confetti(30);say(`أهلًا يا ${r.name||name}! هيّا نبدأ الرحلة.`);
    Online.sync({force:true,quiet:true});go(S.tab,S.step,true)};
-  /* restore: the saved snapshot of the account replaces this device's progress (unless this device already holds newer progress of the same account) */
+  /* restore: the saved snapshot of the account comes back in full. If this device holds progress of the SAME student that never reached the database (offline, expired session…), both are merged: nothing is lost either way */
   const restore=r=>{const a=Online.acct(),local=store.snapshot();let ok=false;
-   if(r.snap){try{const s=JSON.parse(r.snap);const sameAcc=a&&a.aid===r.aid,newer=sameAcc&&(local.ts||0)>(r.ts||0);
-    if(!newer||!store.hasData(local.d)){store.load(s);Prof.rehydrate();ok=true}}catch(e){}}
-   Prof.setName(r.name);Online.setAcct({aid:r.aid,phone:r.phone,name:r.name,cls:r.cls,sk:r.sk,first:1});Online.lastSig='';d.hidden=true;d.innerHTML='';
+   if(r.snap){try{const s=JSON.parse(r.snap),mine=store.hasData(local.d)&&((a&&a.aid===r.aid)||Online.lastAid()===r.aid||String(local.d.name||'').replace(/\s+/g,' ').trim()===String(r.name||'').replace(/\s+/g,' ').trim());
+    store.load(mine?store.merge(local,s):s);Prof.rehydrate();ok=true}catch(e){}}
+   Prof.setName(r.name);Online.setAcct({aid:r.aid,phone:r.phone,name:r.name,cls:r.cls,sk:r.sk,bv:r.rv||0,first:1});Online.lastSig='';d.hidden=true;d.innerHTML='';
    Prof.paintName();go(ok?0:S.tab,0,true);sfx('level');FX.confetti(ok?40:20);toast(ok?'✓ استرجعتُ تقدّمك يا '+esc(r.name):'✓ أهلًا بعودتك يا '+esc(r.name));Online.sync({force:true,quiet:true})};
   const login=async(aid,phone,pass,mm)=>{mm=mm||m2;msg(mm,'جارٍ التحقق…','ok');const r=await Online.api('login',{phone,pass,aid});
    if(!r.ok){msg(mm,Online.err(r));return}
@@ -5467,7 +5488,7 @@ const Gate={
    if(!sure){sure=true;$('#gtOm',d).classList.add('on');b.textContent='نعم، سجّل الخروج';return}
    b.disabled=true;const r=await Online.sync({force:true,quiet:true});
    if(!r.ok&&r.error!=='busy'){$('#gtS',d).textContent='لم يُحفظ تقدّمك في الإنترنت ('+Online.err(r)+'). لن أمسح شيئًا حتى يُحفظ.';b.disabled=false;sure=false;b.textContent='تسجيل الخروج: طالب آخر على هذا الجهاز';return}
-   Online.setAcct(null);Online.lastSig='';Online.stat={ok:null,at:0};Prof.reset();this.open('first')};
+   Online.setAcct(null);try{localStorage.removeItem('mf_last')}catch(e){}Online.lastSig='';Online.stat={ok:null,at:0};Prof.reset();this.open('first')};
   setTimeout(()=>{try{$('#gtSn',d).focus()}catch(e){}},60)}};
 Object.assign(Online.why,{session:'انتهت جلسة حسابك على هذا الجهاز؛ اكتب رقم هاتفك وكلمة المرور (إن غيّر معلمك كلمة مرورك فاكتب الجديدة).',name_taken:'هذا الاسم مسجَّل بهذا الرقم بكلمة مرور أخرى. اختر «لدي حساب» واكتب كلمة المرور الصحيحة.',bad_session:'انتهت جلسة حسابك.',bad_login:'بيانات الدخول غير صحيحة؛ تحقق منها وأعد المحاولة.',login:'انتهت جلسة الدخول؛ سجّل الدخول من جديد.',slow_down:'محاولات كثيرة؛ انتظر عشر دقائق ثم أعد المحاولة.',bad_user:'اسم المستخدم قصير (٣ أحرف على الأقل).',bad_pass:'كلمة المرور من ٦ أحرف على الأقل.',exists:'هذا المستخدم موجود بالفعل.',self:'لا يمكنك إزالة حسابك وأنت داخل به.',reg_closed:'التسجيل مغلق الآن؛ اطلب من معلمك فتحه.',no_report:'هذا الرابط غير صالح أو انتهى.',has_students:'في هذا الفصل طلاب.'});
 /* settings the teacher controls from the dashboard: they live in the database and reach the student's page with every heartbeat */
