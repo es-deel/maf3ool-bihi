@@ -7,7 +7,7 @@ module.exports = async (req, res) => {
   const b = await body(req), aid = String(b.aid || '').slice(0, 200);
   if (!aid) return send(res, 400, { error: 'bad_account' });
   try {
-    const [name, cls, phone, ts0, sk, aw, rv0, snap0, bkt0] = await redis(['HMGET', 'mf:acc:' + aid, 'name', 'cls', 'phone', 'ts', 'sk', 'aw', 'rv', 'snap', 'bkt']);
+    const [name, cls, phone, ts0, sk, aw, rv0, snap0, bkt0, rst0, ce0] = await redis(['HMGET', 'mf:acc:' + aid, 'name', 'cls', 'phone', 'ts', 'sk', 'aw', 'rv', 'snap', 'bkt', 'rst', 'ce']);
     if (!name) return send(res, 404, { error: 'no_account' });
     if (!sk || !same(b.sk || '', sk)) return send(res, 401, { error: 'bad_session' });
     const now = Date.now(), w = String(b.w || '').slice(0, 40), cmds = [['HSET', 'mf:seen:' + cls, aid, JSON.stringify({ t: now, w, cv: Math.floor(+b.cv || 0) })]];
@@ -44,6 +44,6 @@ module.exports = async (req, res) => {
       if (n > old) { await pipeline([['HSET', key, aid, String(n)], ['INCRBY', key + ':t', String(n - old)], ['EXPIRE', key, 60 * 86400], ['EXPIRE', key + ':t', 60 * 86400]]); tot += n - old; old = n; }
       wk = Object.assign({}, ef.wk, { tot, n: old });
     }
-    return send(res, 200, Object.assign({ ok: true, status, rv, cfg: ef, aw: awards, wk }, extra));
+    return send(res, 200, Object.assign({ ok: true, status, rv, cfg: ef, aw: awards, ce: ce0 === '1' ? 1 : 0, wk, rst: rst0 ? (() => { try { return JSON.parse(rst0); } catch (e) { return null; } })() : null }, extra));
   } catch (e) { return send(res, e.code === 'no_db' ? 503 : 500, { error: e.code === 'no_db' ? 'no_db' : 'server' }); }
 };

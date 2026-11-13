@@ -17,11 +17,11 @@ module.exports = async (req, res) => {
     if (!ok.length) return send(res, 401, { error: 'bad_login' });
     let aid = b.aid && ok.includes(b.aid) ? b.aid : ok.length === 1 ? ok[0] : null;
     if (!aid) return send(res, 200, { ok: true, choose: ok.map(k => { let o = {}; try { o = JSON.parse(list[k]); } catch (e) { } return { aid: k, n: o.n, c: o.c }; }) });
-    let [name, cls, snap, ts, sk, pw, rv] = await redis(['HMGET', 'mf:acc:' + aid, 'name', 'cls', 'snap', 'ts', 'sk', 'pw', 'rv']);
+    let [name, cls, snap, ts, sk, pw, rv, rst, ce] = await redis(['HMGET', 'mf:acc:' + aid, 'name', 'cls', 'snap', 'ts', 'sk', 'pw', 'rv', 'rst', 'ce']);
     if (!name) return send(res, 401, { error: 'bad_login' });
     const set = []; if (!sk) { sk = crypto.randomBytes(16).toString('hex'); set.push('sk', sk); } if (!pw) set.push('pw', hashPw(pass));
     const cmds = [['HSET', 'mf:seen:' + cls, aid, JSON.stringify({ t: Date.now() })]]; if (set.length) cmds.push(['HSET', 'mf:acc:' + aid].concat(set));
     await pipeline(cmds);
-    return send(res, 200, { ok: true, aid, name, cls, phone, sk, snap: snap || '', ts: +ts || 0, rv: +rv || 0 });
+    return send(res, 200, { ok: true, aid, name, cls, phone, sk, snap: snap || '', ts: +ts || 0, rv: +rv || 0, ce: ce === '1' ? 1 : 0, rst: rst ? (() => { try { return JSON.parse(rst); } catch (e) { return null; } })() : null });
   } catch (e) { return send(res, e.code === 'no_db' ? 503 : 500, { error: e.code === 'no_db' ? 'no_db' : 'server' }); }
 };

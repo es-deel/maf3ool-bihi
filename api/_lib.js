@@ -6,7 +6,7 @@ function parseCode(code) {
   const m = String(code || '').match(/^MFR1\.([A-Za-z0-9_-]{6,1500})\.([0-9a-z]{6})$/);
   if (!m || H(m[1]) !== m[2]) return null;
   let a; try { a = JSON.parse(b64u(m[1]).toString('utf8')); } catch (e) { return null; }
-  if (!Array.isArray(a) || (a.length !== 28 && a.length !== 30) || a[0] !== 1 || typeof a[1] !== 'string') return null;
+  if (!Array.isArray(a) || (a.length !== 28 && a.length !== 30 && a.length !== 34 && a.length !== 40) || a[0] !== 1 || typeof a[1] !== 'string') return null;
   const name = a[1].replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40); if (!name) return null;
   const v = a.slice(2); if (!v.every(x => Number.isInteger(x) && x >= 0 && x <= 1e9)) return null;
   const [t, pts, max, stars, smax, done, total, n, c] = v;
@@ -105,12 +105,23 @@ function cleanCfg(b, old) {
   if (b.rep && typeof b.rep === 'object') c.rep = cleanRep(b.rep, c.rep);
   if (['off', 'top5', 'top10', 'all'].includes(b.board)) c.board = b.board;
   if (['full', 'first'].includes(b.boardNames)) c.boardNames = b.boardNames;
+  if (b.sc && typeof b.sc === 'object') c.sc = { x: b.sc.x !== false };   // whether the extra games and the last battle count in the score (otherwise they only earn the bonus)
+  if (b.cert && typeof b.cert === 'object') c.cert = cleanCert(b.cert, c.cert);
   if ('wk' in b) {   // the weekly class goal: {on, t, goal, days, cls:[…]} starts a new one; {on:false} ends it
     const w = b.wk;
     if (!w || !w.on) c.wk = null;
     else c.wk = { id: Date.now().toString(36), t: tx(w.t, 60) || 'تحدّي الفصل الأسبوعي', goal: Math.max(10, Math.min(50000, Math.floor(+w.goal) || 300)), end: Date.now() + Math.max(1, Math.min(30, Math.floor(+w.days) || 7)) * 86400000, cls: (Array.isArray(w.cls) ? w.cls : []).map(x => tx(x, 24)).filter(Boolean).slice(0, 16), from: Date.now() };
   }
   c.v = Date.now(); return c;
+}
+const CERT_TH = ['gold', 'royal', 'emerald', 'rose', 'space'];
+/* the certificate: conditions for getting it (min) and its design (d) */
+function cleanCert(b, old) {
+  const r = Object.assign({}, old), n = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.floor(+v) || 0));
+  if ('on' in b) r.on = !!b.on;
+  if (b.min && typeof b.min === 'object') { const m = Object.assign({}, r.min), x = b.min; if ('pct' in x) m.pct = n(x.pct, 0, 100); if ('stars' in x) m.stars = n(x.stars, 0, 30); if ('games' in x) m.games = n(x.games, 0, 30); if ('daily' in x) m.daily = n(x.daily, 0, 60); ['all', 'boss'].forEach(k => { if (k in x) m[k] = !!x[k]; }); r.min = m; }
+  if (b.d && typeof b.d === 'object') { const d = Object.assign({}, r.d), x = b.d; [['title', 30], ['lead', 50], ['body', 220], ['honor', 40], ['teacher', 40], ['role', 40], ['school', 60]].forEach(([k, l]) => { if (k in x) d[k] = tx(x[k], l); }); if (CERT_TH.includes(x.theme)) d.theme = x.theme; ['stats', 'badges', 'bonus', 'logo'].forEach(k => { if (k in x) d[k] = !!x[k]; }); r.d = d; }
+  return r;
 }
 const REP_SEC = ['compare', 'topics', 'heat', 'wrong', 'plan', 'notes', 'recs', 'students', 'insights'];
 /* the look of the reports (teacher + student): school line, titles, footer, parent note, colour, which sections are printed */
@@ -124,7 +135,7 @@ function cleanRep(b, old) {
 }
 /* what one student's page receives: the global values with his class's overrides on top */
 function eff(c, cls) {
-  const o = c.byCls && cls ? c.byCls[cls] || {} : {}, r = { v: c.v, reg: c.reg !== false, hints: c.hints !== false, board: c.board || 'off', boardNames: c.boardNames || 'first', sound: c.sound !== false, fx: c.fx !== false, win: c.win || CFG0.win, rep: c.rep || {}, ct: c.ct || 0 };
+  const o = c.byCls && cls ? c.byCls[cls] || {} : {}, r = { v: c.v, reg: c.reg !== false, hints: c.hints !== false, board: c.board || 'off', boardNames: c.boardNames || 'first', sound: c.sound !== false, fx: c.fx !== false, win: c.win || CFG0.win, rep: c.rep || {}, ct: c.ct || 0, sc: c.sc || { x: true }, cert: c.cert || null };
   SCOPED.forEach(k => { r[k] = k in o ? o[k] : c[k]; });
   if ((o.cheerAt || 0) < (c.cheerAt || 0)) { r.cheer = c.cheer; r.cheerAt = c.cheerAt; }
   { const w = c.wk; if (w && w.id && w.end > Date.now() && (!w.cls || !w.cls.length || !cls || w.cls.includes(cls))) r.wk = { id: w.id, t: w.t, goal: w.goal, end: w.end }; }

@@ -138,7 +138,7 @@ main{max-width:1180px;margin:0 auto}
 /* ---------- tokens (sentence words) ---------- */
 .sent{display:flex;flex-wrap:wrap;gap:.7rem;align-items:center;font-family:var(--f-text);direction:rtl}
 .tk{--c:#fff;position:relative;display:inline-flex;flex-direction:column;align-items:center;font:700 clamp(1.7rem,4.2vw,2.5rem)/1.5 var(--f-text);padding:.05rem .85rem .1rem;border-radius:14px;background:color-mix(in srgb,var(--c) 14%,transparent);border-bottom:4px solid var(--c);color:var(--c);transition:transform .3s,box-shadow .3s,background .3s,opacity .4s}
-.tk.v{--c:var(--verb)}.tk.s{--c:var(--subj)}.tk.o{--c:var(--obj)}.tk.n{--c:#fff;border-bottom-color:#ffffff55}
+.tk.v{--c:var(--verb)}.tk.s{--c:var(--subj)}.tk.o{--c:var(--obj)}.tk.j{--c:#fb923c}.tk.nm{--c:#fbbf24}.tk.pt{--c:#fb7185}.tk.mb{--c:#f472b6}.tk.kh{--c:#60a5fa}.tk.zt{--c:#22d3ee}.tk.zp{--c:#4ade80}.tk.n{--c:#fff;border-bottom-color:#ffffff55}
 .tk.glow{background:color-mix(in srgb,var(--c) 32%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--c) 70%,transparent),0 0 28px color-mix(in srgb,var(--c) 85%,transparent);transform:scale(1.08)}
 .tk.dim{opacity:.35}
 .tk.hide{opacity:0;transform:scale(.6) translateY(-12px);pointer-events:none;width:0;padding:0;margin:0 -.35rem;overflow:hidden}
@@ -399,7 +399,7 @@ main{max-width:1180px;margin:0 auto}
 .cs-card .sent{margin-bottom:.4rem}
 .ana{display:grid;gap:.5rem;margin-top:1rem}
 .arow{display:grid;grid-template-columns:7.2rem minmax(0,1fr);gap:.8rem;align-items:center;padding:.55rem .9rem;border-radius:14px;border:1.5px solid var(--c);background:color-mix(in srgb,var(--c) 14%,transparent)}
-.arow.v{--c:var(--verb)}.arow.s{--c:var(--subj)}.arow.o{--c:var(--obj)}
+.arow.nm{--c:#fbbf24}.arow.pt{--c:#fb7185}.arow.mb{--c:#f472b6}.arow.kh{--c:#60a5fa}.arow.v{--c:var(--verb)}.arow.s{--c:var(--subj)}.arow.o{--c:var(--obj)}
 .arow b{font:400 1.2rem var(--f-display);color:var(--c)}
 .arow span b{font:700 1rem var(--f-body);color:#fff}
 .card.swap .sent{min-height:6rem}
@@ -1643,6 +1643,34 @@ body.cls .opt{min-height:4.6rem}
 .wk-bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#fde047,#4ade80);transition:width .6s}
 .wk-card small{opacity:.9}
 .wk-card.done{background:linear-gradient(135deg,#15803dcc,#0f766ecc)}
+
+/* certificate */
+.cert-cv{display:block;width:100%;max-width:60rem;height:auto;margin:0 auto;border-radius:18px;box-shadow:0 20px 50px #0008}
+.cert-act{justify-content:center;align-items:center;margin-top:.9rem}
+.cert-h{display:flex;gap:.4rem;align-items:center;justify-content:center;margin:0}
+.cert-req{list-style:none;margin:.4rem 0;padding:0;display:grid;gap:.5rem;text-align:start}
+.cert-req li{display:grid;grid-template-columns:auto 1fr auto;gap:.6rem;align-items:center;padding:.6rem .9rem;border-radius:14px;background:#ffffff14;border:1.5px solid #ffffff30}
+.cert-req li.ok{background:#16a34a33;border-color:#4ade80}
+.cert-req li b{width:1.6rem;height:1.6rem;border-radius:50%;display:grid;place-items:center;background:#0004}
+.cert-req li small{opacity:.85}
+
+/* the four groups of the lesson */
+.orr-grps{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.5rem;max-width:58rem;width:100%;margin:.2rem auto .6rem}
+.og{display:grid;gap:.25rem;text-align:start;padding:.5rem .65rem .45rem;border-radius:.95rem;background:#ffffff10;border:2px solid color-mix(in srgb,var(--gc) 45%,transparent);color:inherit;font:inherit;cursor:pointer;transition:.2s;align-content:start;min-width:0}
+.og:hover{background:#ffffff1c}.og.on{background:color-mix(in srgb,var(--gc) 22%,transparent);border-color:var(--gc);box-shadow:0 0 0 3px color-mix(in srgb,var(--gc) 35%,transparent)}
+.og.fin{border-color:#4ade80}.og.soon{opacity:.72;border-style:dashed}
+.og-h{display:flex;align-items:center;gap:.4rem;min-width:0}.og-h b{flex:none;display:grid;place-items:center;min-width:1.55rem;height:1.55rem;border-radius:50%;background:var(--gc);color:#1b0f40;font:800 .85rem var(--f-body)}
+.og-t{font:800 .86rem/1.3 var(--f-body)}
+.og-bar{display:block;height:.34rem;border-radius:1rem;background:#ffffff1c;overflow:hidden}.og-bar u{display:block;height:100%;width:0;background:var(--gc);border-radius:1rem;transition:width .5s}
+.og-n{font:700 .72rem var(--f-body);font-style:normal;opacity:.9}
+@media(max-width:700px){.orr-grps{grid-template-columns:repeat(2,minmax(0,1fr))}.og:last-child{grid-column:1/-1}}
+.orr-pl .orr-n{border-color:var(--gc,#ffffff66)}
+.orr-pl.gdim,.oleg-c.gdim{opacity:.28;filter:saturate(.5)}
+.oleg-g{flex-basis:100%;display:flex;align-items:center;gap:.5rem;margin-top:.35rem;font:800 .8rem var(--f-body);color:var(--gc)}
+.oleg-g::before{content:"";width:.7rem;height:.7rem;border-radius:50%;background:var(--gc)}
+.oleg-c{border-color:color-mix(in srgb,var(--gc,#fff) 40%,transparent)}
+.dh-grp{margin:.5rem 0 .15rem;padding-inline-start:.6rem;border-inline-start:4px solid var(--gc);font:800 .82rem var(--f-body);color:var(--gc)}
+@media(max-width:480px){.board{font-size:.92rem}.board th{font-size:.98rem;padding:.4rem .45rem}.board td{padding:.4rem .4rem;font-size:.98rem}.board td:first-child{font-size:.9rem}}
 </style></head><body><div class="sky" aria-hidden="true"><div class="stars"></div><div class="stars b"></div><img class="float-pl a" data-em="p2" alt=""><img class="float-pl b" data-em="p3" alt=""><i class="comet"></i></div>
 <header class="top"><div class="top-in">
  <div class="brand"><img data-em="logo" alt=""><div><h1>مغامرة المفعول به</h1><small>رحلة بين الكواكب مع الأستاذ إسلام قنديل</small></div></div>
@@ -2175,7 +2203,12 @@ const TOPIC={
  f:{n:'الفاعل وعلامات رفعه',tab:'subject'},
  o:{n:'المفعول به وعلامات نصبه',tab:'object'},
  d:{n:'التمييز بين الفاعل والمفعول به',tab:'compare'},
- e:{n:'الإعراب الكامل للمفعول به',tab:'parse'}};
+ e:{n:'الإعراب الكامل للمفعول به',tab:'parse'},
+ j:{n:'المفعول لأجله',tab:'ajl'},
+ z:{n:'ظرفا الزمان والمكان',tab:'zarf'},
+ k:{n:'أقسام الكلام',tab:'kalam'},
+ m:{n:'الجملة الاسمية (المبتدأ والخبر)',tab:'nom'},
+ r:{n:'علامات رفع المبتدأ والخبر',tab:'rafa'}};
 const blankST=()=>({tp:{},lv:{},ty:{},cx:{},w:[],seq:'',n:0,c:0,streak:0,best:0,fixed:0,sec:0});
 const ST=Object.assign(blankST(),store.get('st',{}));
 const NAME=()=>String(store.get('name','')||'');
@@ -2195,8 +2228,13 @@ const Score={
  lessonMax(){return LQ.reduce((s,it)=>s+it.pts,0)},
  practice(){return PB.reduce((s,c,i)=>s+(c||0)*10*(i+1),0)},
  practiceMax:300,                                                   // 5 questions × 10 × level, for the three stages
- games(){return GAMES.reduce((s,g)=>s+10*(GB[g.id]||0),0)},
- gamesMax(){return GAMES.length*30},                                // 3 stars × 10 for each game
+ /* the games section: every game's best stars × 10 (the six games, «المحقّق», and — unless the teacher turned it off — the four extra games and the last battle, worth 30 like a 3-star game) */
+ xon(){const c=typeof Ctl!=='undefined'?Ctl.cfg:null;return!(c&&c.sc&&c.sc.x===false)},
+ boss(){return(store.get('fb',null)||{}).won?30:0},
+ games(){let s=GAMES.reduce((s,g)=>s+10*(GB[g.id]||0),0);if(this.xon()){if(typeof EXTRA!=='undefined')s+=EXTRA.reduce((t,g)=>t+10*(GB[g.id]||0),0);s+=this.boss()}return s},
+ gamesMax(){return(GAMES.length+(this.xon()?(typeof EXTRA!=='undefined'?EXTRA.length:0)+1:0))*30},   // 3 stars × 10 for each game
+ /* the score by section, for «لوحتي», the certificate and the teacher's file */
+ parts(){return[{k:'lesson',n:'الدروس',v:this.lesson(),max:this.lessonMax()},{k:'practice',n:'التدريبات',v:this.practice(),max:this.practiceMax},{k:'games',n:'الألعاب والمعركة الأخيرة',v:this.games(),max:this.gamesMax()}]},
  total(){return this.lesson()+this.practice()+this.games()},
  max(){return this.lessonMax()+this.practiceMax+this.gamesMax()},
  stars(){const m=this.max();return m>0?Math.min(STARS_MAX,Math.floor(this.total()*STARS_MAX/m+1e-9)):0},   // a star for every 1/30 of the grand total
@@ -2425,21 +2463,30 @@ const Prof={
    · everything keeps moving all the time; choosing a planet zooms the camera onto it (and follows it) and opens a short summary
      of what is inside, with a button for every part
    · two small buttons make the planets bigger or smaller, and one button hides / shows the finished planets */
-const PLDESC={start:'من هنا تبدأ الرحلة',sentence:'أركانها وترتيبها وأنواع الفعل',numbers:'نكوّن كل نوع ونميّزه',subject:'تعريفه وعلامات رفعه',object:'تعريفه وعلامات نصبه',signs:'شرح كل قسم ومقارنته بالفاعل مع تدريبات',compare:'كيف نفرّق بين الفاعل والمفعول به',parse:'نُعرب المفعول به خطوة بخطوة',maps:'خرائط ولوحات تلخّص الدرس',practice:'ثلاث مراحل من السهل إلى الصعب',games:'ألعاب تفاعلية ممتعة',certificate:'الملخص وشهادة بطل المفعول به',report:'تقرير أدائك ونقاط قوتك'};
-const PLHUE={maps:140,practice:110,report:220,games:80}; /* the same picture on two planets gets another tint */
+const PLDESC={kalam:'اسم وفعل وحرف، وعلامات الاسم',nom:'المبتدأ والخبر',rafa:'علامات الرفع وإعراب المبتدأ والخبر',ajl:'سبب الفعل، وفرقه عن المفعول به',zarf:'متى؟ وأين؟ وفرقهما عن الجار والمجرور',start:'من هنا تبدأ الرحلة',sentence:'أركانها وترتيبها وأنواع الفعل',numbers:'نكوّن كل نوع ونميّزه',subject:'تعريفه وعلامات رفعه',object:'تعريفه وعلامات نصبه',signs:'شرح كل قسم ومقارنته بالفاعل مع تدريبات',compare:'كيف نفرّق بين الفاعل والمفعول به',parse:'نُعرب المفعول به خطوة بخطوة',maps:'خرائط ولوحات تلخّص الدرس',practice:'ثلاث مراحل من السهل إلى الصعب',games:'ألعاب تفاعلية ممتعة',certificate:'الملخص وشهادة بطل المفعول به',report:'تقرير أدائك ونقاط قوتك'};
+/* the lesson in four groups (+ a closing one). A planet belongs to the group that lists its id; the groups that have no planets yet are being written */
+const GROUPS=[
+ {id:'g1',t:'أنواع الكلمة',d:'الاسم والفعل والحرف',c:'#38bdf8',tabs:['kalam']},
+ {id:'g2',t:'الجملة الاسمية',d:'المبتدأ والخبر، وإعرابهما وعلامات رفعهما',c:'#4ade80',tabs:['nom','numbers','rafa']},
+ {id:'g3',t:'الجملة الفعلية والفاعل',d:'أركان الجملة الفعلية، وإعراب الفاعل وعلامات رفعه',c:'#a78bfa',tabs:['sentence','subject']},
+ {id:'g4',t:'المفعول به وأخواته',d:'المفعول به وعلامات نصبه ومقارنته بالفاعل، ثم المفعول لأجله وظرفا الزمان والمكان',c:'#2dd4bf',tabs:['object','signs','compare','parse','ajl','zarf','maps']},
+ {id:'gz',t:'التدريب والختام',d:'تدريبات وألعاب وشهادة وتقرير',c:'#ffd43b',tabs:['practice','games','certificate','report'],end:true}];
+const groupOf=id=>GROUPS.find(g=>g.tabs.includes(id))||GROUPS[GROUPS.length-1],groupNo=g=>g.end?'':AR(GROUPS.indexOf(g)+1);
+const PLHUE={kalam:200,nom:300,rafa:60,ajl:30,zarf:170,maps:140,practice:110,report:220,games:80}; /* the same picture on two planets gets another tint */
 function orrery(host){
  const SUN=TABS.findIndex(t=>t.id==='start'),timers=[],ghosts=new Set(),lit=store.get('lit',{});
  const ZL=[60,75,90,100,115,130,150,175],pf=Object.assign({z:100,hide:false},store.get('orr',{}));if(!ZL.includes(pf.z))pf.z=100;
  const done=t=>!!S.done[t.id],PL=TABS.map((t,i)=>({t,i})).filter(x=>x.i!==SUN),SB={t:TABS[SUN],i:SUN,sun:true},ALL=[SB,...PL],byI=i=>ALL.find(x=>x.i===i);
  const allDone=PL.every(p=>done(p.t)),NX=PL.find(p=>!done(p.t)),PER=[30,46,64,86];
  PL.forEach(p=>{p.dk=!allDone&&done(p.t)&&!!lit[p.t.id]});                       // finished and already celebrated before: it waits on the shelf
- const ico=t=>IMG[t.id==='start'?'sun':t.pl],tone=t=>`--c:${t.color};--h:${PLHUE[t.id]||0}deg`,orbit=()=>PL.filter(p=>!p.dk);
+ const ico=t=>IMG[t.id==='start'?'sun':t.pl],tone=t=>`--c:${t.color};--h:${PLHUE[t.id]||0}deg;--gc:${groupOf(t.id).c}`,orbit=()=>PL.filter(p=>!p.dk);
  const P0=store.get('pos'),PT=P0&&TABS.find(t=>t.id===P0.t),cont=PT&&PT.id!=='start'&&!done(PT)?{T:PT,s:Math.max(0,Math.min(+P0.s||0,PT.steps.length-1))}:null;
  host.innerHTML=`<div class="orr">
   ${cont?`<div class="orr-cont rise">${em('rocket','lg')}<span class="oc-t">تابع من حيث توقفتَ<b>${esc(cont.T.title)}</b><small>${esc(cont.T.steps[cont.s].t)}</small></span><button class="btn go sm" type="button" data-act="ocn">تابع ←</button></div>`:''}
   <div class="orr-bar"><div class="orr-cnt" id="ocnt" aria-live="polite"></div>
    <div class="orr-ctl"><span class="orr-sz" role="group" aria-label="حجم الكواكب"><span class="orr-szl" aria-hidden="true">حجم الكواكب</span><button type="button" id="ozm" data-act="oz" data-d="-1" aria-label="تصغير الكواكب">−</button><output id="ozl"></output><button type="button" id="ozp" data-act="oz" data-d="1" aria-label="تكبير الكواكب">+</button></span>
     <button class="orr-tg" id="otg" type="button" data-act="oh" aria-pressed="false"></button></div></div>
+  <div class="orr-grps" id="ogrp" role="group" aria-label="مجموعات الدرس">${GROUPS.map(g=>`<button type="button" class="og${g.tabs.length?'':' soon'}" data-act="ogp" data-g="${g.id}" style="--gc:${g.c}" aria-pressed="false" title="${esc(g.d)}" aria-label="${g.end?'':'المجموعة '+groupNo(g)+': '}${esc(g.t)}. ${esc(g.d)}"><span class="og-h">${g.end?'<b>★</b>':`<b>${groupNo(g)}</b>`}<span class="og-t">${esc(g.t)}</span></span><i class="og-bar"><u></u></i><em class="og-n"></em></button>`).join('')}</div>
   <div class="orr-stage" id="ostage" data-act="oc">
    <div class="orr-cam" id="ocam">
     ${PER.map((_,r)=>`<i class="orr-ring" data-r="${r}"></i>`).join('')}
@@ -2450,7 +2497,7 @@ function orrery(host){
    <div class="orr-info" id="oinfo" data-act="oi" hidden></div>
   </div>
   <p class="orr-tip" id="otip"></p>
-  <div class="orr-leg" id="oleg">${PL.map((p,k)=>`<button class="oleg-c${NX&&NX.i===p.i?' nx':''}" type="button" data-act="op" data-oi="${p.i}"${p.dk?' hidden':''}><b>${AR(k+1)}</b>${esc(p.t.title)}</button>`).join('')}</div>
+  <div class="orr-leg" id="oleg">${PL.map((p,k)=>`${k===0||groupOf(PL[k-1].t.id)!==groupOf(p.t.id)?`<span class="oleg-g" style="--gc:${groupOf(p.t.id).c}">${groupOf(p.t.id).end?'':'المجموعة '+groupNo(groupOf(p.t.id))+': '}${esc(groupOf(p.t.id).t)}</span>`:''}<button class="oleg-c${NX&&NX.i===p.i?' nx':''}" type="button" data-act="op" data-oi="${p.i}" style="--gc:${groupOf(p.t.id).c}"${p.dk?' hidden':''}><b>${AR(k+1)}</b>${esc(p.t.title)}</button>`).join('')}</div>
   <section class="orr-dock" id="odock" aria-labelledby="odT">
    <h3 id="odT">الكواكب المنتهية <b id="odn"></b></h3>
    <div class="dk-row">${PL.map(p=>`<button class="dk-c" type="button" data-act="op" data-oi="${p.i}" style="${tone(p.t)}"${p.dk?'':' hidden'}><img src="${IMG[p.t.pl]}" alt=""><span>${esc(p.t.title)}</span><i>✓</i></button>`).join('')}</div>
@@ -2470,6 +2517,11 @@ function orrery(host){
   return{items,q,pts,unit,d:items.filter(x=>x.ok).length}};
  const openTo=(T,o)=>{if(T.id==='start')return go(SUN,1);const f=o.items.findIndex(x=>!x.ok);jumpTo(o.items[done(T)||f<0?0:f].j)};
 
+ /* ---- the four groups: progress of each, and the chosen one lights its planets while the others dim ---- */
+ let sg=null;
+ const paintGrp=()=>{GROUPS.forEach(g=>{const b=$(`.og[data-g=${g.id}]`,host);if(!b)return;const ps=PL.filter(p=>g.tabs.includes(p.t.id)),n=ps.filter(p=>done(p.t)).length;b.classList.toggle('on',sg===g.id);b.classList.toggle('fin',!!ps.length&&n===ps.length);b.setAttribute('aria-pressed',String(sg===g.id));
+   $('.og-n',b).textContent=ps.length?`${AR(n)} من ${AR(ps.length)}`:'قيد الإعداد';$('.og-bar u',b).style.width=(ps.length?Math.round(n*100/ps.length):0)+'%'});
+  PL.forEach(p=>{const d=sg&&groupOf(p.t.id).id!==sg;p.el.classList.toggle('gdim',!!d);if(p.lg)p.lg.classList.toggle('gdim',!!d)})};
  /* ---- the bar above, the tip inside, the shelf below ---- */
  const paintBar=()=>{
   const fin=PL.filter(p=>done(p.t)).length,rem=PL.length-fin,dk=PL.filter(p=>p.dk).length,zi=ZL.indexOf(pf.z);
@@ -2481,6 +2533,7 @@ function orrery(host){
   e.innerHTML=allDone?`<span>${em('trophy','lg')} أنجزتَ كل الكواكب. ما أجمل ما فعلتَ!</span><span class="row"><button class="btn gold sm" type="button" data-act="ogo" data-t="certificate">شهادتي</button><button class="btn sky sm" type="button" data-act="ogo" data-t="report">تقريري</button></span>`:'';
   e.hidden=!allDone;
   PL.forEach(p=>{p.lg.hidden=p.dk});
+  paintGrp();
   const tip=$('#otip',host);tip.textContent=sel!=null?'':allDone?'اضغط على أي كوكب لتراجعه':NX?`الكوكب التالي: ${NX.t.title} — اضغط على أي كوكب لتقترب منه`:'';};
 
  /* ---- the summary of the chosen planet ---- */
@@ -2550,6 +2603,8 @@ function orrery(host){
  act(host,{
   op:b=>{const i=+b.dataset.oi;if(sel===i){const x=byI(i);openTo(x.t,stat(x.t))}else{select(i);sfx('pop')}},
   og:()=>{if(sel!=null){const x=byI(sel);openTo(x.t,stat(x.t))}},
+  ogp:b=>{const g=GROUPS.find(x=>x.id===b.dataset.g);if(!g)return;if(!g.tabs.length){toast('هذه المجموعة قيد الإعداد وستُضاف دروسها قريبًا');return}
+   sg=sg===g.id?null:g.id;paintGrp();if(sg){const ps=PL.filter(p=>g.tabs.includes(p.t.id)),f=ps.find(p=>!done(p.t))||ps[0];if(f&&!f.dk)select(f.i);else select(null)}else select(null);sfx('pop')},
   os:b=>{if(sel!=null)stepTo(byI(sel),+b.dataset.n)},
   oc:()=>{if(sel!=null)select(null)},oi:()=>{},
   oz:b=>{const zi=Math.max(0,Math.min(ZL.length-1,ZL.indexOf(pf.z)+(+b.dataset.d)));pf.z=ZL[zi];store.set('orr',pf);paintBar();sfx('pop');onR()},
@@ -2928,13 +2983,19 @@ TABS.push({id:'certificate',title:'الملخص والشهادة',pl:'p2',color:
   render(sc){let sq;sc.innerHTML=`<p class="lead rise">ست أفكار تلخّص الدرس كله. اقلبها واحدة واحدة.</p><div class="flips big">${SUMM.map((s,i)=>`<button class="flip rise" style="--d:${i}" data-act="fl" data-i="${i}"><span class="face front">${s[0]}<small>اضغط لتقلب</small></span><span class="face back"><span class="bk">${s[1]}</span><span class="goto" data-act="gt" data-t="${s[2]}">اذهب إلى الكوكب ←</span></span></button>`).join('')}</div>`;
    sq=Seq.run(sc,SUMM.length,i=>{const f=$$('.flip',sc)[i];if(f&&!f.classList.contains('on')){f.classList.add('on');sfx('pop')}},{start:-1,noun:'البطاقة',fem:true,all:'البطاقات',verb:'اقلب',after:'.flips'});
    act(sc,{fl:(b,e)=>{if(e.target.closest('[data-act=gt]'))return;if(b.classList.contains('on')){b.classList.remove('on');sfx('pop')}else sq.go(+b.dataset.i)},gt:b=>{go(TABS.findIndex(t=>t.id===b.dataset.t),0)}});return()=>sq.stop()}},
- {t:'شهادة بطل المفعول به',tip:'اكتب اسمك لتحصل على شهادتك. التقط صورة للشاشة لتحتفظ بها!',
-  render(sc){const nm=store.get('name','');const n=TABS.filter(t=>S.done[t.id]).length;
+ {t:'شهادة بطل المفعول به',tip:'اكتب اسمك لتحصل على شهادتك، ثم احفظها صورة لتشاركها مع أسرتك!',
+  render(sc){const nm=store.get('name','');const n=TABS.filter(t=>S.done[t.id]).length,cf=Cert.cfg(),ck=Cert.check();
+   if(!cf.on){sc.innerHTML=`<div class="cert-form rise"><p class="sub">الشهادات غير متاحة الآن. سيُخبرك معلمك حين تُفتح.</p></div>`;return}
+   if(!ck.ok){sc.innerHTML=`<div class="cert-form rise"><h3 class="cert-h">${em('locked')} شروط الحصول على الشهادة</h3><ul class="cert-req">${ck.items.map(i=>`<li class="${i.ok?'ok':''}"><b aria-hidden="true">${i.ok?'✓':'○'}</b><span>${i.t}</span><small>${i.v}</small></li>`).join('')}</ul><p class="sub">أكمل الشروط الناقصة ثم عُد إلى هنا لتحصل على شهادتك. أنجزتَ ${AR(n)} من ${AR(TABS.length)} كوكبًا، ودرجتك ${AR(S.pts)} من ${AR(Score.max())}، ونجومك ${AR(S.stars)} من ${AR(Score.starsMax())}.</p></div>`;return}
    sc.innerHTML=`<div class="cert-form rise"><label for="nm">اكتب اسمك الكريم</label><input id="nm" class="inp" maxlength="40" autocomplete="off" value="${esc(nm)}" placeholder="اسم الطالب"><button class="btn gold" data-act="mk">أنشئ شهادتي ${em('sparkles')}</button><p class="sub">أنجزتَ ${AR(n)} من ${AR(TABS.length)} كوكبًا، ودرجتك ${AR(S.pts)} من ${AR(Score.max())}، ونجومك ${AR(S.stars)} من ${AR(Score.starsMax())}.</p></div><div id="cert"></div>`;
-   const mk=()=>{const v=($('#nm').value||'').trim()||'البطل الصغير';Prof.setName(v);const d=new Date().toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'});
-    $('#cert').innerHTML=`<div class="cert zoom-in"><div class="cert-in"><img class="clogo" src="${IMG.logo}" alt=""><h3>شهادة تفوّق</h3><p>تُمنح هذه الشهادة للبطل</p><div class="cname">${esc(v)}</div><p class="ctxt">لإتقانه درس «المفعول به والفاعل» وعلامات الرفع والنصب، والنجاح في رحلة الكواكب والألعاب.<br>فاستحقّ لقب <b>«بطل المفعول به»</b>.</p><div class="cmedals">${em('trophy','xl')}${em('1st_place_medal','xl')}${em('crown','xl')}</div><div class="cstars">${AR(S.stars)} من ${AR(Score.starsMax())} ${em('star')} نجمة · الدرجة ${AR(S.pts)} من ${AR(Score.max())}</div>${Bonus.pts()?`<div class="cbonus">${em('sparkles')} تقييم إضافي منفصل (بونص): ${NUM(Bonus.pts(),N_BPT)}${Bonus.stars()?` · ${NUM(Bonus.stars(),N_BSTAR)}`:''}</div>`:''}${typeof Ach!=='undefined'?Ach.certHTML():''}<div class="cfoot"><span>${d}</span><span class="sig">الأستاذ إسلام قنديل<small>معلم اللغة العربية</small></span></div></div></div>`;
-    FX.confetti(90);markDone('certificate',true);{const k=$('#cert .cach');if(k&&typeof Ach!=='undefined')k.outerHTML=Ach.certHTML()}progress();$('#cert').scrollIntoView({behavior:RM?'auto':'smooth',block:'center'})};
-   act(sc,{mk});$('#nm').onkeydown=e=>{if(e.key==='Enter')mk()}}},
+   let cv=null,cur='';
+   const mk=async()=>{const v=($('#nm').value||'').trim()||'البطل الصغير';Prof.setName(v);cur=v;const box=$('#cert');box.innerHTML='<p class="sub" style="text-align:center">جارٍ تجهيز شهادتك…</p>';
+    cv=await Cert.draw(v);if(!box.isConnected)return;cv.className='cert-cv zoom-in';cv.setAttribute('role','img');cv.setAttribute('aria-label',`${Cert.cfg().d.title} للطالب ${v}`);
+    box.innerHTML='';box.appendChild(cv);const row=document.createElement('div');row.className='row cert-act';
+    row.innerHTML=`<button class="btn gold" data-act="sv" type="button">${em('star')} احفظ الشهادة صورة</button>${navigator.canShare?`<button class="btn sky" data-act="sh" type="button">شاركها</button>`:''}<span class="sub" id="cSm" role="status"></span>`;box.appendChild(row);
+    FX.confetti(90);markDone('certificate',true);progress();box.scrollIntoView({behavior:RM?'auto':'smooth',block:'center'})};
+   const save=async share=>{if(!cv)return;const r=await Cert.save(cv,cur,share),m=$('#cSm');if(m)m.textContent=r==='saved'?'حُفظت الشهادة في ملف التنزيلات ✓':r==='shared'?'✓':r==='fail'?'تعذّر الحفظ؛ اضغط مطوّلًا على الشهادة واختر «حفظ الصورة».':''};
+   act(sc,{mk,sv:()=>save(false),sh:()=>save(true)});$('#nm').onkeydown=e=>{if(e.key==='Enter')mk()}}},
 ]});
 
 /* --- tab_f.js --- */
@@ -3105,7 +3166,7 @@ TABS.push({id:'games',title:'الألعاب',pl:'p6',color:'#fb923c',mentor:'boy
   render(sc){let cur=null;const api={exit:()=>{if(cur){try{cur()}catch(e){}cur=null}PU.unmount();hub()}};S.cleanup=()=>{PU.unmount();if(cur)try{cur()}catch(e){}};
    const play=g=>{sfx('level');const start=()=>{if(cur){try{cur()}catch(e){}}sc.onclick=null;PU.unmount();cur=g.run(sc,api,start)||null;PU.mount(sc,g.id);const gm=$('.gm',sc);if(gm)try{gm.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})}catch(e){}};start()};
    S.play=id=>{const g=id==='final'?FINAL_G:(GAMES.find(x=>x.id===id)||(typeof EXTRA!=='undefined'&&EXTRA.find(x=>x.id===id)));if(g)play(g)};
-   const hub=()=>{sc.innerHTML=`<p class="lead rise">${AR(GAMES.length)} مهمّات فضائية. كل إجابة صحيحة أو خاطئة لها <b>تأثير</b> تراه أمامك، والأسئلة متدرّجة من السهل إلى الصعب. فُز بكل لعبة مرة واحدة على الأقل لتُنجز الكوكب، وتُحسب لك <b>أفضل نتيجة</b> في كل لعبة (حتى ٣ نجوم، وكل نجمة تعادل ${AR(10)} نقاط في درجتك). وإذا أعدتَ لعبة سبق أن نلتَ نجومها فلك <b>بونص</b> منفصل عن الدرجة.</p><div id="wkBox">${typeof Week!=='undefined'?Week.card():''}</div><div class="games">${GAMES.map((g,i)=>`<button class="gcard rise" style="--d:${i}" data-act="pl" data-i="${i}" data-id="${g.id}"><span class="gic">${em(g.ic,'xl')}</span><h3>${g.t}</h3><p>${g.d}</p><div class="gmeta"><span>${g.g}</span><span class="lvl l2">${g.lv}</span></div><div class="sstars">${starsRow(GB[g.id]||0)}</div></button>`).join('')}${Final.card(GAMES.length)}${typeof Daily!=='undefined'?Daily.card(GAMES.length+1):''}</div>${typeof EXTRA!=='undefined'?`<p class="lead xg-lead rise">${em('sparkles')} <b>ألعاب إضافية</b> للمتعة والتدريب: نقاطها ونجومها في «البونص» ولا تغيّر درجتك.</p><div class="games">${EXTRA.map((g,i)=>`<button class="gcard xg rise" style="--d:${i}" data-act="pl" data-id="${g.id}"><span class="gic">${em(g.ic,'xl')}</span><h3>${g.t}</h3><p>${g.d}</p><div class="gmeta"><span>${g.g}</span><span class="lvl l2">${g.lv}</span></div><div class="sstars">${starsRow(GB[g.id]||0)}</div></button>`).join('')}</div>`:''}`;
+   const hub=()=>{sc.innerHTML=`<p class="lead rise">${AR(GAMES.length)} مهمّات فضائية. كل إجابة صحيحة أو خاطئة لها <b>تأثير</b> تراه أمامك، والأسئلة متدرّجة من السهل إلى الصعب. فُز بكل لعبة مرة واحدة على الأقل لتُنجز الكوكب، وتُحسب لك <b>أفضل نتيجة</b> في كل لعبة (حتى ٣ نجوم، وكل نجمة تعادل ${AR(10)} نقاط في درجتك). وإذا أعدتَ لعبة سبق أن نلتَ نجومها فلك <b>بونص</b> منفصل عن الدرجة.</p><div id="wkBox">${typeof Week!=='undefined'?Week.card():''}</div><div class="games">${GAMES.map((g,i)=>`<button class="gcard rise" style="--d:${i}" data-act="pl" data-i="${i}" data-id="${g.id}"><span class="gic">${em(g.ic,'xl')}</span><h3>${g.t}</h3><p>${g.d}</p><div class="gmeta"><span>${g.g}</span><span class="lvl l2">${g.lv}</span></div><div class="sstars">${starsRow(GB[g.id]||0)}</div></button>`).join('')}${Final.card(GAMES.length)}${typeof Daily!=='undefined'?Daily.card(GAMES.length+1):''}</div>${typeof EXTRA!=='undefined'?`<p class="lead xg-lead rise">${em('sparkles')} <b>ألعاب إضافية</b> للمتعة والتدريب: ${Score.xon()?'كل نجمة فيها تعادل '+AR(10)+' نقاط في درجتك مثل بقية الألعاب':'نقاطها ونجومها في «البونص» ولا تغيّر درجتك'}.</p><div class="games">${EXTRA.map((g,i)=>`<button class="gcard xg rise" style="--d:${i}" data-act="pl" data-id="${g.id}"><span class="gic">${em(g.ic,'xl')}</span><h3>${g.t}</h3><p>${g.d}</p><div class="gmeta"><span>${g.g}</span><span class="lvl l2">${g.lv}</span></div><div class="sstars">${starsRow(GB[g.id]||0)}</div></button>`).join('')}</div>`:''}`;
     act(sc,{pl:b=>{if(b.dataset.id==='daily'){Daily.open();return}play(b.dataset.id==='final'?FINAL_G:(GAMES.find(x=>x.id===b.dataset.id)||(typeof EXTRA!=='undefined'&&EXTRA.find(x=>x.id===b.dataset.id))))}})};
    hub()}},
 ]});
@@ -3267,9 +3328,233 @@ function gHole(host,api,restart){
  render();ask();raf=requestAnimationFrame(t=>{last=t;loop(t)});act(host,{ex:api.exit,again:restart});
  return()=>{over=true;cancelAnimationFrame(raf);timers.forEach(clearTimeout)}}
 
+/* --- tab_h.js --- */
+/* ===== two more planets of group 4: the effect-object (المفعول لأجله) and the adverbs of time and place (ظرفا الزمان والمكان).
+   Built from the school book's lessons (examples and exercises) ===== */
+/* these questions keep their own ids, far from the question bank's and from the teacher's new questions */
+let _jid=6000;const QJ=q=>{q.id=++_jid;return q};
+const MJ=(tp,lv,q,o,a,e,h)=>QJ(M(tp,lv,q,o,a,e,h)),TJ=(tp,lv,w,a,role,e)=>QJ(T(tp,lv,w,a,role,e));
+const TY3=['مفعول به','مفعول لأجله','فاعل'];
+
+/* ---- المفعول لأجله ---- */
+const JSENT=[[['يجتهدُ','التلميذُ','في','دراستِه','رغبةً','في','النجاحِ'],4,'لماذا يجتهدُ التلميذُ في دراستِه؟'],
+ [['أتناولُ','الطعامَ','الصحيَّ','حفاظًا','على','صحَّتي'],3,'لماذا أتناولُ الطعامَ الصحيَّ؟'],
+ [['عاقبَ','القاضي','المجرمَ','تأديبًا','له'],3,'لماذا عاقبَ القاضي المجرمَ؟']];
+const JQ1=[TJ('j',1,['زرتُ','مهرجانَ','الفنونِ','حبًّا','في','الموسيقى'],3,'المفعول لأجله','«حبًّا» يبيّن سبب الزيارة (لماذا زرتُ؟)، وهو منصوب بالفتحة.'),
+ TJ('j',1,['صفّقَ','الجمهورُ','للعازفينَ','تشجيعًا','لهم'],3,'المفعول لأجله','«تشجيعًا» يبيّن سبب التصفيق، فهو المفعول لأجله.'),
+ TJ('j',1,['يستأذنُ','التلاميذُ','من','معلمِهم','احترامًا','له'],4,'المفعول لأجله','«احترامًا» هو سبب الاستئذان، وعلامة نصبه الفتحة.'),
+ TJ('j',2,['انتبهْ','إلى','إشاراتِ','المرورِ','حرصًا','على','سلامتِك'],4,'المفعول لأجله','«حرصًا» يبيّن سبب الانتباه؛ أما «إشاراتِ» فمجرورة بحرف الجرّ «إلى».'),
+ TJ('j',2,['تكرِّمُ','الدولةُ','العلماءَ','اعترافًا','بجميلِهم'],3,'المفعول لأجله','«العلماءَ» وقع عليه التكريم (مفعول به)، و«اعترافًا» سبب التكريم (مفعول لأجله).')];
+const JQ2=[MJ('j',1,'لماذا تذهبُ إلى المدرسةِ؟ اختر الجواب الذي فيه مفعول لأجله:',['في الصباحِ.','رغبةً في التعلّمِ.','المدرسةَ.'],1,'السؤال بـ«لماذا» يُجاب عنه بمفعول لأجله: «رغبةً».','المفعول لأجله يبيّن السبب.'),
+ MJ('j',1,'لماذا تمارسين هوايةَ الرسمِ؟',['أمامَ الشرفةِ.','لوحةً جميلةً.','حبًّا في الفنِّ.'],2,'«حبًّا» مفعول لأجله يبيّن سبب ممارسة الهواية.'),
+ MJ('j',1,'لِمَ تنفِّذُ نصائحَ أمِّكَ؟',['ثقةً بها.','تحتَ المنضدةِ.','نصائحَ مفيدةً.'],0,'«ثقةً» هي السبب، وهي مفعول لأجله منصوب.'),
+ MJ('j',2,'لِمَ نتصدّقُ على الفقراءِ؟',['الفقراءَ.','رحمةً بهم.','بعدَ الظهرِ.'],1,'«رحمةً» تبيّن سبب التصدّق فهي مفعول لأجله.'),
+ MJ('j',2,'وقفَ الطلابُ ______ للمعلمِ.',['احترامٌ','احترامًا','احترامِ'],1,'المفعول لأجله منصوب وعلامة نصبه الفتحة: احترامًا.','المفعول لأجله منصوب.')];
+const JQ3=[MJ('j',2,'في «كرّمَ المديرُ الطالبَ تشجيعًا له» ما إعراب «الطالبَ»؟',TY3,0,'«الطالبَ» وقع عليه التكريم فهو مفعول به (ماذا؟ مَن؟).','اسأل: مَن كرّمَ المديرُ؟'),
+ MJ('j',2,'وفي الجملة نفسها ما إعراب «تشجيعًا»؟',TY3,1,'«تشجيعًا» يبيّن سبب التكريم (لماذا؟) فهو مفعول لأجله.','اسأل: لماذا كرّمَ؟'),
+ MJ('j',2,'في «قرأَ الطالبُ الدرسَ حبًّا في العلمِ»: أيُّ الكلمتين مفعول به؟',['الدرسَ','حبًّا','الطالبُ'],0,'«الدرسَ» جواب (ماذا قرأ؟) فهو مفعول به، و«حبًّا» جواب (لماذا قرأ؟) فهو مفعول لأجله.'),
+ MJ('j',3,'أيُّ الجمل الآتية فيها مفعول لأجله؟',['كتبَ الطالبُ الدرسَ.','نجحَ الطالبُ المجتهدُ.','ذاكرَ الطالبُ دروسَه حرصًا على النجاحِ.'],2,'«حرصًا» يبيّن سبب المذاكرة فهو مفعول لأجله.'),
+ MJ('j',3,'أيُّ الكلمتين تجيب عن «لماذا؟» في: ساعدَ الولدُ جارَه رحمةً به؟',['جارَه','رحمةً','الولدُ'],1,'«رحمةً» هي سبب المساعدة، أما «جارَه» فمفعول به.')];
+const JQ4=[MJ('j',2,'نزورُ المكتبةَ حبًّا في القراءةِ. إعراب «حبًّا»:',['مفعول لأجله منصوب وعلامة نصبه الفتحة','مفعول به منصوب وعلامة نصبه الفتحة','فاعل مرفوع وعلامة رفعه الضمة'],0,'«حبًّا» يبيّن سبب الزيارة فهو مفعول لأجله منصوب، وعلامة نصبه الفتحة.'),
+ MJ('j',2,'يحبُّ الأطفالُ الاستماعَ لزقزقةِ العصافيرِ. إعراب «الاستماعَ»:',['مفعول لأجله منصوب وعلامة نصبه الفتحة','مفعول به منصوب وعلامة نصبه الفتحة','فاعل مرفوع وعلامة رفعه الضمة'],1,'«الاستماعَ» وقع عليه الحبّ (ماذا يحبّ الأطفالُ؟) فهو مفعول به، وليس سببًا.','اسأل: ماذا يحبّ الأطفالُ؟'),
+ MJ('j',3,'جرى اللصُّ خوفًا من الشرطيِّ. إعراب «خوفًا»:',['مفعول به منصوب وعلامة نصبه الفتحة','مفعول لأجله منصوب وعلامة نصبه الفتحة','فاعل مرفوع وعلامة رفعه الضمة'],1,'«خوفًا» هو سبب الجري، فهو مفعول لأجله منصوب وعلامة نصبه الفتحة.'),
+ MJ('j',3,'كافأَ المديرُ الموظفينَ تشجيعًا لهم. إعراب «الموظفينَ»:',['مفعول به منصوب وعلامة نصبه الياء','مفعول لأجله منصوب وعلامة نصبه الفتحة','فاعل مرفوع وعلامة رفعه الواو'],0,'«الموظفينَ» جمع مذكر سالم وقع عليه فعل المكافأة فهو مفعول به منصوب بالياء، أما «تشجيعًا» فمفعول لأجله.')];
+
+/* ---- ظرفا الزمان والمكان ---- */
+const ZSENT=[[['استمعنا','إلى','الأغنيةِ','مساءً'],3,'t','متى استمعنا إلى الأغنيةِ؟'],[['يروي','الفلاحُ','الحقلَ','صباحًا'],3,'t','متى يروي الفلاحُ الحقلَ؟'],[['تسافرُ','الأسرةُ','إلى','الإسكندريةِ','صيفًا'],4,'t','متى تسافرُ الأسرةُ إلى الإسكندريةِ؟'],
+ [['وقفتُ','أمامَ','محلِّ','الزهورِ'],1,'p','أين وقفتُ؟'],[['تقعُ','أسوانُ','جنوبًا'],2,'p','أين تقعُ أسوانُ؟'],[['تنتشرُ','الأخبارُ','بينَ','الناسِ'],2,'p','أين تنتشرُ الأخبارُ؟']];
+const TZ=['ظرف زمان','ظرف مكان','جار ومجرور'];
+const ZQ1=[MJ('z',1,'ما نوع «مساءً» في: يعودُ الأبُ من عملِه مساءً؟',TZ,0,'«مساءً» يجيب عن (متى؟) فهو ظرف زمان.','اسأل: متى يعودُ الأبُ؟'),
+ MJ('z',1,'ما نوع «بينَ» في: بنى العصفورُ عشَّه بينَ الأغصانِ؟',TZ,1,'«بينَ» يجيب عن (أين؟) فهو ظرف مكان.','اسأل: أين بنى العصفورُ عشَّه؟'),
+ TJ('z',1,['يقعُ','البحرُ','الأحمرُ','شرقًا'],3,'ظرف المكان','«شرقًا» يبيّن مكان وقوع البحر (أين؟)، وهو ظرف مكان منصوب.'),
+ MJ('z',2,'ما نوع «أمامَ» في: محطةُ الحافلاتِ أمامَ الميدانِ؟',TZ,1,'«أمامَ» يجيب عن (أين؟) فهو ظرف مكان.'),
+ MJ('z',2,'ما نوع «شتاءً» في: يسافرُ السيّاحُ إلى أسوانَ شتاءً؟',TZ,0,'«شتاءً» يجيب عن (متى؟) فهو ظرف زمان؛ أما «إلى أسوانَ» فجار ومجرور.','اسأل: متى يسافرُ السيّاحُ؟')];
+const ZQ2=[MJ('z',1,'متى تذاكرينَ دروسَكِ؟',['ليلًا.','فوقَ.','أمامَ.'],0,'السؤال بـ«متى» جوابه ظرف زمان: ليلًا.'),
+ MJ('z',1,'أين وجدتَ الحقيبةَ؟',['صباحًا.','تحتَ السريرِ.','شتاءً.'],1,'السؤال بـ«أين» جوابه ظرف مكان: تحتَ.'),
+ MJ('z',1,'أين يقعُ البحرُ المتوسطُ؟',['شمالَ مصرَ.','مساءً.','يومًا.'],0,'«شمالَ» ظرف مكان يجيب عن (أين؟).'),
+ MJ('z',2,'متى تذهبينَ إلى الفراشِ؟',['خلفَ.','يمينَ.','ليلًا.'],2,'«ليلًا» ظرف زمان يجيب عن (متى؟).')];
+const ZQ3=[MJ('z',2,'أيُّ الجملتين فيها ظرف زمان؟',['سافرتُ في الصباحِ.','سافرتُ صباحًا.','سافرتُ إلى الصباحِ.'],1,'«صباحًا» اسم منصوب واحد بلا حرف جرّ فهو ظرف زمان. أما «في الصباحِ» فجار ومجرور.','الظرف لا يسبقه حرف جرّ.'),
+ MJ('z',2,'ما نوع «في» في: جلسَ الولدُ في الحديقةِ؟',['ظرف مكان','حرف جرّ','فاعل'],1,'«في» حرف جرّ، وما بعده اسم مجرور.'),
+ MJ('z',3,'ما إعراب «الحديقةِ» في: جلسَ الولدُ في الحديقةِ؟',['ظرف مكان منصوب','اسم مجرور وعلامة جرّه الكسرة','مفعول به منصوب'],1,'جاءت بعد حرف الجرّ «في» فهي اسم مجرور وعلامة جرّه الكسرة.','هل قبلها حرف جرّ؟'),
+ MJ('z',3,'أيُّ الكلمات ظرف مكان في: نامَ الطفلُ فوقَ السريرِ؟',['نامَ','فوقَ','الطفلُ'],1,'«فوقَ» تبيّن مكان النوم وليس قبلها حرف جرّ، فهي ظرف مكان.')];
+const ZQ4=[MJ('z',2,'أغسلُ أسناني صباحًا بالفرشاةِ. إعراب «صباحًا»:',['ظرف زمان منصوب وعلامة نصبه الفتحة','ظرف مكان منصوب وعلامة نصبه الفتحة','مفعول به منصوب وعلامة نصبه الفتحة'],0,'«صباحًا» يجيب عن (متى؟) فهو ظرف زمان منصوب وعلامة نصبه الفتحة.'),
+ MJ('z',2,'محلُّ الزهورِ أمامَ المكتبةِ. إعراب «أمامَ»:',['ظرف زمان منصوب وعلامة نصبه الفتحة','مفعول به منصوب وعلامة نصبه الفتحة','ظرف مكان منصوب وعلامة نصبه الفتحة'],2,'«أمامَ» يجيب عن (أين؟) فهو ظرف مكان منصوب وعلامة نصبه الفتحة.'),
+ MJ('z',3,'بنى العمالُ سورًا حولَ الحديقةِ. إعراب «سورًا»:',['مفعول به منصوب وعلامة نصبه الفتحة','ظرف مكان منصوب وعلامة نصبه الفتحة','ظرف زمان منصوب وعلامة نصبه الفتحة'],0,'«سورًا» وقع عليه البناء (ماذا بنى العمالُ؟) فهو مفعول به، وليس ظرفًا.','اسأل: ماذا بنى العمالُ؟'),
+ MJ('z',3,'تقعُ دولةُ ليبيا غربَ مصرَ. إعراب «غربَ»:',['ظرف مكان منصوب وعلامة نصبه الفتحة','ظرف زمان منصوب وعلامة نصبه الفتحة','اسم مجرور وعلامة جرّه الكسرة'],0,'«غربَ» يجيب عن (أين؟) فهو ظرف مكان منصوب وعلامة نصبه الفتحة.')];
+
+/* a step that shows its sentences one after the other: the question («لماذا؟» / «متى؟» / «أين؟») pops up, then the answer word lights and is named */
+function askStep(sc,list,o){let timers=[],cur=0,sq;
+ sc.innerHTML=`<p class="lead rise">${o.lead}</p><div class="chips rise" style="--d:1">${list.map((s,i)=>`<button class="chip ${i?'':'on'}" data-act="as" data-i="${i}">${s[0].slice(0,2).join(' ')} …</button>`).join('')}</div>
+  <div class="card rise" style="--d:2;--cc:${o.color}"><div class="sent" id="as"></div><div class="qbub" id="aq"></div><p class="sub" id="ar" style="min-height:3rem"></p></div><div class="row"><button class="btn ghost sm" data-act="re" type="button">أعد العرض ↻</button></div>`;
+ const play=()=>{timers.forEach(clearTimeout);timers=[];if(!$('#as'))return;const s=list[cur],ty=o.type?o.type(s):'j';$$('.chip',sc).forEach((c,k)=>c.classList.toggle('on',k===cur));
+  $('#as').innerHTML=s[0].map(w=>tk(w,'n')).join('');$('#aq').innerHTML='';$('#ar').innerHTML='';const t=$$('#as .tk',sc),at=(ms,f)=>timers.push(setTimeout(f,ms));
+  at(250,()=>{$('#aq').innerHTML=`<span class="q-pop">${o.q(s)}</span>`;sfx('pop')});
+  at(1400,()=>{const el=t[s[1]];el.querySelector('.wd').innerHTML=hl(s[0][s[1]],1,'f');label(el,o.name(s),ty);FX.burst(innerWidth/2,innerHeight*.45,{n:12});sfx('ok');$('#ar').innerHTML=o.why(s);say(o.say(s))})};
+ sq=Seq.run(sc,list.length,i=>{cur=i;play()},{noun:'الجملة',fem:true,all:'الجمل',chips:'.chip',after:'.chips',wait:1700,delay:150});
+ act(sc,{as:b=>sq.go(+b.dataset.i),re:()=>sq.go(cur)});return()=>{sq.stop();timers.forEach(clearTimeout)}}
+
+const fitTable=sc=>{const w=$('.scroll-x',sc);if(w)w.classList.add('fit')};
+TABS.push({id:'ajl',title:'المفعول لأجله',pl:'p2',color:'#fb923c',mentor:'boyB',steps:[
+ {t:'لماذا فعل الفاعل؟',tip:'اسأل بعد الجملة: «لماذا؟». الكلمة التي تجيب عن السؤال هي المفعول لأجله. اضغط الزرّ لترى الجملة التالية.',
+  render(sc){return askStep(sc,JSENT,{lead:'الفاعل يفعل الفعل لسببٍ. اقرأ الجملة ثم اسأل: <b>لماذا؟</b>',color:'#fb923c',q:s=>s[2],name:()=>'مفعول لأجله',why:s=>`«${s[0][s[1]]}» تبيّن <b>سبب</b> حدوث الفعل، وهي اسم <b>منصوب</b> وعلامة نصبه <b>الفتحة</b>.`,say:s=>`«${s[0][s[1]]}» هي السبب، فهي المفعول لأجله.`})}},
+ {t:'تعريفه وحكمه',tip:'اكشف الصفوف واحدًا بعد الآخر لتعرف تعريف المفعول لأجله وحكمه وعلامته.',
+  render(sc){const r=revealTable(sc,['وجه المقارنة','المفعول لأجله'],[['التعريف','اسم منصوب يبيّن <b>سبب</b> حدوث الفعل'],['السؤال','لماذا؟'],['الحكم','منصوب'],['العلامة','الفتحة: رغبةً • حفاظًا • تأديبًا'],['أمثلة على الأسباب','حبًّا • خوفًا • احترامًا • تشجيعًا • حرصًا']],['#c4b5fd','#fdba74'],'اكشف الصف التالي');fitTable(sc);act(sc,{rv:r.show,all:r.all});r.show()}},
+ {t:'الفرق بينه وبين المفعول به',tip:'كلاهما منصوب، لكن المفعول به يقع عليه الفعل، والمفعول لأجله هو سبب الفعل. اكشف الصفوف واحدًا بعد الآخر.',
+  render(sc){const r=revealTable(sc,['وجه المقارنة','المفعول به','المفعول لأجله'],[['المعنى','مَن (ما) وقع عليه الفعل','سبب حدوث الفعل'],['السؤال','ماذا؟ / مَن؟','لماذا؟'],['الحكم','منصوب','منصوب'],['العلامة','الفتحة أو الياء أو الكسرة بحسب نوعه','الفتحة'],['مثال','كرّمتِ الدولةُ <b>العلماءَ</b>','كرّمتِ الدولةُ العلماءَ <b>اعترافًا</b> بجميلِهم']],['#c4b5fd','#fde047','#fdba74'],'اكشف الصف التالي');
+   sc.insertAdjacentHTML('beforeend',`<div class="note rise" style="--d:2">قد يجتمع الاثنان في جملة واحدة: «كرّمتِ الدولةُ <b>العلماءَ</b> (مفعول به) <b>اعترافًا</b> (مفعول لأجله) بجميلِهم».</div>`);fitTable(sc);act(sc,{rv:r.show,all:r.all});r.show()}},
+ {t:'اختبر نفسك: اضغط على المفعول لأجله',tip:'اسأل: لماذا حدث الفعل؟ ثم اضغط على الكلمة التي تجيب.',qs:JQ1,render(sc){miniQuiz(sc,JQ1,'<h3>أحسنتَ!</h3><p>عرفتَ كيف تكتشف سبب الفعل.</p>','trophy')}},
+ {t:'أجب بمفعول لأجله',tip:'السؤال الذي يبدأ بـ«لماذا» أو «لِمَ» جوابه مفعول لأجله. اختر الجواب المناسب.',qs:JQ2,render(sc){miniQuiz(sc,JQ2,'<h3>رائع!</h3><p>أجبتَ عن أسئلة «لماذا؟» بمفعول لأجله.</p>','star')}},
+ {t:'مفعول به أم مفعول لأجله؟',tip:'اسأل: ماذا؟ أو مَن؟ ← مفعول به. اسأل: لماذا؟ ← مفعول لأجله.',qs:JQ3,render(sc){miniQuiz(sc,JQ3,'<h3>تفرّق بينهما جيدًا!</h3><p>انتقل الآن إلى الإعراب.</p>','crown')}},
+ {t:'أعرِب بنفسك',tip:'اذكر نوع الكلمة وحكمها وعلامتها. انتبه: ليس كل اسم منصوب مفعولًا لأجله!',qs:JQ4,render(sc){miniQuiz(sc,JQ4,'<h3>أنت بطل المفعول لأجله!</h3><p>أنهيتَ إعرابه بنجاح.</p>','trophy')}},
+]});
+
+TABS.push({id:'zarf',title:'ظرفا الزمان والمكان',pl:'p7',color:'#22d3ee',mentor:'boyA',steps:[
+ {t:'متى؟ وأين؟',tip:'اقرأ الجملة ثم اسأل: متى؟ أو أين؟ الكلمة التي تجيب هي الظرف. اضغط الزرّ لترى الجملة التالية.',
+  render(sc){return askStep(sc,ZSENT,{lead:'ثلاث جمل تجيب عن <b>متى؟</b> (الزمان)، وثلاث تجيب عن <b>أين؟</b> (المكان).',color:'#22d3ee',type:s=>s[2]==='t'?'zt':'zp',q:s=>s[3],name:s=>s[2]==='t'?'ظرف زمان':'ظرف مكان',why:s=>`«${s[0][s[1]]}» ${s[2]==='t'?'تبيّن <b>زمان</b> حدوث الفعل':'تبيّن <b>مكان</b> حدوث الفعل'}، وهي اسم <b>منصوب</b> وعلامة نصبه <b>الفتحة</b>.`,say:s=>`«${s[0][s[1]]}» ${s[2]==='t'?'ظرف زمان':'ظرف مكان'}.`})}},
+ {t:'تعريفهما وحكمهما',tip:'اكشف الصفوف واحدًا بعد الآخر. لتحديد ظرف الزمان نسأل بـ(متى)، ولظرف المكان نسأل بـ(أين).',
+  render(sc){const r=revealTable(sc,['وجه المقارنة','ظرف الزمان','ظرف المكان'],[['التعريف','اسم منصوب يبيّن <b>زمان</b> حدوث الفعل','اسم منصوب يبيّن <b>مكان</b> حدوث الفعل'],['السؤال','متى؟','أين؟'],['أمثلة','يومًا • ليلًا • شتاءً • صباحًا','فوقَ • شمالَ • داخلَ • أمامَ'],['الحكم','منصوب','منصوب'],['العلامة','الفتحة','الفتحة']],['#c4b5fd','#67e8f9','#86efac'],'اكشف الصف التالي');fitTable(sc);act(sc,{rv:r.show,all:r.all});r.show()}},
+ {t:'الظرف أم الجار والمجرور؟',tip:'قد تجيب كلمتان عن «متى؟» أو «أين؟»، لكن إعرابهما مختلف. انظر: هل قبل الكلمة حرف جرّ؟',
+  render(sc){const r=revealTable(sc,['وجه المقارنة','الظرف','الجار والمجرور'],[['التركيب','اسم منصوب <b>لا يسبقه</b> حرف جرّ','حرف جرّ + اسم <b>مجرور</b>'],['العلامة','الفتحة (منصوب)','الكسرة (مجرور)'],['مثال في الزمان','سافرتُ <b>صباحًا</b>','سافرتُ <b>في الصباحِ</b>'],['مثال في المكان','جلستُ <b>أمامَ</b> المدرسةِ','جلستُ <b>في</b> المدرسةِ'],['الإعراب','«صباحًا»: ظرف زمان منصوب وعلامة نصبه الفتحة','«في»: حرف جرّ، و«الصباحِ»: اسم مجرور وعلامة جرّه الكسرة']],['#c4b5fd','#67e8f9','#fda4af'],'اكشف الصف التالي');
+   sc.insertAdjacentHTML('beforeend',`<div class="note rise" style="--d:2">القاعدة: إن سبقَ الكلمةَ حرفُ جرّ (في، إلى، على، من…) فهي <b>مجرورة</b> وليست ظرفًا. وإن لم يسبقها حرف جرّ وكانت تجيب عن «متى؟» أو «أين؟» فهي <b>ظرف</b> منصوب.</div>`);fitTable(sc);act(sc,{rv:r.show,all:r.all});r.show()}},
+ {t:'استخرج الظرف وحدّد نوعه',tip:'اسأل: متى؟ أو أين؟ ثم حدّد نوع الظرف.',qs:ZQ1,render(sc){miniQuiz(sc,ZQ1,'<h3>أحسنتَ!</h3><p>تعرف الآن نوع كل ظرف.</p>','trophy')}},
+ {t:'أجب بالظرف المناسب',tip:'«متى» جوابها ظرف زمان، و«أين» جوابها ظرف مكان. اختر الجواب المناسب.',qs:ZQ2,render(sc){miniQuiz(sc,ZQ2,'<h3>رائع!</h3><p>اخترتَ الظرف المناسب لكل سؤال.</p>','star')}},
+ {t:'ظرف أم جار ومجرور؟',tip:'انظر إلى الكلمة: هل قبلها حرف جرّ؟ ثم اختر.',qs:ZQ3,render(sc){miniQuiz(sc,ZQ3,'<h3>تفرّق بينهما جيدًا!</h3><p>انتقل الآن إلى الإعراب.</p>','crown')}},
+ {t:'أعرِب الظرف',tip:'اذكر نوع الظرف ثم حكمه وعلامة نصبه. وانتبه لما ليس ظرفًا!',qs:ZQ4,render(sc){miniQuiz(sc,ZQ4,'<h3>أنت بطل الظروف!</h3><p>أنهيتَ إعراب ظرفَي الزمان والمكان.</p>','trophy')}},
+]});
+
+/* --- tab_i.js --- */
+/* ===== groups 1 and 2: the parts of speech (أقسام الكلام), the nominal sentence (الجملة الاسمية), and the signs of raising the subject and predicate
+   Built from the school book's revision pages («مراجعة على ما سبق دراسته») ===== */
+_jid=6100;
+const KIND3=['اسم','فعل','حرف'],MB3=['مبتدأ','خبر','لا مبتدأ ولا خبر'];
+/* one sentence at a time: each stage asks its question, then lights the words and names them. stage {i:[word indexes], r:role class, n:name, q:question, t:explanation, e:[letters,cls] (colour the ending)} */
+function labelStep(sc,list,o){let timers=[],cur=0,sq;
+ sc.innerHTML=`<p class="lead rise">${o.lead}</p><div class="chips rise" style="--d:1">${list.map((s,i)=>`<button class="chip ${i?'':'on'}" data-act="ls" data-i="${i}">${s.w.slice(0,2).join(' ')} …</button>`).join('')}</div>
+  <div class="card rise" style="--d:2;--cc:${o.color}"><div class="sent" id="ls"></div><div class="qbub" id="lq"></div><div class="ana" id="lr"></div></div><div class="row"><button class="btn ghost sm" data-act="re" type="button">أعد العرض ↻</button></div>`;
+ const play=()=>{timers.forEach(clearTimeout);timers=[];if(!$('#ls'))return;const s=list[cur];$$('.chip',sc).forEach((c,k)=>c.classList.toggle('on',k===cur));
+  $('#ls').innerHTML=s.w.map(w=>tk(w,'n')).join('');$('#lq').innerHTML='';$('#lr').innerHTML='';const t=$$('#ls .tk',sc),at=(ms,f)=>timers.push(setTimeout(f,ms));
+  s.st.forEach((g,k)=>{const t0=250+k*2000;
+   at(t0,()=>{$('#lq').innerHTML=`<span class="q-pop">${g.q}</span>`;sfx('pop')});
+   at(t0+1000,()=>{g.i.forEach(j=>{if(g.e)t[j].querySelector('.wd').innerHTML=hl(s.w[j],g.e[0],g.e[1]);label(t[j],g.n,g.r)});
+    $('#lr').insertAdjacentHTML('beforeend',`<div class="arow ${g.r} rise"><b>${g.n}</b><span>${g.t}</span></div>`);FX.burst(innerWidth/2,innerHeight*.45,{n:8});sfx('ok');say(g.s||g.n)})})};
+ sq=Seq.run(sc,list.length,i=>{cur=i;play()},{noun:'الجملة',fem:true,all:'الجمل',chips:'.chip',after:'.chips',wait:250+list[0].st.length*2000+300,delay:150});
+ act(sc,{ls:b=>sq.go(+b.dataset.i),re:()=>sq.go(cur)});return()=>{sq.stop();timers.forEach(clearTimeout)}}
+const fitT=sc=>{const w=$('.scroll-x',sc);if(w)w.classList.add('fit')};
+const tbl=(sc,heads,rows,cols)=>{const r=revealTable(sc,heads,rows,cols,'اكشف الصف التالي');fitT(sc);act(sc,{rv:r.show,all:r.all});r.show();return r};
+
+/* ---- أقسام الكلام ---- */
+const KSENT=[
+ {w:['ذهبَ','محمدٌ','إلى','المدرسةِ'],st:[{i:[0],r:'v',n:'فعل',q:'ماذا حدث؟',t:'«ذهبَ» يدلّ على <b>حدث</b> (الذهاب) في زمن ماضٍ، فهو <b>فعل</b>.'},{i:[1,3],r:'nm',n:'اسم',q:'مَن؟ وإلى أين؟',t:'«محمدٌ» إنسان و«المدرسةِ» مكان، فهما <b>اسمان</b>.'},{i:[2],r:'pt',n:'حرف',q:'هل لها معنى وحدها؟',t:'«إلى» لا يُفهم معناها إلا مع غيرها، فهي <b>حرف</b> (حرف جرّ).'}]},
+ {w:['أكلَ','الولدُ','التفاحَ','و','الموزَ'],st:[{i:[0],r:'v',n:'فعل',q:'ماذا حدث؟',t:'«أكلَ» حدث (الأكل) في الزمن الماضي، فهو <b>فعل</b>.'},{i:[1,2,4],r:'nm',n:'اسم',q:'مَن؟ وماذا؟',t:'«الولدُ» إنسان، و«التفاحَ» و«الموزَ» نبات، وكلها <b>أسماء</b>.'},{i:[3],r:'pt',n:'حرف',q:'هل لها معنى وحدها؟',t:'«و» لا معنى لها وحدها، فهي <b>حرف</b> (حرف عطف).'}]},
+ {w:['يكتبُ','التلميذُ','الدرسَ','في','الكراسةِ'],st:[{i:[0],r:'v',n:'فعل',q:'ماذا يحدث؟',t:'«يكتبُ» حدث (الكتابة) في الزمن الحاضر، فهو <b>فعل</b> (مضارع).'},{i:[1,2,4],r:'nm',n:'اسم',q:'مَن؟ وماذا؟',t:'«التلميذُ» إنسان، و«الدرسَ» و«الكراسةِ» جماد، وكلها <b>أسماء</b>.'},{i:[3],r:'pt',n:'حرف',q:'هل لها معنى وحدها؟',t:'«في» لا يُفهم معناها إلا مع غيرها، فهي <b>حرف جرّ</b>.'}]}];
+const KQ1=[TJ('k',1,['تأكلُ','الأسرةُ','السمكَ'],0,'الفعل','«تأكلُ» تدلّ على حدث (الأكل) في زمن معيّن، فهي الفعل.'),
+ TJ('k',1,['يذهبُ','الولدُ','إلى','المدرسةِ'],2,'الحرف','«إلى» حرف جرّ لا يُفهم معناه إلا مع غيره.'),
+ TJ('k',1,['جلسَ','في','الحديقةِ'],2,'الاسم','«الحديقةِ» اسم يدلّ على مكان، أما «جلسَ» فعل و«في» حرف.'),
+ TJ('k',2,['أكلَ','الفلاحُ','الثمارَ','ثم','نامَ'],3,'حرف العطف','«ثم» حرف عطف لا يُفهم معناه إلا مع غيره.'),
+ TJ('k',2,['ركبتُ','الحافلةَ','من','المحطةِ'],0,'الفعل','«ركبتُ» يدلّ على حدث وقع في الزمن الماضي، فهو الفعل.')];
+const KQ2=[MJ('k',1,'أكمل بكلمة من النوع المطلوب: تأكلُ ______ السمكَ. (اسم إنسان)',['الأسرةُ','على','قطفَ'],0,'نحتاج اسمًا يدلّ على إنسان: الأسرةُ.'),
+ MJ('k',1,'الكتابُ ______ المنضدةِ. (حرف جرّ)',['فوقَ','على','وضعَ'].sort(()=>0),1,'«على» حرف جرّ، أما «فوقَ» فاسم (ظرف مكان) و«وضعَ» فعل.'),
+ MJ('k',1,'______ الفلاحُ الثمارَ. (فعل ماضٍ)',['قطفَ','يقطفُ','الثمارُ'],0,'«قطفَ» فعل ماضٍ، و«يقطفُ» مضارع.'),
+ MJ('k',2,'وصلَ القطارُ ______ ركبتُه. (حرف عطف)',['سريعٌ','ثم','في'],1,'«ثم» حرف عطف، و«في» حرف جرّ، و«سريعٌ» اسم.'),
+ MJ('k',2,'أيُّ الكلمات الآتية فعل؟',['المدرسةُ','يلعبُ','على'],1,'«يلعبُ» يدلّ على حدث في الزمن الحاضر.')];
+const KQ3=[MJ('k',1,'في «يا محمدُ، احرصْ على طلبِ العلمِ» الاسم المسبوق بأداة نداء هو …',['احرصْ','على','محمدُ'],2,'«محمدُ» مسبوق بأداة النداء «يا»، وهذه علامة من علامات الاسم.'),
+ MJ('k',1,'اشترى الأبُ تفاحًا من البائعِ. «تفاحًا» اسم لأنه فيه …',['التنوين','أداة نداء','حرف جرّ قبله'],0,'التنوين علامة من علامات الاسم.'),
+ MJ('k',2,'اشتريتُ الكتابَ من معرضِ الكتبِ. «معرضِ» اسم لأنه …',['فيه تنوين','مسبوق بحرف جرّ','مسبوق بأداة نداء'],1,'«معرضِ» جاء بعد حرف الجرّ «من»، وهذه علامة الاسم.'),
+ MJ('k',2,'قرأتُ قصةً عن الفضاءِ. «قصةً» اسم لأن فيه …',['التاء المربوطة والتنوين','أداة نداء','حرف عطف'],0,'التاء المربوطة والتنوين من علامات الاسم.'),
+ MJ('k',3,'أيُّ الكلمات الآتية اسم؟',['كتبَ','أسدٌ','في'],1,'«أسدٌ» اسم حيوان وفيه التنوين، وهو يقبل «ال»: الأسدُ.')];
+const KQ4=[MJ('k',1,'«كتبَ» فعل …',['مضارع','أمر','ماضٍ'],2,'«كتبَ» يدلّ على حدث وقع وانتهى، فهو فعل ماضٍ.'),
+ MJ('k',1,'«يكتبُ» فعل …',['مضارع','ماضٍ','أمر'],0,'«يكتبُ» يدلّ على حدث يحدث الآن أو يستمر، فهو مضارع.'),
+ MJ('k',1,'«اكتبْ» فعل …',['ماضٍ','مضارع','أمر'],2,'«اكتبْ» فيه طلب، فهو فعل أمر.'),
+ MJ('k',2,'«في» و«على» و«من» هي حروف …',['العطف','الجرّ','النداء'],1,'هذه حروف جرّ تسبق الاسم فتجرّه.'),
+ MJ('k',2,'«و» و«ثم» و«أو» هي حروف …',['العطف','الجرّ','النداء'],0,'هذه حروف عطف تربط بين كلمتين.')];
+
+TABS.push({id:'kalam',title:'أقسام الكلام',pl:'p8',color:'#f59e0b',mentor:'boyA',steps:[
+ {t:'اسم وفعل وحرف',tip:'كل كلمة في اللغة العربية إما اسم أو فعل أو حرف. اختر جملة وشاهد كل قسم وهو يُسمّى. اضغط الزرّ لترى الجملة التالية.',
+  render(sc){return labelStep(sc,KSENT,{lead:'الكلام ثلاثة أقسام. شاهد كيف نميّز كل قسم في الجملة.',color:'#f59e0b'})}},
+ {t:'أقسام الكلام الثلاثة',tip:'اكشف الصفوف واحدًا بعد الآخر لتعرف معنى كل قسم وأمثلته.',
+  render(sc){tbl(sc,['القسم','معناه','أمثلة'],[['الاسم','كل كلمة تدلّ على إنسان أو حيوان أو نبات أو جماد أو مكان أو صفة','طالبٌ • أسدٌ • وردةٌ • كتابٌ • مصرُ • جميلٌ'],['الفعل','ما دلّ على <b>حدث</b> معيّن في <b>زمن</b> معيّن','ماضٍ: كتبَ • مضارع: يكتبُ • أمر: اكتبْ'],['الحرف','كل كلمة لا يُفهم معناها إلا مع غيرها','حروف الجرّ: في، من، إلى • حروف العطف: و، ثم']],['#c4b5fd','#fde68a','#a5f3fc'])}},
+ {t:'علامات الاسم',tip:'للاسم علامات تميّزه عن الفعل والحرف. اكشف الصفوف واحدًا بعد الآخر.',
+  render(sc){tbl(sc,['العلامة','مثال'],[['يقبل (ال)','الكتابُ • الأسدُ • المدرسةُ'],['التنوين','تفاحًا • كتابٌ • قصةً'],['التاء المربوطة','سيارةٌ • مدرسةٌ • قصةٌ'],['مسبوق بحرف جرّ (الجرّ)','من معرضِ • في الحديقةِ • إلى المدرسةِ'],['مسبوق بأداة نداء (النداء)','يا محمدُ • يا طالبُ']],['#c4b5fd','#fde68a'])}},
+ {t:'اضغط على نوع الكلمة',tip:'اقرأ الجملة جيدًا ثم اضغط على الكلمة التي يطلبها السؤال.',qs:KQ1,render(sc){miniQuiz(sc,KQ1,'<h3>أحسنتَ!</h3><p>صرتَ تميّز الاسم والفعل والحرف.</p>','trophy')}},
+ {t:'أكمل بكلمة من النوع المطلوب',tip:'فكّر في نوع الكلمة المطلوبة ثم اختر.',qs:KQ2,render(sc){miniQuiz(sc,KQ2,'<h3>رائع!</h3><p>أكملتَ الجمل بالأنواع المناسبة.</p>','star')}},
+ {t:'لماذا هذه الكلمة اسم؟',tip:'ابحث عن علامة الاسم: «ال» أو التنوين أو التاء المربوطة أو حرف الجرّ أو النداء.',qs:KQ3,render(sc){miniQuiz(sc,KQ3,'<h3>تعرف علامات الاسم!</h3><p>بقي أن تراجع أنواع الفعل والحرف.</p>','crown')}},
+ {t:'أنواع الفعل والحرف',tip:'الفعل ماضٍ أو مضارع أو أمر. وللحرف أنواع منها حروف الجرّ وحروف العطف.',qs:KQ4,render(sc){miniQuiz(sc,KQ4,'<h3>أنت بطل أقسام الكلام!</h3><p>انتقل إلى الجملة الاسمية.</p>','trophy')}},
+]});
+
+/* ---- الجملة الاسمية ---- */
+const NSENT=[
+ {w:['الأزهارُ','متفتحةٌ'],st:[{i:[0],r:'mb',n:'مبتدأ',q:'عمّن نتحدّث؟',t:'«الأزهارُ» اسم بدأت به الجملة، وهو <b>المبتدأ</b>.'},{i:[1],r:'kh',n:'خبر',q:'ماذا نقول عن الأزهار؟',t:'«متفتحةٌ» معلومة عن المبتدأ تتمّم معنى الجملة، وهي <b>الخبر</b>.'}]},
+ {w:['البائعُ','أمينٌ'],st:[{i:[0],r:'mb',n:'مبتدأ',q:'عمّن نتحدّث؟',t:'«البائعُ» اسم بدأت به الجملة، وهو <b>المبتدأ</b>.'},{i:[1],r:'kh',n:'خبر',q:'ماذا نقول عن البائع؟',t:'«أمينٌ» هي المعلومة التي تتمّم المعنى، فهي <b>الخبر</b>.'}]},
+ {w:['الأختانِ','متشابهتانِ'],st:[{i:[0],r:'mb',n:'مبتدأ',q:'عمّن نتحدّث؟',t:'«الأختانِ» اسم بدأت به الجملة، وهو <b>المبتدأ</b>.'},{i:[1],r:'kh',n:'خبر',q:'ماذا نقول عن الأختين؟',t:'«متشابهتانِ» تتمّم المعنى، فهي <b>الخبر</b>.'}]},
+ {w:['العاملاتُ','المصرياتُ','ماهراتٌ'],st:[{i:[0],r:'mb',n:'مبتدأ',q:'عمّن نتحدّث؟',t:'«العاملاتُ» اسم بدأت به الجملة، وهو <b>المبتدأ</b>.'},{i:[2],r:'kh',n:'خبر',q:'ماذا نقول عن العاملات؟',t:'«ماهراتٌ» تتمّم المعنى فهي <b>الخبر</b>، وقد جاءت بعد كلمة أخرى (المصرياتُ)، فالخبر لا يلزم أن يأتي بعد المبتدأ مباشرة.'}]}];
+const NQ1=[TJ('m',1,['العلمُ','نورٌ','للعقلِ'],0,'المبتدأ','«العلمُ» اسم بدأت به الجملة، وهو المبتدأ.'),
+ TJ('m',1,['الصدقُ','منجاةٌ','دائمًا'],1,'الخبر','«منجاةٌ» معلومة عن المبتدأ تتمّم المعنى، فهي الخبر.'),
+ TJ('m',2,['الأطباءُ','مشاركونَ','في','المؤتمرِ'],0,'المبتدأ','«الأطباءُ» هو الاسم الذي بدأت به الجملة الاسمية.'),
+ TJ('m',2,['الأختانِ','متشابهتانِ','جدًّا'],1,'الخبر','«متشابهتانِ» هي المعلومة التي تتمّم المعنى.'),
+ TJ('m',3,['العاملاتُ','المصرياتُ','ماهراتٌ'],2,'الخبر','«ماهراتٌ» هي الخبر، وقد فصلت كلمة «المصرياتُ» بينها وبين المبتدأ.')];
+const NQ2=[MJ('m',1,'أيُّ الجمل الآتية جملة اسمية؟',['يلعبُ الأطفالُ في الحديقةِ.','لعبَ الأطفالُ كثيرًا.','الأطفالُ لاعبونَ في الحديقةِ.'],2,'الجملة الاسمية تبدأ باسم: «الأطفالُ».','انظر إلى أول كلمة.'),
+ MJ('m',1,'الجملة الاسمية تبدأ بـ …',['فعل','اسم','حرف'],1,'الجملة الاسمية تبدأ باسم هو المبتدأ.'),
+ MJ('m',1,'ركنا الجملة الاسمية هما …',['الفعل والفاعل','المبتدأ والخبر','الفاعل والمفعول به'],1,'المبتدأ والخبر هما ركنا الجملة الاسمية.'),
+ MJ('m',2,'ما نوع الجملة «الصدقُ منجاةٌ»؟',['فعلية','اسمية','شرطية'],1,'تبدأ باسم (الصدقُ) فهي اسمية.'),
+ MJ('m',2,'المبتدأ لا يكون …',['اسمًا','فعلًا','مرفوعًا'],1,'المبتدأ اسم مرفوع دائمًا، ولا يكون فعلًا ولا حرفًا.')];
+const NQ3=[MJ('m',1,'في «الوردةُ جميلةٌ» المبتدأ هو …',['جميلةٌ','الوردةُ','الجملة فعلية'],1,'«الوردةُ» هي الاسم الذي بدأت به الجملة.'),
+ MJ('m',1,'في «الصدقُ منجاةٌ» الخبر هو …',['منجاةٌ','الصدقُ','لا يوجد خبر'],0,'«منجاةٌ» تتمّم المعنى فهي الخبر.'),
+ MJ('m',2,'أكمل بخبر مناسب: الشمسُ ______.',['أشرقَ','مشرقةٌ','على'],1,'نحتاج اسمًا مرفوعًا يتمّم المعنى: مشرقةٌ.'),
+ MJ('m',2,'أيُّ الكلمات تصلح أن تكون مبتدأ؟',['كتبَ','في','الكتابُ'],2,'المبتدأ اسم، و«الكتابُ» اسم.'),
+ MJ('m',3,'في «العاملاتُ المصرياتُ ماهراتٌ» الخبر هو …',['العاملاتُ','المصرياتُ','ماهراتٌ'],2,'«ماهراتٌ» هي التي تتمّم معنى الجملة، وهي الخبر.')];
+TABS.push({id:'nom',title:'الجملة الاسمية',pl:'p5',color:'#f472b6',mentor:'boyB',steps:[
+ {t:'المبتدأ والخبر',tip:'الجملة الاسمية لها ركنان: المبتدأ والخبر. اختر جملة وشاهد كل ركن وهو يُسمّى. اضغط الزرّ لترى الجملة التالية.',
+  render(sc){return labelStep(sc,NSENT,{lead:'اسأل: <b>عمّن نتحدّث؟</b> ثم: <b>ماذا نقول عنه؟</b>',color:'#f472b6'})}},
+ {t:'تعريف المبتدأ والخبر',tip:'اكشف الصفوف واحدًا بعد الآخر.',
+  render(sc){tbl(sc,['وجه المقارنة','المبتدأ','الخبر'],[['التعريف','الاسم الذي تبدأ به الجملة الاسمية، وهو الركن الأول','ما يُخبرنا <b>معلومة</b> عن المبتدأ ويتمّم معنى الجملة'],['السؤال','عمّن نتحدّث؟','ماذا نقول عنه؟'],['الحكم','مرفوع دائمًا','مرفوع دائمًا'],['مثال','<b>الأزهارُ</b> متفتحةٌ','الأزهارُ <b>متفتحةٌ</b>']],['#c4b5fd','#f9a8d4','#93c5fd'])}},
+ {t:'الاسمية أم الفعلية؟',tip:'انظر إلى أول كلمة في الجملة: اسم أم فعل؟',
+  render(sc){tbl(sc,['وجه المقارنة','الجملة الاسمية','الجملة الفعلية'],[['تبدأ بـ','اسم','فعل'],['ركناها','المبتدأ والخبر','الفعل والفاعل'],['مثال','<b>الطالبُ</b> مجتهدٌ','<b>يجتهدُ</b> الطالبُ']],['#c4b5fd','#f9a8d4','#a5b4fc']);
+   sc.insertAdjacentHTML('beforeend',`<div class="note rise" style="--d:2">المبتدأ اسم دائمًا، فلا يكون فعلًا ولا حرفًا. وشرط الخبر أن يتمّم معنى الجملة، ولا يلزم أن يأتي بعد المبتدأ مباشرة.</div>`)}},
+ {t:'اضغط على المبتدأ أو الخبر',tip:'اسأل: عمّن نتحدّث؟ فهو المبتدأ. وماذا نقول عنه؟ فهو الخبر.',qs:NQ1,render(sc){miniQuiz(sc,NQ1,'<h3>أحسنتَ!</h3><p>تعرف المبتدأ والخبر.</p>','trophy')}},
+ {t:'اسمية أم فعلية؟',tip:'الجملة الاسمية تبدأ باسم، والفعلية تبدأ بفعل.',qs:NQ2,render(sc){miniQuiz(sc,NQ2,'<h3>رائع!</h3><p>تفرّق الآن بين الاسمية والفعلية.</p>','star')}},
+ {t:'حدّد المبتدأ والخبر',tip:'ابحث عن الاسم الذي بدأت به الجملة، ثم عمّا يتمّم معناها.',qs:NQ3,render(sc){miniQuiz(sc,NQ3,'<h3>أنت بطل الجملة الاسمية!</h3><p>انتقل إلى علامات الرفع.</p>','crown')}},
+]});
+
+/* ---- علامات رفع المبتدأ والخبر وإعرابهما ---- */
+/* a parse line for a raised word: type of word -> sign (the same signs as the subject) */
+const RAF=(role,type)=>{const N=NT[type],s=N.r,fr=s[0]==='الضمة';return `${role} مرفوع وعلامة رفعه <b>${s[0]}</b> ${fr?'الظاهرة على آخره':'نيابةً عن الضمة'} لأنه ${N.n}`};
+const RSENT=[['البائعُ','أمينٌ','mufrad','mufrad'],['الباعةُ','أمناءُ','taksir','taksir'],['البائعاتُ','أميناتٌ','jfs','jfs'],['البائعانِ','أمينانِ','muthanna','muthanna'],['البائعونَ','أمينونَ','jms','jms']].map(([a,b,t1,t2])=>({w:[a,b],st:[{i:[0],r:'mb',n:'مبتدأ',e:[NT[t1].r[2],NT[t1].r[1]],q:'ما نوع «'+a+'»؟',t:`«${a}» ${NT[t1].n}، علامة رفعه <b>${NT[t1].r[0]}</b>.`},{i:[1],r:'kh',n:'خبر',e:[NT[t2].r[2],NT[t2].r[1]],q:'وما نوع «'+b+'»؟',t:`«${b}» ${NT[t2].n}، علامة رفعه <b>${NT[t2].r[0]}</b>.`}]}));
+const RPARSE=[['الأزهارُ','متفتحةٌ','taksir','mufrad'],['الأختانِ','متشابهتانِ','muthanna','muthanna'],['الأطباءُ','مشاركونَ','taksir','jms'],['العاملاتُ','ماهراتٌ','jfs','jfs']].map(([a,b,t1,t2])=>({w:[a,b],st:[{i:[0],r:'mb',n:'مبتدأ',e:[NT[t1].r[2],NT[t1].r[1]],q:'أعرب «'+a+'»',t:`«${a}»: ${RAF('مبتدأ',t1)}.`},{i:[1],r:'kh',n:'خبر',e:[NT[t2].r[2],NT[t2].r[1]],q:'وأعرب «'+b+'»',t:`«${b}»: ${RAF('خبر',t2)}.`}]}));
+const RQ1=[MJ('r',1,'علامة رفع المبتدأ المفرد هي …',['الألف','الضمة','الواو'],1,'المفرد يُرفع بالضمة: البائعُ.'),
+ MJ('r',1,'علامة رفع المثنى هي …',['الواو','الضمة','الألف'],2,'يُرفع المثنى بالألف: البائعانِ.'),
+ MJ('r',1,'علامة رفع جمع المذكر السالم هي …',['الألف','الضمة','الواو'],2,'يُرفع جمع المذكر السالم بالواو: البائعونَ.'),
+ MJ('r',1,'جمع التكسير يُرفع بـ …',['الضمة','الواو','الألف'],0,'جمع التكسير (الباعةُ) يُرفع بالضمة.'),
+ MJ('r',2,'جمع المؤنث السالم يُرفع بـ …',['الواو','الألف','الضمة'],2,'جمع المؤنث السالم (البائعاتُ) يُرفع بالضمة.')];
+const RQ2=[MJ('r',1,'الطالبانِ ______.',['مجتهدَيْنِ','مجتهدانِ','مجتهدونَ'],1,'المبتدأ مثنى، فالخبر مثنى مرفوع بالألف: مجتهدانِ.'),
+ MJ('r',1,'المعلمونَ ______.',['مخلصونَ','مخلصينَ','مخلصانِ'],0,'المبتدأ جمع مذكر سالم، فالخبر مرفوع بالواو: مخلصونَ.'),
+ MJ('r',1,'الباعةُ ______.',['أمينانِ','أمناءُ','أمينونَ'],1,'«الباعةُ» جمع تكسير، فالخبر جمع تكسير مرفوع بالضمة: أمناءُ.'),
+ MJ('r',2,'الفتياتُ ______.',['متفوقونَ','متفوقاتِ','متفوقاتٌ'],2,'جمع المؤنث السالم يُرفع بالضمة: متفوقاتٌ.'),
+ MJ('r',2,'الأختانِ ______.',['متشابهتانِ','متشابهتينِ','متشابهاتٌ'],0,'المثنى المرفوع بالألف: متشابهتانِ.')];
+const RQ3=[MJ('r',2,'في «الأطباءُ مشاركونَ في المؤتمرِ» علامة رفع المبتدأ …',['الواو','الضمة','الألف'],1,'«الأطباءُ» جمع تكسير مرفوع بالضمة.'),
+ MJ('r',2,'وعلامة رفع الخبر «مشاركونَ» …',['الواو','الضمة','الألف'],0,'«مشاركونَ» جمع مذكر سالم مرفوع بالواو.'),
+ MJ('r',2,'ما نوع المبتدأ في «العاملاتُ ماهراتٌ»؟',['جمع تكسير','مثنى','جمع مؤنث سالم'],2,'«العاملاتُ» ينتهي بألف وتاء: جمع مؤنث سالم.'),
+ MJ('r',3,'سبب رفع «متشابهتانِ» بالألف أنه …',['مفرد','مثنى','جمع تكسير'],1,'المثنى يُرفع بالألف نيابةً عن الضمة.'),
+ MJ('r',3,'أيُّ الكلمات الآتية مرفوعة بالواو؟',['المعلمانِ','المعلمونَ','المعلماتُ'],1,'جمع المذكر السالم «المعلمونَ» يُرفع بالواو.')];
+const RQ4=[MJ('r',2,'الأزهارُ متفتحةٌ. إعراب «الأزهارُ»:',['مبتدأ مرفوع وعلامة رفعه الضمة','خبر مرفوع وعلامة رفعه الضمة','فاعل مرفوع وعلامة رفعه الضمة'],0,'«الأزهارُ» هو الاسم الذي بدأت به الجملة، فهو مبتدأ مرفوع بالضمة.'),
+ MJ('r',2,'وإعراب «متفتحةٌ» في الجملة نفسها:',['مبتدأ مرفوع وعلامة رفعه الضمة','مفعول به منصوب وعلامة نصبه الفتحة','خبر مرفوع وعلامة رفعه الضمة'],2,'«متفتحةٌ» تتمّم معنى الجملة، فهي خبر مرفوع بالضمة.'),
+ MJ('r',3,'الأختانِ متشابهتانِ. إعراب «الأختانِ»:',['مبتدأ مرفوع وعلامة رفعه الضمة','مبتدأ مرفوع وعلامة رفعه الألف نيابةً عن الضمة لأنه مثنى','مبتدأ منصوب وعلامة نصبه الياء'],1,'«الأختانِ» مثنى، فعلامة رفعه الألف نيابةً عن الضمة.'),
+ MJ('r',3,'الأطباءُ مشاركونَ في المؤتمرِ. إعراب «مشاركونَ»:',['خبر مرفوع وعلامة رفعه الضمة','خبر منصوب وعلامة نصبه الياء','خبر مرفوع وعلامة رفعه الواو نيابةً عن الضمة لأنه جمع مذكر سالم'],2,'«مشاركونَ» جمع مذكر سالم، فعلامة رفعه الواو نيابةً عن الضمة.')];
+TABS.push({id:'rafa',title:'علامات رفع المبتدأ والخبر',pl:'p6',color:'#34d399',mentor:'boyA',steps:[
+ {t:'علامات الرفع بحسب نوع الاسم',tip:'المبتدأ والخبر مرفوعان دائمًا، وتختلف علامة رفعهما بحسب نوع الاسم. اختر جملة وشاهد النوع والعلامة. اضغط الزرّ لترى الجملة التالية.',
+  render(sc){return labelStep(sc,RSENT,{lead:'ما نوع كل اسم؟ وما علامة رفعه؟ العلامة الملوّنة في آخر الكلمة.',color:'#34d399'})}},
+ {t:'مفتاح علامات الرفع',tip:'اكشف الصفوف واحدًا بعد الآخر لتحفظ علامة رفع كل نوع.',
+  render(sc){tbl(sc,['نوع الاسم','علامة الرفع','مثال'],[['المفرد','الضمة','البائعُ أمينٌ'],['جمع التكسير','الضمة','الباعةُ أمناءُ'],['جمع المؤنث السالم','الضمة','البائعاتُ أميناتٌ'],['المثنى','الألف','البائعانِ أمينانِ'],['جمع المذكر السالم','الواو','البائعونَ أمينونَ']],['#c4b5fd','#fde047','#86efac'])}},
+ {t:'نُعرب المبتدأ والخبر',tip:'نذكر الوظيفة ثم الحكم ثم العلامة ثم سببها. اختر جملة وشاهد إعرابها. اضغط الزرّ لترى الجملة التالية.',
+  render(sc){return labelStep(sc,RPARSE,{lead:'إعراب المبتدأ والخبر: <b>الوظيفة، الحكم، العلامة، السبب</b>.',color:'#34d399'})}},
+ {t:'ما علامة الرفع؟',tip:'حدّد نوع الاسم ثم تذكّر علامة رفعه.',qs:RQ1,render(sc){miniQuiz(sc,RQ1,'<h3>أحسنتَ!</h3><p>حفظتَ علامات الرفع.</p>','trophy')}},
+ {t:'أكمل الخبر المناسب',tip:'الخبر يطابق المبتدأ في نوعه، فيُرفع بعلامة المبتدأ نفسها.',qs:RQ2,render(sc){miniQuiz(sc,RQ2,'<h3>رائع!</h3><p>اخترتَ الخبر المناسب لكل مبتدأ.</p>','star')}},
+ {t:'حلّل الجملة',tip:'لكل كلمة نوع وعلامة رفع وسبب. اختر الصحيح.',qs:RQ3,render(sc){miniQuiz(sc,RQ3,'<h3>تحليل ممتاز!</h3><p>انتقل الآن إلى الإعراب.</p>','crown')}},
+ {t:'أعرِب بنفسك',tip:'اذكر: المبتدأ أو الخبر، مرفوع، وعلامة رفعه، وسببها.',qs:RQ4,render(sc){miniQuiz(sc,RQ4,'<h3>أنت بطل المبتدأ والخبر!</h3><p>أنهيتَ مجموعة الجملة الاسمية.</p>','trophy')}},
+]});
+
 /* --- report.js --- */
 /* ===== performance report: analysis, A4 sheet, PDF (save / print / send) ===== */
-const TP_ORDER=['s','n','f','o','d','e'];
+const TP_ORDER=['s','n','f','o','d','e','j','z','k','m','r'];
 const TY_NAME={mcq:'اختيار من متعدد',tap:'تحديد الكلمة',order:'ترتيب الجملة',irab:'الإعراب خطوة بخطوة',tbl:'جدول العلامات',meteor:'لعبة النيازك',det:'لعبة المحقّق'};
 const MINN=3;                                        // fewest answers before a topic is judged
 const pc=(c,n)=>n?Math.round(c/n*100):0;
@@ -3617,7 +3902,7 @@ TABS.push({id:'report',title:'تقرير الأداء',pl:'p4',color:'#34d399',m
 ]});
 
 /* the rail order: lessons → practice → games → summary & certificate → report */
-const ORDER=['start','sentence','numbers','subject','object','signs','compare','parse','maps','practice','games','certificate','report'];
+const ORDER=['start','kalam','nom','numbers','rafa','sentence','subject','object','signs','compare','parse','ajl','zarf','maps','practice','games','certificate','report'];
 TABS.sort((a,b)=>ORDER.indexOf(a.id)-ORDER.indexOf(b.id));
 
 /* --- eng_a.js --- */
@@ -3767,6 +4052,8 @@ const PAGES=[
  {id:'signs',ic:'magic_wand',t:'ساحر العلامات',f:'جمع المؤنث السالم يُنصب بالكسرة، والمثنى وجمع المذكر السالم يُنصبان بالياء.'},
  {id:'compare',ic:'thinking_face',t:'بطل التمييز',f:'اسأل: من فعل الفعل؟ فهو الفاعل. ومن وقع عليه الفعل؟ فهو المفعول به.'},
  {id:'parse',ic:'pencil',t:'أمير الإعراب',f:'نُعرب فنقول: مفعول به منصوب، وعلامة نصبه الفتحة الظاهرة على آخره.'},
+ {id:'ajl',ic:'light_bulb',t:'كاشف الأسباب',f:'المفعول لأجله اسم منصوب يبيّن سبب حدوث الفعل، ونسأل عنه بـ«لماذا؟». مثل: يجتهدُ التلميذُ رغبةً في النجاحِ.'},
+ {id:'zarf',ic:'stopwatch',t:'رائد الزمان والمكان',f:'ظرف الزمان يجيب عن «متى؟» وظرف المكان يجيب عن «أين؟»، وكلاهما منصوب. أما الجار والمجرور فقبله حرف جرّ.'},
  {id:'maps',ic:'world_map',t:'رسّام الخرائط',f:'في خرائط الدرس: الفعل بنفسجي، والفاعل أزرق، والمفعول به أصفر.'},
  {id:'practice',ic:'flexed_biceps',t:'بطل التدريب',f:'من الجذر «د ر س» جاءت: درس، ومدرسة، ومدرّس، ودروس.'},
  {id:'games',ic:'joystick',t:'لاعب فضائي',f:'من الجذر «ل ع ب» جاءت: لعب، ولاعب، وملعب، وألعاب.'},
@@ -3990,7 +4277,7 @@ const Final={
  /* from the banner / the cabinet: go to the games and start the battle */
  start(){if(!Pg.battleReady()){toast('المعركة الأخيرة تُفتح عندما تستردّ كل الصفحات.');return}
   const gi=TABS.findIndex(t=>t.id==='games');S.noNudge=1;go(gi,0);setTimeout(()=>{if(S.play)S.play('final')},350)}};
-Eng.mh.push(o=>{if(o.id!=='final'||!o.win)return;const f=store.get('fb',null)||{};store.set('fb',{won:f.won||Date.now(),n:(f.n||0)+1,last:Date.now()});
+Eng.mh.push(o=>{if(o.id!=='final'||!o.win)return;const f=store.get('fb',null)||{};store.set('fb',{won:f.won||Date.now(),n:(f.n||0)+1,last:Date.now()});if(!f.won&&Score.xon())paintScore(30,3);
  Banner.show({ic:'trophy',k:'انتصار!',t:'استعدتَ كتاب القواعد',s:'هزمتَ الروبوت الأكبر وصرتَ حارس الكتاب',sfx:'win',conf:90,cls:'final',ms:5200});Bdg.check()});
 
 /* --- eng_e.js --- */
@@ -4377,20 +4664,21 @@ const Ach={
 /* ---------- the result code ----------
    MFR1.<base64url of a small JSON array>.<6-character check>
    array: [1, name, minutes-since-1970, score, score max, stars, stars max, planets done, planets, answers, correct, badges, best daily streak, won the last battle, minutes learned, unfinished parts, then six (answers, correct) pairs in TP_ORDER,
-           then the bonus: its points and its stars (a separate evaluation; codes made before it existed have 28 items and no bonus)] */
+           then the bonus: its points and its stars (a separate evaluation; codes made before it existed have 28 items and no bonus),
+           then two more (answers, correct) pairs for the topics added later (المفعول لأجله، ظرفا الزمان والمكان): 34 items, and three more pairs (أقسام الكلام، الجملة الاسمية، علامات الرفع): 40 items; shorter codes count the missing ones as zero] */
 const MFR_RE=/MFR1\.[A-Za-z0-9_-]{6,1500}\.[0-9a-z]{6}/g;
 const Code={
  H(s){s='mfr1·'+s;let h=2166136261;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}h^=h>>>15;h=Math.imul(h,2246822519);h^=h>>>13;return(h>>>0).toString(36).padStart(7,'0').slice(-6)},
- make(R){R=R||REP();const tp=[];TP_ORDER.forEach(k=>{const t=R.top.find(x=>x.k===k)||{n:0,c:0};tp.push(t.n,t.c)});
-  const a=[1,String(R.name||'').replace(/\s+/g,' ').trim().slice(0,40),Math.floor(Date.now()/60000),R.pts,R.max,R.stars,R.smax,R.done,R.total,R.n,R.c,Bdg.n(),+((store.get('dc',null)||{}).best||0),(store.get('fb',null)||{}).won?1:0,Math.round(ST.sec/60),R.inc.count].concat(tp,[R.bp||0,R.bs||0]);
+ make(R){R=R||REP();const tp=[],tx=[];TP_ORDER.forEach((k,i)=>{const t=R.top.find(x=>x.k===k)||{n:0,c:0};(i<6?tp:tx).push(t.n,t.c)});
+  const a=[1,String(R.name||'').replace(/\s+/g,' ').trim().slice(0,40),Math.floor(Date.now()/60000),R.pts,R.max,R.stars,R.smax,R.done,R.total,R.n,R.c,Bdg.n(),+((store.get('dc',null)||{}).best||0),(store.get('fb',null)||{}).won?1:0,Math.round(ST.sec/60),R.inc.count].concat(tp,[R.bp||0,R.bs||0],tx);
   const b=Codec.b64(new TextEncoder().encode(JSON.stringify(a)));return'MFR1.'+b+'.'+this.H(b)},
  /* a code → its data, or null when it is incomplete / altered / not a result code */
  parse(code){const m=String(code||'').match(/^MFR1\.([A-Za-z0-9_-]{6,1500})\.([0-9a-z]{6})$/);if(!m||this.H(m[1])!==m[2])return null;
   let a;try{a=JSON.parse(new TextDecoder().decode(Codec.unb64(m[1])))}catch(e){return null}
-  if(!Array.isArray(a)||(a.length!==28&&a.length!==30)||a[0]!==1||typeof a[1]!=='string')return null;
+  if(!Array.isArray(a)||(a.length!==28&&a.length!==30&&a.length!==34&&a.length!==40)||a[0]!==1||typeof a[1]!=='string')return null;
   const nm=a[1].replace(/[\u0000-\u001f\u007f<>]/g,'').replace(/\s+/g,' ').trim().slice(0,40);if(!nm)return null;
   const v=a.slice(2);if(!v.every(x=>Number.isInteger(x)&&x>=0&&x<=1e9))return null;
-  const[t,pts,max,stars,smax,done,total,n,c,bd,dc,won,mins,inc]=v,tp=[],bp=v[26]||0,bs=v[27]||0;for(let i=14;i<26;i+=2)tp.push([v[i],v[i+1]]);
+  const[t,pts,max,stars,smax,done,total,n,c,bd,dc,won,mins,inc]=v,tp=[],bp=v[26]||0,bs=v[27]||0;for(let i=14;i<26;i+=2)tp.push([v[i],v[i+1]]);for(let i=28;i<v.length;i+=2)tp.push([v[i]||0,v[i+1]||0]);while(tp.length<TP_ORDER.length)tp.push([0,0]);
   if(t<2e7||t>8e7||max<1||max>9999||pts>max||smax<1||smax>999||stars>smax||total<1||total>99||done>total||c>n||n>1e6||bd>99||dc>9999||won>1||mins>1e5||inc>999||bp>1e6||bs>1e5||tp.some(x=>x[1]>x[0]||x[0]>1e6))return null;
   return{name:nm,t,pts,max,stars,smax,done,total,n,c,bd,dc,won,mins,inc,tp,bp,bs,code:String(code)}},
  /* every code found in a pasted text (whole WhatsApp messages are fine) */
@@ -4416,6 +4704,7 @@ const Mine={
    <h2 id="mnT">لوحتي · ${esc(NAME())}</h2>
    <p class="sub">رتبتك: <b>${c.n}</b>${c.next?` · بقي <b>${AR(c.need)}</b> نقطة لرتبة «${c.next.n}»`:' · أعلى رتبة في الرحلة!'}</p>
    <div class="rk-bar" role="img" aria-label="التقدّم إلى الرتبة التالية ${AR(c.pct)}٪"><i style="width:${c.pct}%"></i></div>
+   <p class="sub mn-parts" aria-label="تفصيل الدرجة">${Score.parts().map(x=>`${x.n}: <b>${AR(x.v)}</b>/${AR(x.max)}`).join(' · ')} · النجوم: <b>${AR(Score.stars())}</b>/${AR(Score.starsMax())} · بونص (منفصل): <b>${AR(Bonus.pts())}</b></p>
    <div class="mn-body">
     <section class="mn-c"><h3>${em('compass')} مكان توقفك الأخير</h3>
      <p>${p?esc(Resume.where(p)):'لم تبدأ بعد؛ اختر كوكبًا من الشريط أعلى الصفحة.'}</p>
@@ -4569,15 +4858,17 @@ const XBD=[
 const XROLE={v:'فعل',s:'فاعل',o:'مفعول به',x:'كلمة مشتّتة'};
 const xParse=s=>{const w=String(s).trim().split(/\s+/).filter(Boolean),oi=w.findIndex(x=>x[0]==='*');return{w:w.map(x=>x.replace(/^\*/,'')),oi}};
 const xVar=w=>{const c=w[w.length-1],V=['َ','ُ','ِ'];return V.includes(c)?V.filter(v=>v!==c).map(v=>w.slice(0,-1)+v):[]};
-const XPTS=8;   // bonus points for each new star in an extra game (a repeat earns the usual 5 per star)
+const XPTS=8;   // bonus points for each new star of an extra game when the teacher keeps the extra games out of the score (a repeat earns the usual 5 per star)
 const xRec=(id,tp,lv,q,ans,e,ok)=>Stats.rec({id,t:'det',tp,lv,q,ans,e},ok);
 function xEnd(host,api,o){
- const prev=GB[o.id]||0,st=o.win?o.stars:0,gain=Math.max(0,st-prev);let bp=0;
- if(o.win){if(st>prev){GB[o.id]=st;store.set('gb',GB)}if(gain)bp+=Bonus.add(0,gain*XPTS);if(st-gain>0)bp+=Bonus.repeatGame(st-gain)||0}
+ const prev=GB[o.id]||0,st=o.win?o.stars:0,gain=Math.max(0,st-prev),inScore=Score.xon();let bp=0;
+ if(o.win){if(st>prev){GB[o.id]=st;store.set('gb',GB)}
+  if(gain){if(inScore)paintScore(gain*10,gain);else bp+=Bonus.add(0,gain*XPTS)}      // new stars: into the score (or, if the teacher keeps the extra games out of it, into the bonus)
+  if(st-gain>0)bp+=Bonus.repeatGame(st-gain)||0}                                       // stars that did not raise the best: the usual bonus for repeating
  if(o.win)FX.confetti(80);else sfx('lose');
  if(typeof Eng!=='undefined')Eng.onGame(o,gain);
  const el=document.createElement('div');el.className='gm-end '+(o.win?'win':'lose');
- el.innerHTML=`<div class="ge-card zoom-in">${em(o.win?'trophy':'broken_heart','xl')}<h3>${o.title}</h3><p>${o.msg}</p><div class="sstars big">${starsRow(st)}</div>${bp?`<p class="gain bn">${em('sparkles')} +${AR(bp)} نقطة إضافية (منفصلة عن درجتك)</p>`:'<p class="gain" style="opacity:.8">لعبة إضافية: نجومها ونقاطها تُحسب في «البونص» ولا تغيّر درجتك.</p>'}<div class="row"><button class="btn go" data-act="again">العب مرة أخرى</button><button class="btn ghost" data-act="ex">كل الألعاب</button></div></div>`;
+ el.innerHTML=`<div class="ge-card zoom-in">${em(o.win?'trophy':'broken_heart','xl')}<h3>${o.title}</h3><p>${o.msg}</p><div class="sstars big">${starsRow(st)}</div>${gain&&inScore?`<p class="gain">+${AR(gain*10)} نقطة إلى درجتك ${em('hundred_points')}</p>`:''}${bp?`<p class="gain bn">${em('sparkles')} +${AR(bp)} نقطة بونص ${gain&&inScore?'لأنك أعدتَ اللعبة':'(منفصلة عن درجتك)'}</p>`:''}<div class="row"><button class="btn go" data-act="again">العب مرة أخرى</button><button class="btn ghost" data-act="ex">كل الألعاب</button></div></div>`;
  host.querySelector('.gm').appendChild(el)}
 const xTop=(ic,t)=>`<div class="gm-top"><button class="btn ghost sm" data-act="ex">→ الألعاب</button><b class="gm-t">${em(ic)} ${t}</b><span class="gm-h"><span id="hl" class="lvl l1">لعبة إضافية</span><span id="hh"></span></span></div>`;
 const xStars=l=>l>=4?3:l>=2?2:1;
@@ -4700,6 +4991,94 @@ const Week={
   return`<div class="wk-card${done?' done':''} rise"><h3>${em(done?'trophy':'flexed_biceps')} ${esc(w.t||'تحدّي الفصل الأسبوعي')}</h3><div class="wk-bar" role="img" aria-label="تقدّم الفصل ${AR(pct)}٪"><i style="width:${pct}%"></i></div>
    <small>${done?'حقّق فصلكم الهدف! ':''}<b>${AR(w.tot)}</b> من <b>${AR(w.goal)}</b> إجابة صحيحة من فصلكم · مساهمتك: <b>${AR(this.mine())}</b> · ${days>0?'بقي '+NUM(days,N_DAYS):'ينتهي اليوم'}</small></div>`},
  paint(){const b=$('#wkBox');if(b)b.innerHTML=this.card()}};
+
+/* --- cert.js --- */
+/* ===== the certificate: drawn on a canvas, so it can be saved as a picture. The teacher sets the conditions for getting it and its design ===== */
+const CERT0={on:true,
+ min:{pct:0,all:false,stars:0,games:0,boss:false,daily:0},
+ d:{title:'شهادة تفوّق',lead:'تُمنح هذه الشهادة للبطل',body:'لإتقانه درس «المفعول به والفاعل» وعلامات الرفع والنصب، والنجاح في رحلة الكواكب والألعاب.',honor:'بطل المفعول به',teacher:'الأستاذ إسلام قنديل',role:'معلم اللغة العربية',school:'',theme:'gold',stats:true,badges:true,bonus:true,logo:true}};
+const CERT_THEMES={
+ gold:{n:'ذهبي',bg:['#fffbea','#ffe9a8'],ink:'#4a2c00',acc:'#b4510a',line:'#b8791a',line2:'#e3ad3a',title:'#8a4b00',soft:'#b8791a',pat:'rgba(184,121,26,.10)',pill:'rgba(255,255,255,.65)'},
+ royal:{n:'أزرق ملكي',bg:['#f5f8ff','#d7e3ff'],ink:'#14214d',acc:'#1d4ed8',line:'#1e3a8a',line2:'#c9a227',title:'#1e3a8a',soft:'#3b5bb5',pat:'rgba(30,58,138,.07)',pill:'rgba(255,255,255,.7)'},
+ emerald:{n:'أخضر',bg:['#f3fff7','#d3f3df'],ink:'#0b3d24',acc:'#15803d',line:'#166534',line2:'#c9a227',title:'#166534',soft:'#2f8f5a',pat:'rgba(22,101,52,.07)',pill:'rgba(255,255,255,.7)'},
+ rose:{n:'وردي',bg:['#fff7fa','#ffd6e4'],ink:'#4a0d26',acc:'#be185d',line:'#9d174d',line2:'#e3ad3a',title:'#9d174d',soft:'#c2417a',pat:'rgba(157,23,77,.07)',pill:'rgba(255,255,255,.7)'},
+ space:{n:'فضائي داكن',bg:['#1b1240','#2d1f78'],ink:'#f4efff',acc:'#ffd43b',line:'#ffd43b',line2:'#a78bfa',title:'#ffd43b',soft:'#c4b5fd',pat:'rgba(255,255,255,.06)',pill:'rgba(255,255,255,.12)'}};
+const Cert={
+ W:1600,H:1131,imgs:{},
+ /* the design / conditions as the teacher set them, over the defaults */
+ cfg(){const c=(typeof Ctl!=='undefined'&&Ctl.cfg&&Ctl.cfg.cert)||{};return{on:c.on!==false,min:Object.assign({},CERT0.min,c.min||{}),d:Object.assign({},CERT0.d,c.d||{})}},
+ forced(){try{return localStorage.getItem('mf_ce')==='1'}catch(e){return false}},
+ setForced(v){try{if(v)localStorage.setItem('mf_ce','1');else localStorage.removeItem('mf_ce')}catch(e){}},
+ /* what the student still has to do: a list of {t, ok, v}; ok when every condition holds (or the teacher allowed this student) */
+ check(){const m=this.cfg().min,it=[],add=(t,ok,v)=>it.push({t,ok,v});
+  const pct=Score.max()?Math.floor(Score.total()*100/Score.max()):0,left=(()=>{try{return Incomplete.list().count}catch(e){return 0}})();
+  const won=GAMES.filter(g=>(GB[g.id]||0)>0).length,days=(Daily.get().total)|0;
+  if(m.pct>0)add(`درجة لا تقل عن ${AR(m.pct)}٪`,pct>=m.pct,`درجتك الآن ${AR(pct)}٪`);
+  if(m.all)add('إنجاز كل أجزاء الكواكب',left===0,left?`بقي ${AR(left)}`:'مكتمل');
+  if(m.stars>0)add(`الحصول على ${AR(m.stars)} نجمة على الأقل`,Score.stars()>=m.stars,`نجومك ${AR(Score.stars())}`);
+  if(m.games>0)add(`الفوز بـ ${AR(m.games)} ألعاب على الأقل`,won>=m.games,`فزتَ بـ ${AR(won)}`);
+  if(m.boss)add('هزيمة الروبوت في المعركة الأخيرة',Final.won(),Final.won()?'تمّ':'لم تهزمه بعد');
+  if(m.daily>0)add(`إنجاز تحدّي اليوم ${AR(m.daily)} أيام`,days>=m.daily,`أنجزتَ ${AR(days)}`);
+  const forced=this.forced();return{ok:forced||it.every(x=>x.ok),items:it,forced}},
+ fonts(){if(this._f)return this._f;const fs=['400 100px Lalezar','700 40px Amiri','400 40px Amiri','700 100px "Aref Ruqaa"','400 100px "Aref Ruqaa"','700 30px "Baloo Bhaijaan 2"','400 30px "Baloo Bhaijaan 2"'];
+  return this._f=Promise.all(fs.map(f=>{try{return document.fonts.load(f,'أبجد')}catch(e){return null}})).then(()=>1,()=>1)},
+ img(n){if(!IMG[n])return Promise.resolve(null);if(!this.imgs[n])this.imgs[n]=new Promise(r=>{const i=new Image();i.onload=()=>r(i);i.onerror=()=>r(null);i.src=IMG[n]});return this.imgs[n]},
+ /* name, {d: design (defaults to the teacher's), s: the figures to print} → a canvas */
+ async draw(name,o){o=o||{};const D=Object.assign({},this.cfg().d,o.d||{}),T=CERT_THEMES[D.theme]||CERT_THEMES.gold,W=this.W,H=this.H;
+  await this.fonts();
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');x.direction='rtl';x.textAlign='center';x.textBaseline='alphabetic';
+  const s=o.s||this.figures(),dark=D.theme==='space';
+  /* paper */
+  let g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,T.bg[0]);g.addColorStop(1,T.bg[1]);x.fillStyle=g;x.fillRect(0,0,W,H);
+  x.save();x.strokeStyle=T.pat;x.lineWidth=2;for(let i=-H;i<W;i+=34){x.beginPath();x.moveTo(i,0);x.lineTo(i+H,H);x.stroke()}x.restore();
+  const rg=x.createRadialGradient(W/2,H*.42,60,W/2,H*.42,W*.55);rg.addColorStop(0,dark?'rgba(255,255,255,.08)':'rgba(255,255,255,.65)');rg.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=rg;x.fillRect(0,0,W,H);
+  /* frame: a thick band, a thin gold line, a fine inner line, corner stars */
+  x.lineJoin='round';x.strokeStyle=T.line;x.lineWidth=18;x.strokeRect(26,26,W-52,H-52);
+  x.strokeStyle=T.line2;x.lineWidth=5;x.strokeRect(50,50,W-100,H-100);x.lineWidth=2;x.strokeRect(66,66,W-132,H-132);
+  const star=(cx,cy,r,col)=>{x.save();x.translate(cx,cy);x.fillStyle=col;x.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.42:r;x.lineTo(Math.cos(a)*rr,Math.sin(a)*rr)}x.closePath();x.fill();x.restore()};
+  [[58,58],[W-58,58],[58,H-58],[W-58,H-58]].forEach(([a,b])=>{x.fillStyle=T.bg[0];x.beginPath();x.arc(a,b,34,0,7);x.fill();x.strokeStyle=T.line2;x.lineWidth=4;x.stroke();star(a,b,22,T.line2)});
+  /* header: logo, school */
+  let y=92;const logo=D.logo?await this.img('logo'):null;
+  if(logo){const h=86,w=logo.width*h/logo.height;x.drawImage(logo,W/2-w/2,y,w,h);y+=h+8}
+  if(D.school){x.fillStyle=T.soft;x.font='700 32px "Baloo Bhaijaan 2",sans-serif';x.fillText(D.school,W/2,y+30);y+=40}
+  /* title, flanked by two medals */
+  const ty=Math.max(y+92,296);x.save();x.shadowColor=dark?'rgba(0,0,0,.5)':'rgba(120,70,0,.25)';x.shadowBlur=10;x.shadowOffsetY=4;
+  g=x.createLinearGradient(W/2-400,0,W/2+400,0);g.addColorStop(0,T.title);g.addColorStop(.5,T.acc);g.addColorStop(1,T.title);x.fillStyle=g;x.font='400 110px Lalezar,"Baloo Bhaijaan 2",sans-serif';x.fillText(D.title,W/2,ty);x.restore();
+  const med=await Promise.all(['trophy','crown'].map(n=>this.img(n)));
+  if(med[0])x.drawImage(med[0],W/2-W*.33-48,ty-96,96,96);if(med[1])x.drawImage(med[1],W/2+W*.33-48,ty-96,96,96);
+  const oy=ty+26;x.strokeStyle=T.line2;x.lineWidth=3;x.beginPath();x.moveTo(W/2-300,oy);x.lineTo(W/2-40,oy);x.moveTo(W/2+40,oy);x.lineTo(W/2+300,oy);x.stroke();star(W/2,oy,16,T.line2);
+  x.fillStyle=T.ink;x.font='700 42px Amiri,serif';x.fillText(D.lead,W/2,oy+62);
+  /* the name */
+  const ny=oy+176;x.fillStyle=T.acc;let fs=124;const nm=String(name||'البطل الصغير');x.font=`700 ${fs}px "Aref Ruqaa",Amiri,serif`;while(x.measureText(nm).width>W-420&&fs>56){fs-=6;x.font=`700 ${fs}px "Aref Ruqaa",Amiri,serif`}
+  x.fillText(nm,W/2,ny);const nw=Math.min(W-300,Math.max(560,x.measureText(nm).width+160));x.strokeStyle=T.line2;x.lineWidth=4;x.setLineDash([2,12]);x.lineCap='round';x.beginPath();x.moveTo(W/2-nw/2,ny+24);x.lineTo(W/2+nw/2,ny+24);x.stroke();x.setLineDash([]);
+  /* the text */
+  x.fillStyle=T.ink;x.font='400 40px Amiri,serif';const lines=this.wrap(x,D.body,W-460).slice(0,3);let by=ny+82;lines.forEach(l=>{x.fillText(l,W/2,by);by+=52});
+  if(D.honor){x.font='700 46px Amiri,serif';const a1='فاستحقّ لقب',a2='«'+D.honor+'»';const w1=x.measureText(a1+' ').width;x.font='700 56px Amiri,serif';const w2=x.measureText(a2).width,tw=w1+w2;
+   x.textAlign='right';x.font='700 46px Amiri,serif';x.fillStyle=T.ink;x.fillText(a1,W/2+tw/2,by+10);x.font='700 56px Amiri,serif';x.fillStyle=T.acc;x.textAlign='left';x.fillText(a2,W/2-tw/2,by+10);x.textAlign='center';by+=14}
+  /* figures */
+  let fy=by+62;
+  if(D.stats){const t=`الدرجة ${AR(s.pts)} من ${AR(s.max)}  ·  النجوم ${AR(s.stars)} من ${AR(s.smax)}`;x.font='700 36px "Baloo Bhaijaan 2",Amiri,sans-serif';const w=x.measureText(t).width+110;
+   x.fillStyle=T.pill;this.rr(x,W/2-w/2,fy-40,w,60,30);x.fill();x.strokeStyle=T.line2;x.lineWidth=2;x.stroke();x.fillStyle=T.title;x.fillText(t,W/2,fy)}
+  const info=[];if(D.badges&&s.rank)info.push('الرتبة الفضائية: '+s.rank);if(D.bonus&&s.bonus)info.push(`بونص منفصل: ${AR(s.bonus)} نقطة`+(s.bstars?` · ${AR(s.bstars)} نجمة إضافية`:''));
+  if(info.length){fy+=52;x.fillStyle=T.ink;x.font='700 30px "Baloo Bhaijaan 2",Amiri,sans-serif';x.fillText(info.join('   ·   '),W/2,fy)}
+  if(D.badges&&s.badges&&s.badges.length){const ims=await Promise.all(s.badges.slice(0,10).map(n=>this.img(n)));const z=44,gap=12,tot=ims.length*(z+gap)-gap;let bx=W/2-tot/2;const by3=fy+16;ims.forEach(im=>{if(im)x.drawImage(im,bx,by3,z,z);bx+=z+gap})}
+  /* footer: date, seal, signature */
+  const fl=962;x.strokeStyle=T.line2;x.lineWidth=2;x.beginPath();x.moveTo(150,fl);x.lineTo(W-150,fl);x.stroke();
+  x.fillStyle=T.soft;x.font='600 24px "Baloo Bhaijaan 2",sans-serif';x.fillText('التاريخ',300,fl+34);x.fillStyle=T.ink;x.font='700 34px "Baloo Bhaijaan 2",Amiri,sans-serif';x.fillText(s.date,300,fl+76);
+  x.fillStyle=T.title;x.font='700 52px "Aref Ruqaa",Amiri,serif';x.fillText(D.teacher,W-330,fl+58);x.fillStyle=T.soft;x.font='600 26px "Baloo Bhaijaan 2",sans-serif';x.fillText(D.role,W-330,fl+92);
+  const sx=W/2,sy=fl+46;x.save();x.translate(sx,sy);for(let k=0;k<16;k++){x.rotate(Math.PI/8);x.fillStyle=T.line2;x.beginPath();x.arc(0,-54,12,0,7);x.fill()}x.restore();
+  x.fillStyle=T.line;x.beginPath();x.arc(sx,sy,48,0,7);x.fill();x.strokeStyle=T.bg[0];x.lineWidth=3;x.beginPath();x.arc(sx,sy,39,0,7);x.stroke();star(sx,sy+2,27,T.bg[0]);
+  return cv},
+ rr(x,a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath()},
+ wrap(x,t,maxW){const w=String(t||'').split(/\s+/).filter(Boolean),L=[];let cur='';w.forEach(k=>{const n=cur?cur+' '+k:k;if(x.measureText(n).width>maxW&&cur){L.push(cur);cur=k}else cur=n});if(cur)L.push(cur);return L},
+ /* the figures printed on the certificate: this student's */
+ figures(){let a=null;try{a=Ach.get()}catch(e){}
+  return{pts:Score.total(),max:Score.max(),stars:Score.stars(),smax:Score.starsMax(),bonus:Bonus.pts(),bstars:Bonus.stars(),rank:a?a.rank:'',badges:a?a.badges.map(b=>b.ic):[],date:new Date().toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'})}},
+ blob(cv){return new Promise(r=>cv.toBlob(b=>r(b),'image/png'))},
+ /* save as a picture: a share sheet on phones that support it (so it can go straight to the gallery), a download elsewhere */
+ async save(cv,name,share){const blob=await this.blob(cv);if(!blob)return'fail';const fn='maf3ool-bihi-certificate.png';
+  try{const f=new File([blob],fn,{type:'image/png'});if(share&&navigator.canShare&&navigator.canShare({files:[f]})){await navigator.share({files:[f],title:'شهادتي'});return'shared'}}catch(e){if(e&&e.name==='AbortError')return'cancel'}
+  try{const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);return'saved'}catch(e){return'fail'}}};
 
 /* --- online.js --- */
 /* TEACHER DASHBOARD (Vercel build only): class analysis + a detailed report for every student, on screen and as PDF.
@@ -4917,11 +5296,11 @@ const Dash={
   const multi=S.scope==='all',sec=S.sec||'over',now=this.now();
   const scopeSel=`<label class="sr" for="dhSc">اختر الفصل</label><select id="dhSc" class="inp dh-sel"><option value="all"${multi?' selected':''}>كل الفصول</option>${S.classes.map(c=>`<option value="${esc(c)}"${S.scope===c?' selected':''}>${esc(c)}</option>`).join('')}</select>`;
   const top=`<div class="dh-top"><b>${em('man_teacher')} لوحة المعلم</b><span>${scopeSel}<button class="btn ghost sm" id="dhR" type="button">تحديث</button><button class="btn ghost sm" id="dhX" type="button">إغلاق</button></span></div>
-   <div class="dh-nav2"><button class="btn gold sm" id="dhG" type="button">${em('bullseye')} التحكم باللعبة</button><button class="btn gold sm" id="dhCt" type="button">${em('books')} محتوى الدرس</button><button class="btn gold sm" id="dhWk" type="button">${em('trophy')} تحدّي الأسبوع</button><button class="btn sky sm" id="dhRd" type="button">${em('closed_book')} تصميم التقارير</button><button class="btn ghost sm" id="dhM2" type="button">إدارة الفصول</button><button class="btn ghost sm" id="dhCm" type="button">وضع الحصة</button><button class="btn ghost sm" id="dhAc" type="button">حسابي</button><button class="btn red sm" id="dhLo" type="button">تسجيل الخروج</button></div>`;
+   <div class="dh-nav2"><button class="btn gold sm" id="dhG" type="button">${em('bullseye')} التحكم باللعبة</button><button class="btn gold sm" id="dhCt" type="button">${em('books')} محتوى الدرس</button><button class="btn gold sm" id="dhWk" type="button">${em('trophy')} تحدّي الأسبوع</button><button class="btn sky sm" id="dhRd" type="button">${em('closed_book')} تصميم التقارير</button><button class="btn gold sm" id="dhCe" type="button">${em('1st_place_medal')} الشهادة</button><button class="btn ghost sm" id="dhM2" type="button">إدارة الفصول</button><button class="btn ghost sm" id="dhCm" type="button">وضع الحصة</button><button class="btn ghost sm" id="dhAc" type="button">حسابي</button><button class="btn red sm" id="dhLo" type="button">تسجيل الخروج</button></div>`;
   const bind=()=>{$('#dhX',d).onclick=()=>this.close();
    $('#dhR',d).onclick=async()=>{const r=await this.load();if(r.ok)this.classView(d)};
    $('#dhSc',d).onchange=async e=>{S.scope=e.target.value;S.q='';S.sel=new Set();const r=await this.load();if(r.ok)this.classView(d)};
-   $('#dhM2',d).onclick=()=>this.manage();$('#dhG',d).onclick=()=>this.ctl();$('#dhCt',d).onclick=()=>this.content();$('#dhWk',d).onclick=()=>this.week();$('#dhRd',d).onclick=()=>this.design();$('#dhAc',d).onclick=()=>this.account();$('#dhLo',d).onclick=()=>Online.teacherLogout();$('#dhCm',d).onclick=()=>{this.close();try{Cls.toggle()}catch(e){toast('وضع الحصة غير متاح')}}};
+   $('#dhM2',d).onclick=()=>this.manage();$('#dhG',d).onclick=()=>this.ctl();$('#dhCt',d).onclick=()=>this.content();$('#dhWk',d).onclick=()=>this.week();$('#dhRd',d).onclick=()=>this.design();$('#dhCe',d).onclick=()=>this.certDesign();$('#dhAc',d).onclick=()=>this.account();$('#dhLo',d).onclick=()=>Online.teacherLogout();$('#dhCm',d).onclick=()=>{this.close();try{Cls.toggle()}catch(e){toast('وضع الحصة غير متاح')}}};
   if(!A.regs){d.innerHTML=top+`<div class="dh-wrap"><div class="dh-wait"><p>لا يوجد طلاب مسجّلون ${S.scope==='all'?'بعد':'في هذا الفصل بعد'}. أعطِ طلابك رابط الدرس؛ يسجّل كل طالب اسمه وفصله ورقم هاتفه.</p></div></div>`;bind();return}
   const tile=(v,l,c)=>`<div class="dh-tile"${c?` style="--tc:${c}"`:''}><b>${v}</b><small>${l}</small></div>`;
   const bar=(l,pct,txt,col)=>`<div class="dh-bar"><span>${l}</span><i><u style="width:${Math.max(pct,pct>0?3:0)}%;background:${col}"></u></i><em>${txt}</em></div>`;
@@ -4980,6 +5359,8 @@ const Dash={
   const bm=$('#dhBm',d);if(bm)bm.onclick=async()=>{const to=$('#dhBt',d).value,ids=[...S.sel];if(!ids.length)return;msg.textContent='جارٍ النقل…';const r=await Online.api('admin',{op:'bulk',act:'move',aids:ids,to},S.key);if(!r.ok){msg.textContent=this.err(r);return}S.sel=new Set();await this.load();this.classView(d);toast('نُقل '+AR(r.n)+' طالبًا إلى '+to+' ✓')};
   const bd=$('#dhBx',d);if(bd){let sure=false;bd.onclick=async()=>{if(!sure){sure=true;bd.textContent='اضغط مرة أخرى لحذف '+AR(S.sel.size)+' طالبًا نهائيًا';return}const r=await Online.api('admin',{op:'bulk',act:'del',aids:[...S.sel]},S.key);if(!r.ok){msg.textContent=this.err(r);return}S.sel=new Set();await this.load();this.classView(d);toast('حُذف '+AR(r.n)+' طالبًا')}};
   const ba=$('#dhBa',d);if(ba)ba.onclick=()=>this.awardModal([...S.sel],'');
+  const bcs=$('#dhBc',d);if(bcs)bcs.onclick=async()=>{bcs.disabled=true;const x=await Online.api('admin',{op:'certok',aids:[...S.sel]},S.key);bcs.disabled=false;toast(x.ok?'سُمح بالشهادة لـ '+AR(x.n)+' ✓':'تعذّر الحفظ')};
+  const brs=$('#dhBr',d);if(brs)brs.onclick=()=>this.resetModal([...S.sel],'');
   const bw=$('#dhBw',d);if(bw)bw.onclick=()=>{this.waAll([...S.sel])};},
  /* ---------- the Students tab: sort, group by class, select, edit ---------- */
  stuTable(A,multi,now){const S=this.S,rows=this.sorted(),grp=multi&&S.group,sel=S.sel;
@@ -4993,7 +5374,7 @@ const Dash={
   if(grp){S.classes.forEach(c=>{const g=rows.filter(r=>r.cls===c);if(!g.length)return;const act=g.filter(r=>!r.empty),avg=act.length?Math.round(act.reduce((s,r)=>s+r.spct,0)/act.length):0,rk=A.act.filter(r=>r.cls===c).map(r=>r.k);
    body+=`<tr class="dh-grp"><td colspan="${cols}"><b>${esc(c)}</b> <small>${NUM(g.length,N_ST)} · متوسط الدرجة ${AR(avg)}٪</small></td></tr>`+g.map(r=>tr(r,rk.indexOf(r.k)+1)).join('')})}
   else body=rows.map(r=>tr(r)).join('');
-  const bulk=sel.size?`<div class="dh-bulk" role="status"><b>حُدّد ${AR(sel.size)}</b><select id="dhBt" class="inp dh-sel" aria-label="انقل إلى فصل">${S.classes.map(c=>`<option>${esc(c)}</option>`).join('')}</select><button class="btn sky sm" id="dhBm" type="button">انقل المحدَّدين</button><button class="btn go sm" id="dhBw" type="button">واتساب للمحدَّدين</button><button class="btn gold sm" id="dhBa" type="button">جائزة للمحدَّدين</button><button class="btn red sm" id="dhBx" type="button">احذف المحدَّدين</button></div>`:'';
+  const bulk=sel.size?`<div class="dh-bulk" role="status"><b>حُدّد ${AR(sel.size)}</b><select id="dhBt" class="inp dh-sel" aria-label="انقل إلى فصل">${S.classes.map(c=>`<option>${esc(c)}</option>`).join('')}</select><button class="btn sky sm" id="dhBm" type="button">انقل المحدَّدين</button><button class="btn go sm" id="dhBw" type="button">واتساب للمحدَّدين</button><button class="btn gold sm" id="dhBa" type="button">جائزة للمحدَّدين</button><button class="btn ghost sm" id="dhBc" type="button">اسمح بالشهادة للمحدَّدين</button><button class="btn ghost sm" id="dhBr" type="button">إعادة تعيين للمحدَّدين</button><button class="btn red sm" id="dhBx" type="button">احذف المحدَّدين</button></div>`:'';
   return`<section class="dh-card"><h3>الطلاب وحساباتهم</h3>
    <div class="dh-tool"><label class="sr" for="dhQ">بحث باسم الطالب أو رقمه</label><input id="dhQ" class="bk-ta dh-q" placeholder="ابحث باسم الطالب أو رقم هاتفه" value="${esc(S.q)}" autocomplete="off">
     <label class="sr" for="dhSo">ترتيب الطلاب حسب</label><select id="dhSo" class="inp dh-sel">${OPT.map(([k,t])=>`<option value="${k}"${S.sort===k?' selected':''}>ترتيب: ${t}</option>`).join('')}</select>
@@ -5037,13 +5418,13 @@ const Dash={
    <div class="dh-set"><b>رسالة للطلاب (شريط أعلى الصفحة)</b><label class="sr" for="dhNt">نص الرسالة</label><input id="dhNt" class="inp" maxlength="200" placeholder="مثال: افتحوا كوكب «المفعول به» الآن" value="${esc(val('notice',''))}"><small>اتركها فارغة لإخفاء الشريط.</small></div>
    <div class="dh-set"><b>إيقاف الحل مؤقتًا</b><label class="dh-sw"><input type="checkbox" id="dhPs"${val('pause',false)?' checked':''}> أوقِف الطلاب (تظهر لهم شاشة انتظار)</label><label class="sr" for="dhPm">رسالة الإيقاف</label><input id="dhPm" class="inp" maxlength="120" placeholder="مثال: انتبهوا إلى الشرح" value="${esc(val('pauseMsg',''))}"></div>
    <div class="dh-set"><b>الكواكب (التبويبات)</b><small>«مغلق» يظهر للطالب بقفل ولا يفتحه؛ «مخفي» يختفي من الشريط تمامًا. افتح الكوكب عند وصولك إليه في الشرح.</small>
-    <div class="dh-tbl">${tabs.map(t=>`<div class="dh-tr"><span>${esc(t.title)}</span><select class="inp dh-sel" data-tb="${t.id}" aria-label="حالة ${esc(t.title)}"><option value="open"${st(t.id)==='open'?' selected':''}>مفتوح</option><option value="lock"${st(t.id)==='lock'?' selected':''}>مغلق</option><option value="hide"${st(t.id)==='hide'?' selected':''}>مخفي</option></select></div>`).join('')}</div>
+    <div class="dh-tbl">${tabs.map((t,k)=>`${k===0||groupOf(tabs[k-1].id)!==groupOf(t.id)?`<div class="dh-grp" style="--gc:${groupOf(t.id).c}">${groupOf(t.id).end?'':'المجموعة '+groupNo(groupOf(t.id))+': '}${esc(groupOf(t.id).t)}</div>`:''}<div class="dh-tr"><span>${esc(t.title)}</span><select class="inp dh-sel" data-tb="${t.id}" aria-label="حالة ${esc(t.title)}"><option value="open"${st(t.id)==='open'?' selected':''}>مفتوح</option><option value="lock"${st(t.id)==='lock'?' selected':''}>مغلق</option><option value="hide"${st(t.id)==='hide'?' selected':''}>مخفي</option></select></div>`).join('')}</div>
     <div class="row"><button class="btn ghost sm" id="dhLa" type="button">أغلِق الكل</button><button class="btn ghost sm" id="dhLn" type="button">افتح الكل</button></div></div>
    <div class="dh-set"><b>الألعاب داخل كوكب «الألعاب»</b><small>أزل العلامة لإغلاق لعبة بعينها.</small><div class="dh-lk">${(typeof GAMES!=='undefined'?GAMES:[]).map(g=>`<label class="dh-sw"><input type="checkbox" data-gm="${g.id}"${goff.has(g.id)?'':' checked'}> ${esc(g.t)}</label>`).join('')}</div></div>
    <div class="dh-set"><b>رسالة تشجيع لحظية</b><div class="dh-cr"><input id="dhCh" class="inp" maxlength="100" placeholder="مثال: أحسنتم يا أبطال!"><button class="btn gold sm" id="dhCs2" type="button">أرسل${cl?' للفصل':' للجميع'}</button></div></div>
    ${cl?'<p class="dh-sub">الخيارات التالية تخص كل الفصول؛ اخترها من «كل الفصول».</p>':`<div class="dh-set"><b>لوحة ترتيب الفصل للطلاب</b><label class="sr" for="dhBd">عرض لوحة الترتيب</label><select id="dhBd" class="inp dh-sel"><option value="off">مغلقة (لا يراها الطلاب)</option><option value="top5">أفضل ٥ في الفصل</option><option value="top10">أفضل ١٠ في الفصل</option><option value="all">كل طلاب الفصل</option></select>
     <label class="sr" for="dhBn">الأسماء</label><select id="dhBn" class="inp dh-sel"><option value="first">الاسم الأول فقط</option><option value="full">الاسم الكامل</option></select><small>يرى الطالب ترتيب فصله فقط، ويظهر ترتيبه هو دائمًا.</small></div>
-   <div class="dh-set"><b>خيارات عامة</b><label class="dh-sw"><input type="checkbox" id="dhRg"${c.reg===false?'':' checked'}> التسجيل مفتوح للطلاب الجدد</label><label class="dh-sw"><input type="checkbox" id="dhHn"${c.hints===false?'':' checked'}> السماح بالتلميحات في الأسئلة</label><label class="dh-sw"><input type="checkbox" id="dhSn"${c.sound===false?'':' checked'}> الأصوات مفعّلة</label><label class="dh-sw"><input type="checkbox" id="dhFx"${c.fx===false?'':' checked'}> المؤثرات (قصاصات الاحتفال)</label></div>
+   <div class="dh-set"><b>خيارات عامة</b><label class="dh-sw"><input type="checkbox" id="dhRg"${c.reg===false?'':' checked'}> التسجيل مفتوح للطلاب الجدد</label><label class="dh-sw"><input type="checkbox" id="dhSx"${(c.sc&&c.sc.x===false)?'':' checked'}> تُحتسب الألعاب الإضافية والمعركة الأخيرة في الدرجة والنجوم (وإلا فهي بونص فقط)</label><label class="dh-sw"><input type="checkbox" id="dhHn"${c.hints===false?'':' checked'}> السماح بالتلميحات في الأسئلة</label><label class="dh-sw"><input type="checkbox" id="dhSn"${c.sound===false?'':' checked'}> الأصوات مفعّلة</label><label class="dh-sw"><input type="checkbox" id="dhFx"${c.fx===false?'':' checked'}> المؤثرات (قصاصات الاحتفال)</label></div>
    <div class="dh-set"><b>ساعات إتاحة اللعبة يوميًا</b><label class="dh-sw"><input type="checkbox" id="dhWn"${w.on?' checked':''}> لا تعمل اللعبة إلا في هذه الساعات (بتوقيت جهاز الطالب)</label><div class="dh-cr"><label for="dhWf">من</label><input type="time" id="dhWf" class="inp" value="${esc(w.from||'08:00')}"><label for="dhWt">إلى</label><input type="time" id="dhWt" class="inp" value="${esc(w.to||'14:00')}"></div><small>خارج الساعات تظهر شاشة انتظار، ولا تنطبق عليك أنت.</small></div>`}
    <p class="dh-msg" id="dhGm" role="status"></p>
    <div class="row"><button class="btn go sm" id="dhGs" type="button">حفظ التغييرات</button>${cl&&has?'<button class="btn ghost sm" id="dhGr" type="button">إلغاء إعدادات هذا الفصل</button>':''}<button class="btn ghost sm" id="dhGx" type="button">إغلاق</button></div>`,m=>{
@@ -5053,7 +5434,7 @@ const Dash={
    $('#dhSco',m).onchange=e=>this.ctl(e.target.value);
    $('#dhRf',m).onclick=async()=>{await this.load();this.ctl(scope)};
    const post=async cfg=>{msg('جارٍ الحفظ…');const r=await Online.api('config',{cfg},S.key);if(!r.ok){msg(this.err(r));if(r.error==='login'){this.close();Online.teacherForget();Online.teacherAsk(Online.why.login)}return false}S.cfg=r.cfg;return true};
-   const fields=extra=>Object.assign({scope,notice:$('#dhNt',m).value,pause:$('#dhPs',m).checked,pauseMsg:$('#dhPm',m).value,lock:sels().filter(b=>b.value==='lock').map(b=>b.dataset.tb),hide:sels().filter(b=>b.value==='hide').map(b=>b.dataset.tb),gamesOff:$$('[data-gm]',m).filter(b=>!b.checked).map(b=>b.dataset.gm)},cl?{}:{reg:$('#dhRg',m).checked,hints:$('#dhHn',m).checked,sound:$('#dhSn',m).checked,fx:$('#dhFx',m).checked,win:{on:$('#dhWn',m).checked,from:$('#dhWf',m).value||'08:00',to:$('#dhWt',m).value||'14:00'},board:$('#dhBd',m).value,boardNames:$('#dhBn',m).value},extra||{});
+   const fields=extra=>Object.assign({scope,notice:$('#dhNt',m).value,pause:$('#dhPs',m).checked,pauseMsg:$('#dhPm',m).value,lock:sels().filter(b=>b.value==='lock').map(b=>b.dataset.tb),hide:sels().filter(b=>b.value==='hide').map(b=>b.dataset.tb),gamesOff:$$('[data-gm]',m).filter(b=>!b.checked).map(b=>b.dataset.gm)},cl?{}:{reg:$('#dhRg',m).checked,sc:{x:$('#dhSx',m).checked},hints:$('#dhHn',m).checked,sound:$('#dhSn',m).checked,fx:$('#dhFx',m).checked,win:{on:$('#dhWn',m).checked,from:$('#dhWf',m).value||'08:00',to:$('#dhWt',m).value||'14:00'},board:$('#dhBd',m).value,boardNames:$('#dhBn',m).value},extra||{});
    const ov=$('#dhOv',m);
    $('#dhGs',m).onclick=async()=>{if(cl&&ov&&!ov.checked){if(has&&await post({scope,reset:true}))msg('عاد الفصل إلى إعدادات «كل الفصول» ✓');else if(!has)msg('فعّل «إعدادات خاصة بهذا الفصل» أولًا.');return}
     if(await post(fields())){msg('حُفظت ✓ — تصل إلى الطلاب خلال نحو نصف دقيقة.');await this.load()}};
@@ -5128,6 +5509,39 @@ const Dash={
    $('#dhDs',m).onclick=async()=>{msg('جارٍ الحفظ…');const body={cfg:{rep:read()}};if(logoChanged)body.logo=logo;const r=await Online.api('config',body,S.key);if(!r.ok){msg(r.error==='logo_big'?'الشعار كبير.':this.err(r));return}
     S.cfg=r.cfg;RepCfg.rep=r.cfg.rep||{};RepCfg.logo=logo;try{localStorage.removeItem('mf_logo')}catch(e){}msg('حُفظ التصميم ✓ — يُطبَّق على كل التقارير.')};
    setTimeout(preview,80)})},
+
+ /* ---------- the certificate: conditions for earning it and its design, with a live preview ---------- */
+ certDesign(){const S=this.S,cur=Cert.cfg(),m0=cur.min,d0=cur.d;
+  const nf=(id,l,v,mx,h)=>`<label for="${id}">${l}</label><input id="${id}" class="inp" type="number" min="0" max="${mx}" value="${v}" inputmode="numeric"${h?` aria-describedby="${id}h"`:''}>`;
+  this.modal(`<h3>${em('1st_place_medal')} الشهادة</h3><p class="dh-sub">حدّد متى يحصل الطالب على شهادته وكيف تبدو. التغييرات تصل أجهزة الطلاب خلال نحو نصف دقيقة، ويحفظ الطالب شهادته صورةً من صفحة الشهادة.</p>
+   <div class="dh-set"><label class="dh-sw"><input type="checkbox" id="dhCeOn"${cur.on?' checked':''}> الشهادة متاحة للطلاب</label></div>
+   <div class="dh-set"><b>شروط الحصول عليها</b><small>اترك الرقم صفرًا وأزل التأشير ليكون الشرط غير مطلوب؛ إن لم تضع أي شرط فالشهادة متاحة للجميع.</small>
+    ${nf('dhCeP','حدّ أدنى للدرجة (٪ من الدرجة الكلية)',m0.pct,100)}${nf('dhCeS','حدّ أدنى للنجوم (من ٣٠)',m0.stars,30)}${nf('dhCeG','عدد الألعاب التي يفوز بها (على الأقل)',m0.games,30)}${nf('dhCeD','عدد أيام تحدّي اليوم المنجزة',m0.daily,60)}
+    <label class="dh-sw"><input type="checkbox" id="dhCeA"${m0.all?' checked':''}> إنجاز كل أجزاء الكواكب</label><label class="dh-sw"><input type="checkbox" id="dhCeB"${m0.boss?' checked':''}> هزيمة الروبوت في المعركة الأخيرة</label></div>
+   <div class="dh-set"><b>النصوص</b>
+    <label for="dhCeT">العنوان</label><input id="dhCeT" class="inp" maxlength="30" value="${esc(d0.title)}">
+    <label for="dhCeL">سطر الإهداء</label><input id="dhCeL" class="inp" maxlength="50" value="${esc(d0.lead)}">
+    <label for="dhCeBd">نص الشهادة</label><textarea id="dhCeBd" class="bk-ta" rows="3" maxlength="220">${esc(d0.body)}</textarea>
+    <label for="dhCeH">اللقب (يظهر بعد «فاستحقّ لقب»، اتركه فارغًا لإخفائه)</label><input id="dhCeH" class="inp" maxlength="40" value="${esc(d0.honor)}">
+    <label for="dhCeSc">اسم المدرسة</label><input id="dhCeSc" class="inp" maxlength="60" placeholder="مثال: مدرسة دلتا - المسار المصري" value="${esc(d0.school)}">
+    <label for="dhCeTc">اسم المعلم (التوقيع)</label><input id="dhCeTc" class="inp" maxlength="40" value="${esc(d0.teacher)}">
+    <label for="dhCeR">صفة المعلم</label><input id="dhCeR" class="inp" maxlength="40" value="${esc(d0.role)}"></div>
+   <div class="dh-set"><b>اللون</b><div class="dh-sw-row">${Object.keys(CERT_THEMES).map(k=>`<label class="dh-col" title="${CERT_THEMES[k].n}"><input type="radio" name="dhCeTh" value="${k}"${d0.theme===k?' checked':''}><i style="background:linear-gradient(135deg,${CERT_THEMES[k].bg[0]},${CERT_THEMES[k].bg[1]});border:3px solid ${CERT_THEMES[k].line}"></i><span>${CERT_THEMES[k].n}</span></label>`).join('')}</div></div>
+   <div class="dh-set"><b>ما يُطبع عليها</b><div class="dh-lk"><label class="dh-sw"><input type="checkbox" data-ce="logo"${d0.logo?' checked':''}> شعار الدرس</label><label class="dh-sw"><input type="checkbox" data-ce="stats"${d0.stats?' checked':''}> الدرجة والنجوم</label><label class="dh-sw"><input type="checkbox" data-ce="badges"${d0.badges?' checked':''}> الرتبة والأوسمة</label><label class="dh-sw"><input type="checkbox" data-ce="bonus"${d0.bonus?' checked':''}> نقاط البونص</label></div></div>
+   <div class="dh-set"><b>معاينة (باسم طالب تجريبي)</b><canvas id="dhCeCv" class="cert-cv" aria-label="معاينة الشهادة"></canvas></div>
+   <p class="dh-msg" id="dhCeM" role="status"></p>
+   <div class="row"><button class="btn go sm" id="dhCeS2" type="button">حفظ</button><button class="btn sky sm" id="dhCeX" type="button">حفظ نموذج كصورة</button><button class="btn ghost sm" id="dhCeR2" type="button">الشكل الافتراضي</button><button class="btn ghost sm" id="dhCeQ" type="button">إغلاق</button></div>`,m=>{
+   const msg=t=>{$('#dhCeM',m).textContent=t},v=id=>$('#'+id,m).value,num=id=>Math.max(0,Math.floor(+v(id))||0);
+   const read=()=>{const d={title:v('dhCeT'),lead:v('dhCeL'),body:v('dhCeBd'),honor:v('dhCeH'),school:v('dhCeSc'),teacher:v('dhCeTc'),role:v('dhCeR'),theme:($$('[name=dhCeTh]',m).find(x=>x.checked)||{}).value||'gold'};$$('[data-ce]',m).forEach(b=>d[b.dataset.ce]=b.checked);
+    return{on:$('#dhCeOn',m).checked,min:{pct:Math.min(100,num('dhCeP')),stars:Math.min(30,num('dhCeS')),games:Math.min(30,num('dhCeG')),daily:Math.min(60,num('dhCeD')),all:$('#dhCeA',m).checked,boss:$('#dhCeB',m).checked},d}};
+   const SAMPLE={pts:Math.round(Score.max()*.82)||1210,max:Score.max()||1610,stars:24,smax:30,bonus:50,bstars:2,rank:'قائد المجرّة',badges:['trophy','crown','star','fire','rocket','gem_stone'],date:new Date().toLocaleDateString('ar-EG',{year:'numeric',month:'long',day:'numeric'})};
+   let tk=0;const paint=async()=>{const id=++tk,cv=await Cert.draw('اسم الطالب هنا',{d:read().d,s:SAMPLE});if(id!==tk||!m.isConnected)return;const t=$('#dhCeCv',m);t.width=cv.width;t.height=cv.height;t.getContext('2d').drawImage(cv,0,0)};
+   let tm=0;const soon=()=>{clearTimeout(tm);tm=setTimeout(paint,250)};m.addEventListener('input',soon);m.addEventListener('change',soon);
+   $('#dhCeQ',m).onclick=()=>this.modal();
+   $('#dhCeX',m).onclick=async()=>{const cv=await Cert.draw('اسم الطالب هنا',{d:read().d,s:SAMPLE});const r=await Cert.save(cv,'نموذج',false);msg(r==='fail'?'تعذّر التصدير.':'حُفظ النموذج ✓')};
+   $('#dhCeR2',m).onclick=async()=>{const r=await Online.api('config',{cfg:{cert:{on:true,min:CERT0.min,d:CERT0.d}}},S.key);if(!r.ok){msg(this.err(r));return}S.cfg=r.cfg;try{Ctl.cfg=Object.assign({},Ctl.cfg,{cert:r.cfg.cert})}catch(e){}this.certDesign()};
+   $('#dhCeS2',m).onclick=async()=>{msg('جارٍ الحفظ…');const r=await Online.api('config',{cfg:{cert:read()}},S.key);if(!r.ok){msg(this.err(r));return}S.cfg=r.cfg;try{Ctl.cfg=Object.assign({},Ctl.cfg,{cert:r.cfg.cert})}catch(e){}msg('حُفظت إعدادات الشهادة ✓')};
+   setTimeout(paint,60)})},
 
  /* ---------- the weekly class goal: a target of correct answers for the whole class, with a progress bar the students see ---------- */
  week(){const S=this.S;
@@ -5269,15 +5683,30 @@ const Dash={
   const days=[];for(let i=13;i>=0;i--){const k=dshift(dkey(),-i),x=(dc.days||{})[k];days.push(`<span class="dh-dd${x?' ok':''}" title="${esc(dlabel(k))}${x?` · ${AR(x.s)} من ${AR(x.n)}`:''}">${x?AR(x.s):''}</span>`)}
   const ch=`<section class="dh-card"><h3>${em('fire')} التحديات والألعاب</h3><div class="dh-tiles">${tile(AR(dc.total||0),'أيام أنجز فيها تحدّي اليوم','#fb923c')}${tile(AR(dc.best||0),'أفضل سلسلة أيام','#f472b6')}${tile(fb.won?dt(fb.won):'لم يهزمه بعد','هازم الروبوت'+(fb.n?' · '+AR(fb.n)+' مرة':''),'#4ade80')}</div>
     <p class="dh-sub">آخر ١٤ يومًا (الرقم = الإجابات الصحيحة في تحدّي اليوم):</p><div class="dh-days">${days.join('')}</div>
-    <p class="dh-sub">نجوم الألعاب:</p><div class="dh-chips">${GAMES.map(g=>{const s=gb[g.id]|0;return`<span class="dh-chip${s?' on':''}">${em(g.ic||'joystick')} ${esc(g.t)} ${'★'.repeat(s)}${'☆'.repeat(Math.max(0,3-s))}</span>`}).join('')}</div></section>`;
+    <p class="dh-sub">نجوم الألعاب (الأساسية والإضافية):</p><div class="dh-chips">${GAMES.concat(typeof EXTRA!=='undefined'?EXTRA:[]).map(g=>{const s=gb[g.id]|0;return`<span class="dh-chip${s?' on':''}">${em(g.ic||'joystick')} ${esc(g.t)} ${'★'.repeat(s)}${'☆'.repeat(Math.max(0,3-s))}</span>`}).join('')}</div></section>`;
   const aws=`<section class="dh-card"><h3>${em('trophy')} جوائز المعلم (${AR(aw.length)})</h3>${aw.length?`<div class="dh-chips">${aw.map(a=>`<span class="dh-chip on" title="${esc(a.n||'')}">${em(IMG[a.ic]?a.ic:'trophy')} ${esc(a.t)} <small>${dt(a.at)}</small> <button type="button" class="dh-x" data-ua="${esc(a.id)}" aria-label="احذف الجائزة ${esc(a.t)}">×</button></span>`).join('')}</div>`:'<p class="dh-sub">لم تمنح هذا الطالب جوائز بعد.</p>'}<div class="row"><button class="btn gold sm" id="dhAw" type="button">${em('trophy')} امنح جائزة أو لقبًا</button></div></section>`;
   const bkp=`<section class="dh-card"><h3>${em('shield')} حفظ التقدّم</h3><p class="dh-sub">آخر حفظ في قاعدة البيانات: ${j2.ts?new Date(j2.ts).toLocaleString('ar-EG',{day:'numeric',month:'short',hour:'numeric',minute:'2-digit'}):'—'}. ${j2.bk?'توجد نسخة احتياطية سابقة يمكن استرجاعها إن ضاع شيء من تقدّم الطالب.':'لا توجد نسخة احتياطية بعد.'}</p>${j2.bk?`<div class="row"><button class="btn ghost sm" type="button" id="dhSb">${em('shield')} استرجع النسخة الاحتياطية</button><span class="dh-sub" id="dhSbm"></span></div>`:''}</section>`;
-  box.innerHTML=perf+aws+rk+bd+ch+bkp;
+  const cec=`<section class="dh-card"><h3>${em('1st_place_medal')} الشهادة</h3><p class="dh-sub">${j2.ce?'سمحتَ لهذا الطالب بالحصول على الشهادة مهما كانت الشروط.':'يحصل الطالب عليها عند استيفاء الشروط التي حدّدتَها (من زر «الشهادة» في الأعلى).'}</p><div class="row"><button class="btn ${j2.ce?'ghost':'gold'} sm" type="button" id="dhCeb">${j2.ce?'ألغِ السماح الاستثنائي':'اسمح له بالشهادة الآن'}</button></div></section>`;
+  box.innerHTML=perf+aws+cec+rk+bd+ch+bkp+`<section class="dh-card"><h3>${em('hammer')} إعادة التعيين</h3><p class="dh-sub">تصفير أجزاء من تقدّم هذا الطالب (الدرجة والنجوم، البونص، التحديات، الأوسمة…). تُحفظ نسخة احتياطية قبلها ويمكن استرجاعها.</p><div class="row"><button class="btn red sm" type="button" id="dhRs">إعادة تعيين…</button></div></section>`;
+  $('#dhRs',box).onclick=()=>this.resetModal([r.aid],r.name,()=>this.studentFile(r,box));
+  $('#dhCeb',box).onclick=async()=>{const x=await Online.api('admin',{op:'certok',aid:r.aid,v:!j2.ce},S.key);if(x.ok)this.studentFile(r,box);else toast('تعذّر الحفظ')};
   const sb=$('#dhSb',box);if(sb)sb.onclick=async()=>{if(!sb.dataset.s){sb.dataset.s=1;sb.textContent='اضغط مرة أخرى للتأكيد: يحلّ التقدّم الاحتياطي محلّ الحالي';return}
    sb.disabled=true;const x=await Online.api('admin',{op:'snapback',aid:r.aid},S.key);if(x.ok){$('#dhSbm',box).textContent='تم الاسترجاع ✓ وسيظهر عند الطالب في دخوله القادم.';this.studentFile(r,box)}else{sb.disabled=false;$('#dhSbm',box).textContent='تعذّر الاسترجاع'}};
   $('#dhAw',box).onclick=()=>this.awardModal([r.aid],r.name,()=>this.studentFile(r,box));
   $$('[data-ua]',box).forEach(b=>b.onclick=async()=>{const x=await Online.api('admin',{op:'unaward',aid:r.aid,id:b.dataset.ua},S.key);if(x.ok)this.studentFile(r,box)})},
  /* give a title / medal to one or several students: they see it as a banner and in their cabinet */
+ /* reset parts of one or several students' progress (the student's page applies it the next time it talks to the server; a safety copy is kept) */
+ resetModal(aids,label,done){const S=this.S,SC=[['score','الدرجة والنجوم الأساسية','الدروس والتدريبات والألعاب والمعركة الأخيرة (تبقى الدروس مفتوحة)'],['progress','مواضع التقدّم','الكواكب المنجزة وأماكن التوقف وفتح التدريبات'],['bonus','البونص','النقاط والنجوم الإضافية وسلسلة الإجابات'],['daily','التحديات','تحدّي اليوم وتحدّي الأسبوع'],['badges','الأوسمة والخزانة','الأوسمة والهدايا والرتبة'],['stats','سجل الإجابات','عدد الإجابات والأخطاء المحفوظة']];
+  this.modal(`<h3>${em('hammer')} إعادة تعيين ${aids.length>1?'لـ '+AR(aids.length)+' طلاب':'الطالب '+esc(label||'')}</h3>
+   <p class="dh-sub">اختر ما تريد تصفيره. لا يُحذف الحساب ولا الاسم، وتبقى جوائزك للطالب. يصل التغيير إلى جهاز الطالب خلال نصف دقيقة.</p>
+   <div class="dh-set">${SC.map(([k,t,d])=>`<label class="dh-sw"><input type="checkbox" data-rs="${k}"> <b>${t}</b> <small>${d}</small></label>`).join('')}
+    <div class="row"><button class="btn ghost sm" id="dhRsA" type="button">تحديد الكل</button></div></div>
+   <p class="dh-msg" id="dhRsM" role="status"></p><div class="row"><button class="btn red sm" id="dhRsS" type="button">أعد التعيين</button><button class="btn ghost sm" id="dhRsX" type="button">إلغاء</button></div>`,m=>{
+   const msg=t=>{$('#dhRsM',m).textContent=t};let sure=false;
+   $('#dhRsX',m).onclick=()=>this.modal();$('#dhRsA',m).onclick=()=>$$('[data-rs]',m).forEach(c=>c.checked=true);
+   $('#dhRsS',m).onclick=async()=>{const scopes=$$('[data-rs]',m).filter(c=>c.checked).map(c=>c.dataset.rs);if(!scopes.length){msg('اختر جزءًا واحدًا على الأقل.');return}
+    if(!sure){sure=true;$('#dhRsS',m).textContent='اضغط مرة أخرى للتأكيد';msg(`سيُصفَّر ${scopes.length>=6?'كل شيء':'ما اخترتَه'} ${aids.length>1?'لـ '+AR(aids.length)+' طلاب':'لهذا الطالب'}.`);return}
+    const x=await Online.api('admin',{op:'reset',aids,scopes},S.key);if(!x.ok){msg(this.err(x));return}this.modal();toast('أُعيد تعيين '+AR(x.n)+' ✓');if(done)done();else this.load().then(r=>{if(r.ok)this.classView($('#dash'))})}})},
  awardModal(aids,label,done){const S=this.S,PRE=[['نجم الأسبوع','star'],['المتفوّق','crown'],['الأكثر مثابرة','fire'],['الأكثر تحسّنًا','rocket'],['بطل التحدّي','trophy'],['المساعد الذكي','light_bulb'],['إجابات مبهرة','gem_stone'],['روح الفريق','party_popper']],IC=['trophy','star','glowing_star','crown','fire','rocket','light_bulb','gem_stone','party_popper','1st_place_medal','flexed_biceps','sparkles'];
   this.modal(`<h3>${em('trophy')} جائزة ${aids.length>1?'لـ '+AR(aids.length)+' طلاب':'للطالب '+esc(label||'')}</h3>
    <div class="dh-set"><b>اختر لقبًا جاهزًا أو اكتب لقبك</b><div class="dh-chips">${PRE.map(([t,i])=>`<button type="button" class="dh-chip" data-pre="${esc(t)}" data-ic="${i}">${em(i)} ${t}</button>`).join('')}</div>
@@ -5489,12 +5918,12 @@ const Online={
   try{try{saveST()}catch(e){}
    const snap=store.snapshot(),body={aid:a.aid,sk:a.sk,bv:a.bv,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),snap:JSON.stringify(snap),ts:snap.ts||0,code:Code.make(),detail:this.detail(),wk:typeof Week!=='undefined'?Week.report():undefined};
    const r=await this.api('sync',body,'',JSON.stringify(body).length<60000);
-   if(r.ok){const a2=this.acct()||a;if(r.rv!==undefined&&a2.bv!==r.rv){a2.bv=r.rv;this.setAcct(a2)}
+   if(r.ok){if(r.rst)this.applyReset(r.rst);const a2=this.acct()||a;if(r.rv!==undefined&&a2.bv!==r.rv){a2.bv=r.rv;this.setAcct(a2)}
     if(r.status==='old'&&r.snap){   // another device saved in between: both versions are merged (nothing of either is lost) and the merged one is sent
      try{store.load(store.merge(store.snapshot(),JSON.parse(r.snap)));Prof.rehydrate();toast(em('check_mark_button')+' جمعتُ تقدّمك من جهازك ومن حسابك معًا')}catch(e){}
      this.lastSig='';this.again=1}
     else this.lastSig=sg;
-    this.stat={ok:true,at:Date.now()};if(r.cfg)Ctl.apply(r.cfg);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);if(r.wk!==undefined&&typeof Week!=='undefined')Week.set(r.wk);
+    this.stat={ok:true,at:Date.now()};if(r.cfg)Ctl.apply(r.cfg);if(r.ce!==undefined&&typeof Cert!=='undefined')Cert.setForced(!!r.ce);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);if(r.wk!==undefined&&typeof Week!=='undefined')Week.set(r.wk);
     let fin=false;try{fin=Incomplete.list().count===0}catch(e){}
     if(fin&&!a2.fin){a2.fin=1;this.setAcct(a2);toast(em('trophy')+' أكملتَ الرحلة، ووصل تقريرك النهائي إلى معلمك ✓')}
     else if(!a2.first&&!o.quiet){a2.first=1;this.setAcct(a2);toast(em('check_mark_button')+' تقدّمك محفوظ في حسابك ويصل إلى معلمك تلقائيًا')}}
@@ -5506,7 +5935,14 @@ const Online={
   this.tm=setTimeout(()=>this.sync(),fin?300:6000)},
  async ping(){if(document.visibilityState!=='visible')return;const a=this.acct();
   if(!a){const r=await this.api('config');if(r.ok&&r.cfg)Ctl.apply(r.cfg);return}
-  const r=await this.api('sync',{aid:a.aid,sk:a.sk,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),wk:typeof Week!=='undefined'?Week.report():undefined});if(r.ok&&r.cfg){Ctl.apply(r.cfg);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);if(r.wk!==undefined&&typeof Week!=='undefined')Week.set(r.wk)}else if(r.error==='bad_session'||r.error==='no_account')this.expired()},
+  const r=await this.api('sync',{aid:a.aid,sk:a.sk,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),wk:typeof Week!=='undefined'?Week.report():undefined});if(r.ok&&r.cfg){Ctl.apply(r.cfg);if(r.ce!==undefined&&typeof Cert!=='undefined')Cert.setForced(!!r.ce);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);if(r.wk!==undefined&&typeof Week!=='undefined')Week.set(r.wk);if(r.rst)this.applyReset(r.rst)}else if(r.error==='bad_session'||r.error==='no_account')this.expired()},
+ /* the teacher reset some parts of this student's progress: apply it once on this device (the same keys as the server's list) */
+ RS:{score:['led','pb','ps','gb','fb'],progress:['done','seen','sd','pos','lit','pu'],bonus:['bn','cmb'],daily:['dc','wk','wkh'],badges:['bdg','gift','rk'],stats:['st']},
+ applyReset(rst){const a=this.acct();if(!rst||!rst.id||!a||a.rid===rst.id||!Array.isArray(rst.scopes))return false;
+  try{rst.scopes.forEach(sc=>(this.RS[sc]||[]).forEach(k=>store.del(k)));if(rst.scopes.includes('badges'))store.set('bdg',{});Prof.rehydrate()}catch(e){}
+  a.rid=rst.id;this.setAcct(a);this.lastSig='';
+  try{toast(em('sparkles')+' أعاد معلمك تعيين بعض نقاطك ونجومك. ابدأ من جديد وستصل أبعد!');go(S.tab,S.step,true)}catch(e){}
+  return true},
  /* the saved login no longer works (password reset by the teacher, or an old account): sign in again; progress on this device is kept */
  expired(){if(this._exp)return;this._exp=1;this.setAcct(null);setTimeout(()=>{this._exp=0;if($('#dlg').hidden)Gate.open('old',this.why.session)},300)},
  paintSave(){const b=$('#saveBtn');if(!b)return;const bad=this.acct()&&this.stat.ok===false;b.classList.toggle('warn',!!bad);
@@ -5666,9 +6102,9 @@ const Gate={
    Online.sync({force:true,quiet:true});go(S.tab,S.step,true)};
   /* restore: the saved snapshot of the account comes back in full. If this device holds progress of the SAME student that never reached the database (offline, expired session…), both are merged: nothing is lost either way */
   const restore=r=>{const a=Online.acct(),local=store.snapshot();let ok=false;
-   if(r.snap){try{const s=JSON.parse(r.snap),mine=store.hasData(local.d)&&((a&&a.aid===r.aid)||Online.lastAid()===r.aid||String(local.d.name||'').replace(/\s+/g,' ').trim()===String(r.name||'').replace(/\s+/g,' ').trim());
+   if(r.snap){try{const s=JSON.parse(r.snap),mine=store.hasData(local.d)&&!(r.rst&&(local.ts||0)<(r.rst.at||0))&&((a&&a.aid===r.aid)||Online.lastAid()===r.aid||String(local.d.name||'').replace(/\s+/g,' ').trim()===String(r.name||'').replace(/\s+/g,' ').trim());
     store.load(mine?store.merge(local,s):s);Prof.rehydrate();ok=true}catch(e){}}
-   Prof.setName(r.name);Online.setAcct({aid:r.aid,phone:r.phone,name:r.name,cls:r.cls,sk:r.sk,bv:r.rv||0,first:1});Online.lastSig='';d.hidden=true;d.innerHTML='';
+   if(typeof Cert!=='undefined')Cert.setForced(!!r.ce);Prof.setName(r.name);Online.setAcct({aid:r.aid,phone:r.phone,name:r.name,cls:r.cls,sk:r.sk,bv:r.rv||0,rid:(r.rst&&r.rst.id)||'',first:1});Online.lastSig='';d.hidden=true;d.innerHTML='';
    Prof.paintName();go(ok?0:S.tab,0,true);sfx('level');FX.confetti(ok?40:20);toast(ok?'✓ استرجعتُ تقدّمك يا '+esc(r.name):'✓ أهلًا بعودتك يا '+esc(r.name));Online.sync({force:true,quiet:true})};
   const login=async(aid,phone,pass,mm)=>{mm=mm||m2;msg(mm,'جارٍ التحقق…','ok');const r=await Online.api('login',{phone,pass,aid});
    if(!r.ok){msg(mm,Online.err(r));return}
@@ -5738,7 +6174,7 @@ const Ctl={
   setInterval(()=>Ctl.paint(),20000);
   const qr=Q.render;Q.render=function(h,q,o){if(Ctl.cfg&&Ctl.cfg.hints===false)o=Object.assign({},o||{},{noHint:true});return qr.call(this,h,q,o)};
   setTimeout(()=>this.paint(),50)},
- apply(c){if(!c||typeof c!=='object')return;const old=this.cfg;this.cfg=c;try{Content.check(c.ct)}catch(e){}try{localStorage.setItem('mf_cfg',JSON.stringify(c))}catch(e){}RepCfg.rep=c.rep||{};this.logo(c);this.paint(old);
+ apply(c){if(!c||typeof c!=='object')return;const old=this.cfg;this.cfg=c;try{Content.check(c.ct)}catch(e){}try{localStorage.setItem('mf_cfg',JSON.stringify(c))}catch(e){}RepCfg.rep=c.rep||{};this.logo(c);this.paint(old);if(old&&JSON.stringify(old.sc||{})!==JSON.stringify(c.sc||{})){try{paintScore();progress()}catch(e){}}
   /* tell the server this device now holds the new settings (the teacher's dashboard counts how many students received them) */
   if((!old||old.v!==c.v)&&Online.acct()){clearTimeout(this.ak);this.ak=setTimeout(()=>{const a=Online.acct();if(a)Online.api('sync',{aid:a.aid,sk:a.sk,cv:c.v,w:Online.where()})},400)}},
  /* the report logo is stored apart (it is large): fetched once per version and kept on the device */

@@ -101,6 +101,28 @@ module.exports = async (req, res) => {
       }
       return send(res, 200, { ok: true, n: k });
     }
+    if (op === 'reset') {   // the teacher resets some parts of one or several students' progress: {aids|aid, scopes:[score|progress|bonus|daily|badges|stats]}
+      const RS = { score: ['led', 'pb', 'ps', 'gb', 'fb'], progress: ['done', 'seen', 'sd', 'pos', 'lit', 'pu'], bonus: ['bn', 'cmb'], daily: ['dc', 'wk', 'wkh'], badges: ['bdg', 'gift', 'rk'], stats: ['st'] };
+      const scopes = (Array.isArray(b.scopes) ? b.scopes : []).filter(x => RS[x]).filter((x, i, a) => a.indexOf(x) === i);
+      if (!scopes.length) return send(res, 400, { error: 'bad' });
+      const list = (Array.isArray(b.aids) ? b.aids : [aid]).map(x => String(x || '').slice(0, 200)).filter(Boolean).slice(0, 250), keys = [].concat(...scopes.map(x => RS[x]));
+      const id = Date.now().toString(36); let k = 0;
+      for (const a of list) {
+        const [name, cls, snap, rv, phone] = await redis(['HMGET', 'mf:acc:' + a, 'name', 'cls', 'snap', 'rv', 'phone']); if (!name) continue;
+        let s0 = null; try { s0 = snap ? JSON.parse(snap) : null; } catch (e) { s0 = null; }
+        const set = ['rst', JSON.stringify({ id, scopes, at: Date.now() }), 'rv', String((+rv || 0) + 1)];
+        if (s0 && s0.d) { keys.forEach(x => { delete s0.d[x]; }); s0.ts = Date.now(); set.push('snap', JSON.stringify(s0), 'ts', String(s0.ts), 'bk', snap, 'bkt', String(Date.now())); }
+        const cmds = [['HSET', 'mf:acc:' + a].concat(set)];
+        if (scopes.includes('score')) { cmds[0].push('code', '', 'det', ''); cmds.push(['HSET', 'mf:cls:' + cls, a, JSON.stringify({ n: name, p: phone, c: '', d: 0 })]); }
+        await pipeline(cmds); k++;
+      }
+      return send(res, 200, { ok: true, n: k });
+    }
+    if (op === 'certok' || op === 'certno') {   // let some students have the certificate whatever the conditions: {aids|aid, v:true|false}
+      const list = (Array.isArray(b.aids) ? b.aids : [aid]).map(x => String(x || '').slice(0, 200)).filter(Boolean).slice(0, 250); let k = 0;
+      for (const a of list) { if (!(await redis(['HGET', 'mf:acc:' + a, 'name']))) continue; await redis(['HSET', 'mf:acc:' + a, 'ce', b.v === false || op === 'certno' ? '' : '1']); k++; }
+      return send(res, 200, { ok: true, n: k });
+    }
     if (op === 'wkstat') {   // progress of the weekly class goal: total, participants, top contributors
       const c = await cfg(true), w = c.wk;
       if (!w || !w.id) return send(res, 200, { ok: true, wk: null });
