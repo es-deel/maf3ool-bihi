@@ -63,6 +63,16 @@ module.exports = async (req, res) => {
         if (c.gd.det && !c.gd.det.length) delete c.gd.det;
       } else if (w === 'mw') {
         if (!Array.isArray(b.data) || !b.data.length) delete c.gd.mw; else c.gd.mw = b.data.slice(0, 4).map(x => arr(x, 40, y => [S(y[0], 30), ['verb', 'mufrad', 'muthanna', 'jms', 'jfs', 'taksir'].includes(y[1]) ? y[1] : 'mufrad', ['r', 'a'].includes(y[2]) ? y[2] : '']).filter(y => y[0]));
+      } else if (w === 'fl') {   // «المفعول الهارب»: sentences, the object word starts with *
+        const L = arr(b.data, 40, x => S(x, 120)).filter(x => x.split(' ').length >= 2 && x.split(' ').filter(y => y[0] === '*').length <= 1 && x.replace(/\*/g, '').trim());
+        if (!Array.isArray(b.data) || !b.data.length) delete c.gd.fl; else if (L.length < 4 || !L.some(x => x.includes('*'))) return send(res, 400, { error: 'few' }); else c.gd.fl = L;
+      } else if (w === 'fx') {   // «ورشة التصحيح»: [sentence, wrong word, right word, explanation]
+        const L = arr(b.data, 30, x => [S(x && x[0], 120), S(x && x[1], 30), S(x && x[2], 30), S(x && x[3], 160)]).filter(x => x[0] && x[1] && x[2] && x[1] !== x[2] && x[0].split(' ').includes(x[1]));
+        if (!Array.isArray(b.data) || !b.data.length) delete c.gd.fx; else if (L.length < 3) return send(res, 400, { error: 'few' }); else c.gd.fx = L;
+      } else if (w === 'bd') {   // «ابنِ جملتك»: rounds of {v: verbs, s: subjects, o: objects, x: distractors}
+        const W = a => arr(a, 4, y => S(y, 30).replace(/\s+/g, '')).filter(Boolean);
+        const L = arr(b.data, 12, x => ({ v: W(x && x.v), s: W(x && x.s), o: W(x && x.o), x: W(x && x.x).slice(0, 3) })).filter(x => x.v.length && x.s.length && x.o.length);
+        if (!Array.isArray(b.data) || !b.data.length) delete c.gd.bd; else if (L.length < 2) return send(res, 400, { error: 'few' }); else c.gd.bd = L;
       } else return send(res, 400, { error: 'bad' });
     }
     else if (op === 'reset') { const w = String(b.what || ''); const e = EMPTY(); if (w === 'all') { c.qo = e.qo; c.qh = e.qh; c.qn = e.qn; c.tx = e.tx; c.gm = e.gm; c.ch = e.ch; c.nm = e.nm; c.gd = e.gd; } else if (['qo', 'qh', 'qn', 'tx', 'gm', 'ch', 'nm', 'gd'].includes(w)) c[w] = e[w]; }

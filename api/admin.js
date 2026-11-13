@@ -1,6 +1,6 @@
 'use strict';
 const crypto = require('crypto');
-const { redis, pipeline, send, deny, body, classes, h2o, hashPw, normPhone, normName, aidOf } = require('./_lib');
+const { redis, pipeline, send, deny, body, classes, h2o, hashPw, cfg, normPhone, normName, aidOf } = require('./_lib');
 const err = e => ({ code: e.code === 'no_db' ? 503 : 500, o: { error: e.code === 'no_db' ? 'no_db' : 'server' } });
 
 /* delete one student and everything stored about him */
@@ -100,6 +100,16 @@ module.exports = async (req, res) => {
         await redis(['HSET', 'mf:acc:' + a, 'aw', JSON.stringify(aw)]); k++;
       }
       return send(res, 200, { ok: true, n: k });
+    }
+    if (op === 'wkstat') {   // progress of the weekly class goal: total, participants, top contributors
+      const c = await cfg(true), w = c.wk;
+      if (!w || !w.id) return send(res, 200, { ok: true, wk: null });
+      const flat = await redis(['HGETALL', 'mf:wk:' + w.id]), tot = +(await redis(['GET', 'mf:wk:' + w.id + ':t'])) || 0, rows = [];
+      const m = {}; if (Array.isArray(flat)) { for (let i = 0; i + 1 < flat.length; i += 2) m[flat[i]] = +flat[i + 1] || 0; } else if (flat && typeof flat === 'object') Object.keys(flat).forEach(k => { m[k] = +flat[k] || 0; });
+      const top = Object.keys(m).sort((a, b) => m[b] - m[a]).slice(0, 10);
+      const info = top.length ? await pipeline(top.map(a => ['HMGET', 'mf:acc:' + a, 'name', 'cls'])) : [];
+      top.forEach((a, i) => rows.push({ n: (info[i] && info[i][0]) || '—', c: (info[i] && info[i][1]) || '', v: m[a] }));
+      return send(res, 200, { ok: true, wk: { id: w.id, t: w.t, goal: w.goal, end: w.end, cls: w.cls || [], from: w.from || 0 }, tot, parts: Object.keys(m).length, top: rows });
     }
     if (op === 'snapback') {   // bring back the safety copy of the student's progress (the current version becomes the new safety copy)
       const [snap, bk, rv] = await redis(['HMGET', 'mf:acc:' + aid, 'snap', 'bk', 'rv']);

@@ -1623,6 +1623,26 @@ body.cls .opt{min-height:4.6rem}
 .mn-bn .mn-t b{color:#f5d0fe}
 .rpt-parts{color:var(--muted);font-size:.93rem;margin:.35rem 0 0}
 #olTM{white-space:pre-wrap;word-break:break-all;direction:rtl}
+
+/* extra games + weekly class goal */
+.xg-lead{margin-top:1.4rem}
+.gcard.xg{--cc:#38bdf8}
+.xf-opts{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;margin:.8rem 0}
+.xf-opts .btn{font-size:1.25rem;min-width:7rem}
+.xf-opts .btn.ok{outline:3px solid #4ade80}
+.xf-opts .btn.bad{opacity:.45}
+.xb-line{display:flex;flex-wrap:wrap;gap:.6rem;justify-content:center;min-height:3.2rem;margin:.6rem 0;padding:.6rem;border-radius:1rem;background:#ffffff10;border:2px dashed #ffffff40}
+.xb-slot{display:inline-flex;align-items:center;justify-content:center;min-width:5.5rem;padding:.2rem .8rem;border-radius:.8rem;border:2px dashed #ffffff55;color:#ffffff99;font-size:.95rem}
+.xb-on{border-style:solid;border-color:#a78bfa;background:#a78bfa33}
+.xb-on.found{border-color:#4ade80;background:#4ade8033}
+.det-p.sent .dw:disabled{cursor:default}
+/* weekly class goal */
+.wk-card{display:grid;gap:.5rem;padding:.9rem 1.1rem;margin:0 0 1rem;border-radius:1.2rem;background:linear-gradient(135deg,#1d4ed8cc,#7c3aedcc);border:1.5px solid #ffffff40;color:#fff}
+.wk-card h3{margin:0;font-size:1.1rem;display:flex;gap:.4rem;align-items:center}
+.wk-bar{height:.9rem;border-radius:99px;background:#0003;overflow:hidden}
+.wk-bar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,#fde047,#4ade80);transition:width .6s}
+.wk-card small{opacity:.9}
+.wk-card.done{background:linear-gradient(135deg,#15803dcc,#0f766ecc)}
 </style></head><body><div class="sky" aria-hidden="true"><div class="stars"></div><div class="stars b"></div><img class="float-pl a" data-em="p2" alt=""><img class="float-pl b" data-em="p3" alt=""><i class="comet"></i></div>
 <header class="top"><div class="top-in">
  <div class="brand"><img data-em="logo" alt=""><div><h1>مغامرة المفعول به</h1><small>رحلة بين الكواكب مع الأستاذ إسلام قنديل</small></div></div>
@@ -1752,7 +1772,7 @@ const N_BPT=['نقطة إضافية واحدة','نقطتان إضافيتان',
 const N_PART=['جزء واحد','جزآن','أجزاء','جزءًا'],N_PARTA=['جزءًا واحدًا','جزأين','أجزاء','جزءًا'],N_Q=['سؤال واحد','سؤالان','أسئلة','سؤالًا'],N_PL=['كوكب واحد','كوكبان','كواكب','كوكبًا'];
 /* ---- storage: memory cache → localStorage (written at once) → IndexedDB mirror (written a moment later).
    If the browser clears localStorage, the mirror brings the progress back; a backup code (see Backup) covers browsers that keep nothing. ---- */
-const KEYS=['seen','done','sd','pos','led','pb','st','gb','ps','pu','name','lit','orr','bdg','gift','rk','cmb','dc','fb','bkt','pw','bn'];   // everything that belongs to one student
+const KEYS=['seen','done','sd','pos','led','pb','st','gb','ps','pu','name','lit','orr','bdg','gift','rk','cmb','dc','fb','bkt','pw','bn','wk','wkh'];   // everything that belongs to one student
 const store=(()=>{
  const P='mfb_',mem={};let ls=null,idb=null,idbOk=false,tm=0,dirty=false;const hooks=[];
  try{ls=window.localStorage;ls.setItem(P+'t','1');ls.removeItem(P+'t')}catch(e){ls=null}
@@ -3066,7 +3086,8 @@ function rec(id,stars){const prev=GB[id]||0,gain=Math.max(0,stars-prev);if(stars
 /* next question of a level, never repeating until the pool is used up */
 function pickQ(lv,used,only){let pool=byLv(lv).filter(q=>(!only||q.t===only));let fresh=pool.filter(q=>!used.has(q.id));if(!fresh.length){pool.forEach(q=>used.delete(q.id));fresh=pool}const q=fresh[Math.random()*fresh.length|0];used.add(q.id);return q}
 /* the same end screen for every game */
-function endScreen(host,api,o){const g=o.win&&!o.bonus?rec(o.id,o.stars):0,bp=o.win&&!o.bonus?Bonus.repeatGame(o.stars-g):0;   // stars that did not raise the game's best earn the bonusif(o.win)FX.confetti(80);else sfx('lose');
+function endScreen(host,api,o){const g=o.win&&!o.bonus?rec(o.id,o.stars):0,bp=o.win&&!o.bonus?Bonus.repeatGame(o.stars-g):0;   // stars that did not raise the game's best earn the bonus
+ if(o.win)FX.confetti(80);else sfx('lose');
  if(typeof Eng!=='undefined')Eng.onGame(o,g);
  const el=document.createElement('div');el.className='gm-end '+(o.win?'win':'lose');
  el.innerHTML=`<div class="ge-card zoom-in">${em(o.win?'trophy':'broken_heart','xl')}<h3>${o.title}</h3><p>${o.msg}</p>${o.bonus?'':`<div class="sstars big">${starsRow(o.win?o.stars:0)}</div>`}${g?`<p class="gain">+${AR(g*10)} نقطة إلى درجتك ${em('hundred_points')}</p>`:''}${bp?`<p class="gain bn">${em('sparkles')} +${AR(bp)} نقطة بونص لأنك أعدتَ اللعبة (منفصلة عن درجتك)</p>`:''}<div class="row"><button class="btn go" data-act="again">العب مرة أخرى</button><button class="btn ghost" data-act="ex">كل الألعاب</button></div></div>`;
@@ -3083,9 +3104,9 @@ TABS.push({id:'games',title:'الألعاب',pl:'p6',color:'#fb923c',mentor:'boy
  {t:'ساحة الألعاب',tip:'اختر لعبة! كل لعبة تبدأ بأسئلة سهلة ثم تزداد صعوبة حتى تبلغ الهدف.',
   render(sc){let cur=null;const api={exit:()=>{if(cur){try{cur()}catch(e){}cur=null}PU.unmount();hub()}};S.cleanup=()=>{PU.unmount();if(cur)try{cur()}catch(e){}};
    const play=g=>{sfx('level');const start=()=>{if(cur){try{cur()}catch(e){}}sc.onclick=null;PU.unmount();cur=g.run(sc,api,start)||null;PU.mount(sc,g.id);const gm=$('.gm',sc);if(gm)try{gm.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})}catch(e){}};start()};
-   S.play=id=>{const g=id==='final'?FINAL_G:GAMES.find(x=>x.id===id);if(g)play(g)};
-   const hub=()=>{sc.innerHTML=`<p class="lead rise">${AR(GAMES.length)} مهمّات فضائية. كل إجابة صحيحة أو خاطئة لها <b>تأثير</b> تراه أمامك، والأسئلة متدرّجة من السهل إلى الصعب. فُز بكل لعبة مرة واحدة على الأقل لتُنجز الكوكب، وتُحسب لك <b>أفضل نتيجة</b> في كل لعبة (حتى ٣ نجوم، وكل نجمة تعادل ${AR(10)} نقاط في درجتك). وإذا أعدتَ لعبة سبق أن نلتَ نجومها فلك <b>بونص</b> منفصل عن الدرجة.</p><div class="games">${GAMES.map((g,i)=>`<button class="gcard rise" style="--d:${i}" data-act="pl" data-i="${i}" data-id="${g.id}"><span class="gic">${em(g.ic,'xl')}</span><h3>${g.t}</h3><p>${g.d}</p><div class="gmeta"><span>${g.g}</span><span class="lvl l2">${g.lv}</span></div><div class="sstars">${starsRow(GB[g.id]||0)}</div></button>`).join('')}${Final.card(GAMES.length)}${typeof Daily!=='undefined'?Daily.card(GAMES.length+1):''}</div>`;
-    act(sc,{pl:b=>{if(b.dataset.id==='daily'){Daily.open();return}play(b.dataset.id==='final'?FINAL_G:GAMES[+b.dataset.i])}})};
+   S.play=id=>{const g=id==='final'?FINAL_G:(GAMES.find(x=>x.id===id)||(typeof EXTRA!=='undefined'&&EXTRA.find(x=>x.id===id)));if(g)play(g)};
+   const hub=()=>{sc.innerHTML=`<p class="lead rise">${AR(GAMES.length)} مهمّات فضائية. كل إجابة صحيحة أو خاطئة لها <b>تأثير</b> تراه أمامك، والأسئلة متدرّجة من السهل إلى الصعب. فُز بكل لعبة مرة واحدة على الأقل لتُنجز الكوكب، وتُحسب لك <b>أفضل نتيجة</b> في كل لعبة (حتى ٣ نجوم، وكل نجمة تعادل ${AR(10)} نقاط في درجتك). وإذا أعدتَ لعبة سبق أن نلتَ نجومها فلك <b>بونص</b> منفصل عن الدرجة.</p><div id="wkBox">${typeof Week!=='undefined'?Week.card():''}</div><div class="games">${GAMES.map((g,i)=>`<button class="gcard rise" style="--d:${i}" data-act="pl" data-i="${i}" data-id="${g.id}"><span class="gic">${em(g.ic,'xl')}</span><h3>${g.t}</h3><p>${g.d}</p><div class="gmeta"><span>${g.g}</span><span class="lvl l2">${g.lv}</span></div><div class="sstars">${starsRow(GB[g.id]||0)}</div></button>`).join('')}${Final.card(GAMES.length)}${typeof Daily!=='undefined'?Daily.card(GAMES.length+1):''}</div>${typeof EXTRA!=='undefined'?`<p class="lead xg-lead rise">${em('sparkles')} <b>ألعاب إضافية</b> للمتعة والتدريب: نقاطها ونجومها في «البونص» ولا تغيّر درجتك.</p><div class="games">${EXTRA.map((g,i)=>`<button class="gcard xg rise" style="--d:${i}" data-act="pl" data-id="${g.id}"><span class="gic">${em(g.ic,'xl')}</span><h3>${g.t}</h3><p>${g.d}</p><div class="gmeta"><span>${g.g}</span><span class="lvl l2">${g.lv}</span></div><div class="sstars">${starsRow(GB[g.id]||0)}</div></button>`).join('')}</div>`:''}`;
+    act(sc,{pl:b=>{if(b.dataset.id==='daily'){Daily.open();return}play(b.dataset.id==='final'?FINAL_G:(GAMES.find(x=>x.id===b.dataset.id)||(typeof EXTRA!=='undefined'&&EXTRA.find(x=>x.id===b.dataset.id))))}})};
    hub()}},
 ]});
 
@@ -3796,6 +3817,9 @@ const BADGES=[
  {id:'sleuth',n:'المحقّق',ic:'magnifying_glass_tilted_left',d:'٣ نجوم في لعبة «المحقّق»',ok:()=>(GB.det||0)>=3,pr:()=>[GB.det||0,3]},
  {id:'daily',n:'مواظب',ic:'sun',d:'أنجز تحدّي اليوم ٣ أيام متتالية',ok:()=>((store.get('dc',{})||{}).best||0)>=3,pr:()=>[Math.min(((store.get('dc',{})||{}).best||0),3),3]},
  {id:'robot',n:'هازم الروبوت',ic:'robot',d:'اربح المعركة الأخيرة',ok:()=>!!((store.get('fb',null)||{}).won)},
+ {id:'xmaster',n:'لاعب بلا حدود',ic:'puzzle_piece',d:'فُز بكل الألعاب الإضافية الأربع',ok:()=>typeof EXTRA!=='undefined'&&EXTRA.every(g=>(GB[g.id]||0)>0),pr:()=>[typeof EXTRA!=='undefined'?EXTRA.filter(g=>(GB[g.id]||0)>0).length:0,typeof EXTRA!=='undefined'?EXTRA.length:4]},
+ {id:'team',n:'روح الفريق',ic:'flexed_biceps',d:'ساهم بـ ٢٠ إجابة صحيحة في تحدّي الفصل الأسبوعي',ok:()=>((store.get('wkh',null)||{}).b||0)>=20,pr:()=>[Math.min((store.get('wkh',null)||{}).b||0,20),20]},
+ {id:'goal',n:'هدف الفصل',ic:'trophy',d:'شاركتَ في هدف أسبوعي حقّقه فصلك',ok:()=>((store.get('wkh',null)||{}).g||0)>=1},
  {id:'gem',n:'جوهرة',ic:'gem_stone',d:'اجمع ٨٠٪ من الدرجة الكلية',ok:()=>Score.total()>=.8*Score.max(),pr:()=>[Math.min(Score.total(),Math.round(.8*Score.max())),Math.round(.8*Score.max())]}];
 const Bdg={
  have(){return store.get('bdg',null)||{}},
@@ -3872,7 +3896,7 @@ const PUS={hint:{n:'تلميح',ic:'light_bulb',cost:8,d:'يحذف إجابة خ
 const PU={
  gm:null,gid:'',sh:false,until:0,iv:0,custom:null,
  setHint(f){this.custom=f},
- can:{hint:g=>g!=='meteor'&&g!=='mil',shield:g=>g!=='mil',slow:g=>g==='meteor'||g==='hole'||g==='det'},
+ can:{hint:g=>g!=='meteor'&&g!=='mil',shield:g=>g!=='mil',slow:g=>g==='meteor'||g==='hole'||g==='det'||g==='flee'},
  slowK(){return performance.now()<this.until?.4:1},
  mount(sc,gid){clearInterval(this.iv);const gm=$('.gm',sc);if(!gm||gid==='mil')return;this.gm=gm;this.gid=gid;this.sh=false;this.until=0;
   const bar=document.createElement('div');bar.className='pu-bar';bar.id='puBar';gm.insertBefore(bar,gm.children[1]||null);
@@ -4522,6 +4546,161 @@ const Board={
 
 Eng.ih.push(()=>Mine.dot());
 
+/* --- games_x.js --- */
+/* ===== extra games: four more ways to play. Their points are a SEPARATE bonus (never part of the score, stars or rank), so nobody's grade changes ===== */
+const XFL=['قرأَ الطالبُ *الدرسَ','فتحَ المعلمُ *البابَ','كتبَتْ سارةُ *الواجبَ','ذهبَ الطالبُ إلى المدرسةِ','رسمَ الفنانُ *لوحةً جميلةً','سقى الفلاحُ *الأشجارَ','نجحَ المجتهدُ في الامتحانِ','يشربُ الولدُ *الحليبَ','زارَ الطلابُ *المتحفَ','أكلَ الأرنبُ *الجزرةَ','جلسَ الضيفُ في الغرفةِ','يحبُّ المعلمُ *الطلابَ المجتهدينَ','أكرمَ الأبُ *ابنَهُ','حملَ العاملُ *الصندوقَ'];
+const XFX=[
+ ['قرأَ الطالبُ الكتابُ','الكتابُ','الكتابَ','المفعول به منصوب، وعلامة نصبه الفتحة'],
+ ['فتحَ المعلمَ البابَ','المعلمَ','المعلمُ','الفاعل مرفوع، وعلامة رفعه الضمة'],
+ ['أكلَ الولدُ التفاحةِ','التفاحةِ','التفاحةَ','المفعول به منصوب بالفتحة وليس مجرورًا'],
+ ['كتبَتِ الطالبةُ الواجبُ','الواجبُ','الواجبَ','المفعول به منصوب، وعلامة نصبه الفتحة'],
+ ['يلعبُ الأطفالَ في الحديقةِ','الأطفالَ','الأطفالُ','الأطفالُ فاعل (جمع تكسير) مرفوع بالضمة'],
+ ['زارَ الطلابُ المتحفِ','المتحفِ','المتحفَ','المفعول به منصوب بالفتحة'],
+ ['شاهدَ الطالبَيْنِ العرضَ','الطالبَيْنِ','الطالبانِ','الفاعل مثنى مرفوع، وعلامة رفعه الألف'],
+ ['كرّمَ المديرُ المتفوقونَ','المتفوقونَ','المتفوقينَ','المفعول به جمع مذكر سالم منصوب، وعلامة نصبه الياء'],
+ ['رأيتُ المعلماتُ في الساحةِ','المعلماتُ','المعلماتِ','المفعول به جمع مؤنث سالم منصوب، وعلامة نصبه الكسرة نيابة عن الفتحة'],
+ ['يقرأُ الطالبِ القصةَ','الطالبِ','الطالبُ','الفاعل مرفوع، وعلامة رفعه الضمة']];
+const XBD=[
+ {v:['كتبَ','قرأَ'],s:['الطالبُ','المعلمُ'],o:['الدرسَ','القصةَ'],x:['في']},
+ {v:['أكلَ','شربَ'],s:['الولدُ','الأرنبُ'],o:['التفاحةَ','الماءَ'],x:['الجزرةُ']},
+ {v:['رسمَ','فتحَ'],s:['الفنانُ','العاملُ'],o:['اللوحةَ','البابَ'],x:['إلى']},
+ {v:['زارَ','شاهدَ'],s:['الطلابُ','الضيوفُ'],o:['المتحفَ','العرضَ'],x:['المتحفِ']},
+ {v:['يحملُ','يكتبُ'],s:['العاملُ','الطالبُ'],o:['الصندوقَ','الرسالةَ'],x:['الصندوقُ']}];
+const XROLE={v:'فعل',s:'فاعل',o:'مفعول به',x:'كلمة مشتّتة'};
+const xParse=s=>{const w=String(s).trim().split(/\s+/).filter(Boolean),oi=w.findIndex(x=>x[0]==='*');return{w:w.map(x=>x.replace(/^\*/,'')),oi}};
+const xVar=w=>{const c=w[w.length-1],V=['َ','ُ','ِ'];return V.includes(c)?V.filter(v=>v!==c).map(v=>w.slice(0,-1)+v):[]};
+const XPTS=8;   // bonus points for each new star in an extra game (a repeat earns the usual 5 per star)
+const xRec=(id,tp,lv,q,ans,e,ok)=>Stats.rec({id,t:'det',tp,lv,q,ans,e},ok);
+function xEnd(host,api,o){
+ const prev=GB[o.id]||0,st=o.win?o.stars:0,gain=Math.max(0,st-prev);let bp=0;
+ if(o.win){if(st>prev){GB[o.id]=st;store.set('gb',GB)}if(gain)bp+=Bonus.add(0,gain*XPTS);if(st-gain>0)bp+=Bonus.repeatGame(st-gain)||0}
+ if(o.win)FX.confetti(80);else sfx('lose');
+ if(typeof Eng!=='undefined')Eng.onGame(o,gain);
+ const el=document.createElement('div');el.className='gm-end '+(o.win?'win':'lose');
+ el.innerHTML=`<div class="ge-card zoom-in">${em(o.win?'trophy':'broken_heart','xl')}<h3>${o.title}</h3><p>${o.msg}</p><div class="sstars big">${starsRow(st)}</div>${bp?`<p class="gain bn">${em('sparkles')} +${AR(bp)} نقطة إضافية (منفصلة عن درجتك)</p>`:'<p class="gain" style="opacity:.8">لعبة إضافية: نجومها ونقاطها تُحسب في «البونص» ولا تغيّر درجتك.</p>'}<div class="row"><button class="btn go" data-act="again">العب مرة أخرى</button><button class="btn ghost" data-act="ex">كل الألعاب</button></div></div>`;
+ host.querySelector('.gm').appendChild(el)}
+const xTop=(ic,t)=>`<div class="gm-top"><button class="btn ghost sm" data-act="ex">→ الألعاب</button><b class="gm-t">${em(ic)} ${t}</b><span class="gm-h"><span id="hl" class="lvl l1">لعبة إضافية</span><span id="hh"></span></span></div>`;
+const xStars=l=>l>=4?3:l>=2?2:1;
+
+/* ----- 1: the fleeing object ----- */
+function gFlee(host,api,restart){
+ const items=shuffle(XFL.map(xParse)).slice(0,10);let i=0,lives=4,left=0,sec=9,phase='intro',raf=0,last=0,dead=false,timers=[];const T=(f,ms)=>timers.push(setTimeout(f,ms));
+ host.innerHTML=`<div class="gm">${xTop('stopwatch','المفعول الهارب')}<div class="det"><div class="det-h"><b id="xc"></b><div class="det-t" role="img" aria-label="الوقت المتبقي"><i id="xt"></i></div><span class="det-s" id="xs"></span></div>
+  <div class="det-p sent blur" id="xp"></div><div class="det-m" id="xm">اضغط على المفعول به قبل أن يهرب!</div><div class="row"><button class="btn ghost" type="button" data-act="none" id="xn">لا يوجد مفعول به في الجملة</button></div>
+  <div class="det-i" id="xi"><div class="det-ic zoom-in"><h3>المفعول الهارب</h3><p>تظهر جملة وعليك أن تضغط على <b>المفعول به</b> قبل أن ينتهي الوقت. وإن كانت الجملة بلا مفعول به فاضغط «لا يوجد مفعول به». كل خطأ يُنقص قلبًا.</p><button class="btn go" data-act="beg" type="button">ابدأ</button></div></div></div></div>`;
+ const A=$('#xp',host);
+ const hud=()=>{$('#hh',host).innerHTML=hearts(lives,4);$('#xc',host).textContent=`الجملة ${AR(Math.min(i+1,items.length))} من ${AR(items.length)}`};
+ const bar=()=>{const f=Math.max(0,left/sec),e=$('#xt',host);e.style.width=(f*100)+'%';e.style.background=f>.5?'linear-gradient(90deg,#ffd43b,#4ade80)':f>.25?'linear-gradient(90deg,#f97316,#ffd43b)':'linear-gradient(90deg,#fb7185,#f97316)';$('#xs',host).textContent=AR(Math.ceil(left))+' ث'};
+ const msg=(t,c='')=>{const m=$('#xm',host);m.className='det-m '+c;m.innerHTML=t};
+ const load=()=>{const C=items[i];sec=Math.max(5,9-Math.floor(i/3));left=sec;A.className='det-p sent'+(phase==='intro'?' blur':'');A.innerHTML=C.w.map((x,k)=>`<button class="dw" type="button" data-i="${k}">${esc(x)}</button>`).join(' ');$('#xn',host).disabled=false;msg('اضغط على المفعول به قبل أن يهرب!');hud();bar()};
+ const finish=()=>{if(dead)return;i++;if(lives<=0)return endX(false);if(i>=items.length)return endX(true);load();phase='play'};
+ const endX=win=>{dead=true;cancelAnimationFrame(raf);xEnd(host,api,win?{id:'flee',win:true,stars:xStars(lives),title:'لم يهرب منك أحد!',msg:'أمسكتَ بالمفعول به في كل الجمل.'}:{id:'flee',win:false,title:'هربت المفاعيل به',msg:'نفدت قلوبك. راجع: المفعول به اسم منصوب يقع عليه الفعل.'})};
+ const result=(ok,k)=>{if(phase!=='play'||dead)return;phase='result';const C=items[i],obj=C.oi>=0?C.w[C.oi]:'';
+  $$('.dw',host).forEach(b=>{if(+b.dataset.i===C.oi)b.classList.add(ok?'found':'miss')});if(!ok&&k!==null&&k>=0)$$('.dw',host)[k]&&$$('.dw',host)[k].classList.add('bad');$('#xn',host).disabled=true;
+  xRec('xf:'+C.w.join(' '),'o',1+Math.min(2,(i/4)|0),`حدّد المفعول به في الجملة: «${C.w.join(' ')}»`,obj||'لا يوجد مفعول به',obj?`«${obj}» مفعول به منصوب`:'الجملة ليس فيها مفعول به',ok);
+  if(ok){FX.good(host.querySelector('.det-p'),'✓');Combo.fx(true,A);msg(obj?`أحسنت! «${esc(obj)}» مفعول به ✓`:'أحسنت! الجملة بلا مفعول به ✓','ok')}
+  else{Combo.fx(false,A);msg(obj?`المفعول به هو «${esc(obj)}» ✗`:'هذه الجملة بلا مفعول به ✗','bad');if(!PU.absorb())lives--;hud()}
+  T(finish,ok?1100:2200)};
+ A.onclick=e=>{const b=e.target.closest('.dw');if(b&&phase==='play')result(+b.dataset.i===items[i].oi,+b.dataset.i)};
+ const loop=t=>{if(dead)return;const dt=Math.min(.05,(t-last)/1000||0)*PU.slowK();last=t;if(phase==='play'){left-=dt;bar();if(left<=0){left=0;bar();msg('هرب المفعول به! ✗','bad');result(false,-1)}}raf=requestAnimationFrame(loop)};
+ act(host,{ex:api.exit,again:restart,none:()=>{if(phase==='play')result(items[i].oi<0,-1)},beg:()=>{$('#xi',host).hidden=true;A.classList.remove('blur');phase='play';sfx('pop')}});
+ PU.setHint(()=>{if(phase!=='play'||items[i].oi<0)return false;const b=$$('.dw',host)[items[i].oi];if(!b)return false;b.classList.add('phint');setTimeout(()=>b.classList.remove('phint'),2600);return true});
+ load();raf=requestAnimationFrame(t=>{last=t;loop(t)});
+ return()=>{dead=true;cancelAnimationFrame(raf);timers.forEach(clearTimeout)}}
+
+/* ----- 2: the correction workshop ----- */
+function gFix(host,api,restart){
+ const items=shuffle(XFX.filter(x=>x[0].split(/\s+/).includes(x[1]))).slice(0,8);let i=0,lives=4,stage=1,miss=0,dead=false,timers=[];const T=(f,ms)=>timers.push(setTimeout(f,ms));
+ host.innerHTML=`<div class="gm">${xTop('pencil','ورشة التصحيح')}<div class="det"><div class="det-h"><b id="xc"></b></div><div class="det-p sent" id="xp"></div><div class="det-m" id="xm"></div><div class="xf-opts" id="xo"></div></div></div>`;
+ const A=$('#xp',host),O=$('#xo',host);
+ const hud=()=>{$('#hh',host).innerHTML=hearts(lives,4);$('#xc',host).textContent=`الجملة ${AR(Math.min(i+1,items.length))} من ${AR(items.length)}`};
+ const msg=(t,c='')=>{const m=$('#xm',host);m.className='det-m '+c;m.innerHTML=t};
+ const hit=()=>{if(!PU.absorb())lives--;hud();if(lives<=0){dead=true;T(()=>xEnd(host,api,{id:'fix',win:false,title:'تعطّلت الورشة',msg:'أخطأتَ كثيرًا. راجع علامات الرفع والنصب والجر وحاول مجددًا.'}),900);return true}return false};
+ const load=()=>{const C=items[i];stage=1;miss=0;O.innerHTML='';A.innerHTML=C[0].split(/\s+/).map((x,k)=>`<button class="dw" type="button" data-i="${k}" data-w="${esc(x)}">${esc(x)}</button>`).join(' ');msg('في الجملة كلمة بحركة خاطئة. اضغط عليها.');hud()};
+ A.onclick=e=>{const b=e.target.closest('.dw');if(!b||stage!==1||dead)return;const C=items[i];
+  if(b.dataset.w===C[1]){stage=2;b.classList.add('bad');FX.good(b,'✓');
+   const opts=[C[2],C[1]];xVar(C[2]).forEach(v=>{if(!opts.includes(v))opts.push(v)});const pick=shuffle(opts.slice(1)).slice(0,2);const all=shuffle([C[2]].concat(pick));
+   O.innerHTML=all.map(w=>`<button class="btn sky" type="button" data-o="${esc(w)}">${esc(w)}</button>`).join('');msg('وجدتَ الكلمة! اختر صورتها الصحيحة.')}
+  else{miss++;b.classList.add('shake');setTimeout(()=>b.classList.remove('shake'),500);FX.bad(b,'✗');Combo.fx(false,b);msg(`«${esc(b.dataset.w)}» سليمة. ابحث عن الكلمة الأخرى.`,'bad');hit()}};
+ O.onclick=e=>{const b=e.target.closest('[data-o]');if(!b||stage!==2||dead)return;const C=items[i];
+  if(b.dataset.o===C[2]){stage=3;b.classList.add('ok');const w=$$('.dw.bad',A)[0];if(w){w.textContent=C[2];w.classList.remove('bad');w.classList.add('found')}FX.good(b,'✓');Combo.fx(true,b);msg(`أحسنت! ${esc(C[3]||'')} ✓`,'ok');
+   xRec('xx:'+C[0],'o',2,`صحّح الخطأ في الجملة: «${C[0]}»`,C[2],C[3]||'',miss===0);
+   T(()=>{i++;if(i>=items.length)return xEnd(host,api,{id:'fix',win:true,stars:xStars(lives),title:'أصلحتَ كل الجمل!',msg:'صارت الجمل سليمة بفضل ملاحظتك لعلامات الإعراب.'});load()},2300)}
+  else{b.disabled=true;b.classList.add('bad');miss++;FX.bad(b,'✗');Combo.fx(false,b);msg('ليست هذه الصورة ✗ فكّر في موقع الكلمة من الجملة.','bad');hit()}};
+ act(host,{ex:api.exit,again:restart});
+ PU.setHint(()=>{if(dead)return false;const C=items[i];if(stage===1){const b=$$('.dw',A).find(x=>x.dataset.w===C[1]);if(!b)return false;b.classList.add('phint');setTimeout(()=>b.classList.remove('phint'),2600);return true}
+  if(stage===2){const w=$$('[data-o]:not(:disabled)',O).find(x=>x.dataset.o!==C[2]);if(!w)return false;w.disabled=true;w.classList.add('bad');return true}return false});
+ load();return()=>{dead=true;timers.forEach(clearTimeout)}}
+
+/* ----- 3: build your sentence ----- */
+function gBuild(host,api,restart){
+ const rounds=shuffle(XBD).slice(0,5);let i=0,lives=4,bank=[],sel=[],busy=false,dead=false,timers=[];const T=(f,ms)=>timers.push(setTimeout(f,ms));
+ host.innerHTML=`<div class="gm">${xTop('puzzle_piece','ابنِ جملتك')}<div class="det"><div class="det-h"><b id="xc"></b></div>
+  <p class="det-m" id="xm"></p><div class="xb-line" id="xl" aria-label="جملتك"></div><div class="det-p sent" id="xp"></div><div class="row"><button class="btn go" type="button" data-act="chk" id="xk" disabled>تحقّق من جملتي</button><button class="btn ghost" type="button" data-act="clr">ابدأ من جديد</button></div></div></div>`;
+ const msg=(t,c='')=>{const m=$('#xm',host);m.className='det-m '+c;m.innerHTML=t};
+ const hud=()=>{$('#hh',host).innerHTML=hearts(lives,4);$('#xc',host).textContent=`الجولة ${AR(Math.min(i+1,rounds.length))} من ${AR(rounds.length)}`};
+ const paint=()=>{$('#xl',host).innerHTML=[0,1,2].map(n=>{const k=sel[n];return k===undefined?`<span class="xb-slot">${['فعل','فاعل','مفعول به'][n]}</span>`:`<button class="dw xb-on" type="button" data-u="${n}">${esc(bank[k][0])}</button>`}).join('');
+  $('#xp',host).innerHTML=bank.map((b,k)=>`<button class="dw" type="button" data-k="${k}"${sel.includes(k)?' disabled style="opacity:.35"':''}>${esc(b[0])}</button>`).join(' ');$('#xk',host).disabled=sel.length<3||busy};
+ const load=()=>{const R=rounds[i];bank=shuffle([].concat(R.v.map(w=>[w,'v']),R.s.map(w=>[w,'s']),R.o.map(w=>[w,'o']),(R.x||[]).map(w=>[w,'x'])));sel=[];busy=false;msg('رتّب ثلاث كلمات لتكوّن جملة فعلية: <b>فعل ← فاعل ← مفعول به</b>');hud();paint()};
+ const WHY=['الجملة الفعلية تبدأ بـ<b>فعل</b>','بعد الفعل يأتي <b>الفاعل</b> (اسم مرفوع)','ثم يأتي <b>المفعول به</b> (اسم منصوب)'];
+ const check=()=>{if(sel.length<3||busy||dead)return;const R=rounds[i],rs=sel.map(k=>bank[k][1]),want=['v','s','o'],bad=rs.findIndex((r,n)=>r!==want[n]),words=sel.map(k=>bank[k][0]);
+  const rid='xb:'+R.v[0]+R.s[0]+R.o[0],q=`ألّف جملة فعلية (فعل + فاعل + مفعول به) من: ${bank.map(b=>b[0]).join('، ')}`;
+  if(bad<0){busy=true;xRec(rid,'o',2,q,words.join(' '),'فعل ثم فاعل مرفوع ثم مفعول به منصوب',true);FX.good($('#xl',host),'✓');Combo.fx(true,$('#xl',host));$$('#xl .dw',host).forEach((b,n)=>b.classList.add('found'));
+   msg(`أحسنت! جملتك: «${esc(words.join(' '))}» ✓`,'ok');$('#xk',host).disabled=true;
+   T(()=>{i++;if(i>=rounds.length)return xEnd(host,api,{id:'build',win:true,stars:xStars(lives),title:'ألّفتَ جملًا سليمة!',msg:'رتّبتَ الفعل والفاعل والمفعول به في كل الجولات.'});load()},1900)}
+  else{xRec(rid,'o',2,q,R.v[0]+' '+R.s[0]+' '+R.o[0],'فعل ثم فاعل مرفوع ثم مفعول به منصوب',false);Combo.fx(false,$('#xl',host));FX.bad($('#xl',host),'✗');
+   const w=rs[bad]==='x'?`«${esc(words[bad])}» ليست مناسبة هنا (اسم بحركة لا تناسب موقعها)`:`«${esc(words[bad])}» ${XROLE[rs[bad]]}، لكن ${WHY[bad]}`;msg(w+' ✗','bad');sel=[];paint();
+   if(!PU.absorb()){lives--;hud()}if(lives<=0){dead=true;T(()=>xEnd(host,api,{id:'build',win:false,title:'لم تكتمل الجملة',msg:'راجع ترتيب الجملة الفعلية: فعل ثم فاعل ثم مفعول به، وحاول مرة أخرى.'}),1200)}}};
+ host.onclick=e=>{const b=e.target.closest('[data-k],[data-u],[data-act]');if(!b||dead)return;
+  if(b.dataset.k!==undefined){if(busy||sel.length>=3)return;sel.push(+b.dataset.k);sfx('pop');paint()}
+  else if(b.dataset.u!==undefined){if(busy)return;sel.splice(+b.dataset.u,1);paint()}
+  else{const a=b.dataset.act;if(a==='ex')api.exit();else if(a==='again')restart();else if(a==='chk')check();else if(a==='clr'&&!busy){sel=[];paint()}}};
+ PU.setHint(()=>{if(dead||busy)return false;const R=rounds[i],want=['v','s','o'][sel.length];if(!want)return false;const b=$$('#xp [data-k]:not(:disabled)',host).find(x=>bank[+x.dataset.k][1]===want);if(!b)return false;b.classList.add('phint');setTimeout(()=>b.classList.remove('phint'),2600);return true});
+ load();return()=>{dead=true;timers.forEach(clearTimeout)}}
+
+/* ----- 4: the mistakes corner: the questions this student got wrong, again ----- */
+function gErr(host,api,restart){
+ const mine=(ST.w||[]).slice().sort((a,b)=>b.k-a.k||b.t-a.t).map(w=>QB.find(q=>q.id===w.id)).filter(Boolean);
+ const seen=new Set();let list=mine.filter(q=>!seen.has(q.id)&&seen.add(q.id)).slice(0,8),fresh=false;
+ if(!list.length){fresh=true;list=shuffle(QB.filter(q=>q.lv>=2)).slice(0,6)}
+ let idx=0,energy=4,right=0,dead=false,timers=[];const T=(f,ms)=>timers.push(setTimeout(f,ms));
+ host.innerHTML=`<div class="gm">${xTop('light_bulb','ركن الأخطاء')}<p class="det-m" id="xm">${fresh?'لا توجد أخطاء محفوظة عندك الآن، فهذه أسئلة منوّعة للمراجعة.':`${list.length===1?'هذا سؤال أخطأتَ فيه':list.length===2?'هذان سؤالان أخطأتَ فيهما':'هذه '+AR(list.length)+(list.length<=10?' أسئلة':' سؤالًا')+' أخطأتَ فيها'} من قبل. أجب بنجاح لتُصحّح أخطاءك!`}</p><div class="gm-q" id="gq"></div></div>`;
+ const hud=()=>{$('#hh',host).innerHTML=hearts(energy,4);$('#hl',host).textContent=`${AR(Math.min(idx+1,list.length))} من ${AR(list.length)}`};
+ const ask=()=>{hud();Q.render($('#gq',host),list[idx],{delayOk:900,delayBad:2600,okText:'+١ صُحّح',badText:'−١ ❤',
+  onPick:ok=>{if(ok)right++;else if(!PU.absorb())energy--;hud()},
+  onDone:()=>{if(dead)return;if(energy<=0){dead=true;return xEnd(host,api,{id:'err',win:false,title:'نفدت قلوبك',msg:'راجع الأسئلة التي أخطأتَ فيها وعُد لتصحّحها.'})}
+   idx++;if(idx>=list.length){dead=true;const st=right===list.length?3:right>=Math.ceil(list.length*.6)?2:1;return xEnd(host,api,{id:'err',win:true,stars:st,title:fresh?'أحسنتَ المراجعة!':'صحّحتَ أخطاءك!',msg:`أجبتَ ${AR(right)} من ${AR(list.length)} إجابة صحيحة.`})}ask()}})};
+ act(host,{ex:api.exit,again:restart});ask();return()=>{dead=true;timers.forEach(clearTimeout)}}
+
+const EXTRA=[
+ {id:'flee',t:'المفعول الهارب',ic:'stopwatch',d:'جمل تظهر وعليك أن تضغط على المفعول به قبل أن يهرب! وبعضها بلا مفعول به.',g:'الهدف: ١٠ جمل دون أن تفقد قلوبك',lv:'سريعة',run:gFlee},
+ {id:'fix',t:'ورشة التصحيح',ic:'pencil',d:'في كل جملة كلمة بحركة خاطئة. اعثر عليها ثم اختر صورتها الصحيحة.',g:'الهدف: إصلاح ٨ جمل',lv:'متوسط',run:gFix},
+ {id:'build',t:'ابنِ جملتك',ic:'puzzle_piece',d:'اسحب الكلمات المناسبة لتؤلّف جملة فعلية: فعل ثم فاعل ثم مفعول به.',g:'الهدف: تأليف ٥ جمل سليمة',lv:'متوسط',run:gBuild},
+ {id:'err',t:'ركن الأخطاء',ic:'light_bulb',d:'الأسئلة التي أخطأتَ فيها سابقًا تعود إليك في صورة لعبة لتصحّحها.',g:'الهدف: تصحيح أخطائك',lv:'مخصّص لك',run:gErr}];
+
+/* ===== the weekly class goal: the teacher sets a target of correct answers for the whole class; every student's share is counted ===== */
+const Week={
+ cur:null,
+ rec(){return store.get('wk',null)},
+ /* correct answers this student gave since the goal started (the first time he sees it his count starts at zero) */
+ mine(){const w=this.cur,o=this.rec();return w&&o&&o.id===w.id?Math.max(0,ST.c-(o.base||0)):0},
+ report(){return this.cur?{id:this.cur.id,n:this.mine()}:undefined},
+ set(w){
+  this.cur=w&&w.id?w:null;
+  if(this.cur){
+   let o=this.rec();if(!o||o.id!==this.cur.id){o={id:this.cur.id,base:ST.c,d:0};store.set('wk',o)}
+   const h=Object.assign({g:0,b:0},store.get('wkh',null)||{}),n=Math.max(this.mine(),this.cur.n||0);
+   if(n>h.b){h.b=n;store.set('wkh',h)}
+   if(this.cur.tot>=this.cur.goal&&!o.d){o=Object.assign({},o,{d:1});store.set('wk',o);if(n>0){h.g=(h.g||0)+1;store.set('wkh',h)}
+    try{Banner.show({ic:'trophy',k:'حقّق فصلك الهدف!',t:this.cur.t,s:`أنجزتم معًا ${AR(this.cur.goal)} إجابة صحيحة`,sfx:'win',conf:50,cls:'badge'})}catch(e){}
+    try{Bdg.check()}catch(e){}}
+   else try{Bdg.check()}catch(e){}}
+  this.paint()},
+ card(){const w=this.cur;if(!w)return'';const done=w.tot>=w.goal,pct=Math.min(100,Math.round(w.tot/w.goal*100)),days=Math.ceil((w.end-Date.now())/86400000);
+  return`<div class="wk-card${done?' done':''} rise"><h3>${em(done?'trophy':'flexed_biceps')} ${esc(w.t||'تحدّي الفصل الأسبوعي')}</h3><div class="wk-bar" role="img" aria-label="تقدّم الفصل ${AR(pct)}٪"><i style="width:${pct}%"></i></div>
+   <small>${done?'حقّق فصلكم الهدف! ':''}<b>${AR(w.tot)}</b> من <b>${AR(w.goal)}</b> إجابة صحيحة من فصلكم · مساهمتك: <b>${AR(this.mine())}</b> · ${days>0?'بقي '+NUM(days,N_DAYS):'ينتهي اليوم'}</small></div>`},
+ paint(){const b=$('#wkBox');if(b)b.innerHTML=this.card()}};
+
 /* --- online.js --- */
 /* TEACHER DASHBOARD (Vercel build only): class analysis + a detailed report for every student, on screen and as PDF.
    Data: /api/board (every student's result code) and /api/report (the detailed snapshot a student's page sends along with the code). */
@@ -4738,11 +4917,11 @@ const Dash={
   const multi=S.scope==='all',sec=S.sec||'over',now=this.now();
   const scopeSel=`<label class="sr" for="dhSc">اختر الفصل</label><select id="dhSc" class="inp dh-sel"><option value="all"${multi?' selected':''}>كل الفصول</option>${S.classes.map(c=>`<option value="${esc(c)}"${S.scope===c?' selected':''}>${esc(c)}</option>`).join('')}</select>`;
   const top=`<div class="dh-top"><b>${em('man_teacher')} لوحة المعلم</b><span>${scopeSel}<button class="btn ghost sm" id="dhR" type="button">تحديث</button><button class="btn ghost sm" id="dhX" type="button">إغلاق</button></span></div>
-   <div class="dh-nav2"><button class="btn gold sm" id="dhG" type="button">${em('bullseye')} التحكم باللعبة</button><button class="btn gold sm" id="dhCt" type="button">${em('books')} محتوى الدرس</button><button class="btn sky sm" id="dhRd" type="button">${em('closed_book')} تصميم التقارير</button><button class="btn ghost sm" id="dhM2" type="button">إدارة الفصول</button><button class="btn ghost sm" id="dhCm" type="button">وضع الحصة</button><button class="btn ghost sm" id="dhAc" type="button">حسابي</button><button class="btn red sm" id="dhLo" type="button">تسجيل الخروج</button></div>`;
+   <div class="dh-nav2"><button class="btn gold sm" id="dhG" type="button">${em('bullseye')} التحكم باللعبة</button><button class="btn gold sm" id="dhCt" type="button">${em('books')} محتوى الدرس</button><button class="btn gold sm" id="dhWk" type="button">${em('trophy')} تحدّي الأسبوع</button><button class="btn sky sm" id="dhRd" type="button">${em('closed_book')} تصميم التقارير</button><button class="btn ghost sm" id="dhM2" type="button">إدارة الفصول</button><button class="btn ghost sm" id="dhCm" type="button">وضع الحصة</button><button class="btn ghost sm" id="dhAc" type="button">حسابي</button><button class="btn red sm" id="dhLo" type="button">تسجيل الخروج</button></div>`;
   const bind=()=>{$('#dhX',d).onclick=()=>this.close();
    $('#dhR',d).onclick=async()=>{const r=await this.load();if(r.ok)this.classView(d)};
    $('#dhSc',d).onchange=async e=>{S.scope=e.target.value;S.q='';S.sel=new Set();const r=await this.load();if(r.ok)this.classView(d)};
-   $('#dhM2',d).onclick=()=>this.manage();$('#dhG',d).onclick=()=>this.ctl();$('#dhCt',d).onclick=()=>this.content();$('#dhRd',d).onclick=()=>this.design();$('#dhAc',d).onclick=()=>this.account();$('#dhLo',d).onclick=()=>Online.teacherLogout();$('#dhCm',d).onclick=()=>{this.close();try{Cls.toggle()}catch(e){toast('وضع الحصة غير متاح')}}};
+   $('#dhM2',d).onclick=()=>this.manage();$('#dhG',d).onclick=()=>this.ctl();$('#dhCt',d).onclick=()=>this.content();$('#dhWk',d).onclick=()=>this.week();$('#dhRd',d).onclick=()=>this.design();$('#dhAc',d).onclick=()=>this.account();$('#dhLo',d).onclick=()=>Online.teacherLogout();$('#dhCm',d).onclick=()=>{this.close();try{Cls.toggle()}catch(e){toast('وضع الحصة غير متاح')}}};
   if(!A.regs){d.innerHTML=top+`<div class="dh-wrap"><div class="dh-wait"><p>لا يوجد طلاب مسجّلون ${S.scope==='all'?'بعد':'في هذا الفصل بعد'}. أعطِ طلابك رابط الدرس؛ يسجّل كل طالب اسمه وفصله ورقم هاتفه.</p></div></div>`;bind();return}
   const tile=(v,l,c)=>`<div class="dh-tile"${c?` style="--tc:${c}"`:''}><b>${v}</b><small>${l}</small></div>`;
   const bar=(l,pct,txt,col)=>`<div class="dh-bar"><span>${l}</span><i><u style="width:${Math.max(pct,pct>0?3:0)}%;background:${col}"></u></i><em>${txt}</em></div>`;
@@ -4950,9 +5129,32 @@ const Dash={
     S.cfg=r.cfg;RepCfg.rep=r.cfg.rep||{};RepCfg.logo=logo;try{localStorage.removeItem('mf_logo')}catch(e){}msg('حُفظ التصميم ✓ — يُطبَّق على كل التقارير.')};
    setTimeout(preview,80)})},
 
+ /* ---------- the weekly class goal: a target of correct answers for the whole class, with a progress bar the students see ---------- */
+ week(){const S=this.S;
+  this.modal(`<h3>${em('trophy')} تحدّي الفصل الأسبوعي</h3><p class="dh-sub">حدّد هدفًا جماعيًا (عدد الإجابات الصحيحة التي يجمعها الفصل معًا). يرى الطلاب شريط التقدّم في ساحة الألعاب، وكل إجابة صحيحة يحصل عليها طالب بعد بدء التحدّي تُحسب للفصل. إن تحقّق الهدف ظهرت لهم رسالة تهنئة ووسام «هدف الفصل».</p>
+   <div id="dhWb"><p class="dh-sub">جارٍ التحميل…</p></div>
+   <div class="dh-set"><b>تحدٍّ جديد</b><div class="dh-cr"><label for="dhWt">العنوان</label><input class="inp" id="dhWt" maxlength="60" value="تحدّي الفصل الأسبوعي"></div>
+    <div class="dh-cr"><label for="dhWg">الهدف (إجابة صحيحة)</label><input class="inp" id="dhWg" type="number" min="10" max="50000" value="300" style="max-width:8rem"><label for="dhWd">المدة</label><select class="inp dh-sel" id="dhWd"><option value="3">٣ أيام</option><option value="5">٥ أيام</option><option value="7" selected>أسبوع</option><option value="14">أسبوعان</option></select></div>
+    <div class="dh-lk">${S.classes.map(c=>`<label class="dh-ck"><input type="checkbox" data-wc="${esc(c)}" checked> ${esc(c)}</label>`).join('')}</div>
+    <small>تشمل كل الفصول المحدَّدة. بدء تحدٍّ جديد يلغي السابق.</small>
+    <div class="row"><button class="btn go sm" id="dhWs" type="button">ابدأ التحدّي</button><button class="btn red sm" id="dhWe" type="button" hidden>أنهِ التحدّي الحالي</button></div></div>
+   <p class="dh-msg" id="dhWm" role="status"></p><div class="row"><button class="btn ghost sm" id="dhWx" type="button">إغلاق</button></div>`,m=>{
+   const msg=t=>{$('#dhWm',m).textContent=t};
+   const load=async()=>{const r=await Online.api('admin',{op:'wkstat'},S.key);if(!m.isConnected)return;const b=$('#dhWb',m);
+    if(!r.ok){b.innerHTML='';msg(this.err(r));return}
+    if(!r.wk){b.innerHTML='<p class="dh-sub">لا يوجد تحدٍّ جارٍ الآن.</p>';$('#dhWe',m).hidden=true;return}
+    const w=r.wk,pct=Math.min(100,Math.round(r.tot/w.goal*100)),days=Math.ceil((w.end-Date.now())/86400000);$('#dhWe',m).hidden=false;
+    b.innerHTML=`<div class="dh-card"><h3>${esc(w.t)}</h3><div class="wk-bar" style="background:#0004"><i style="width:${pct}%"></i></div><p class="dh-sub"><b>${AR(r.tot)}</b> من <b>${AR(w.goal)}</b> (${AR(pct)}٪) · مشاركون: ${AR(r.parts)} · ${days>0?'بقي '+NUM(days,N_DAYS):'انتهت المدة'}${w.cls&&w.cls.length?' · الفصول: '+esc(w.cls.join('، ')):' · كل الفصول'}</p>
+     ${r.top.length?`<p class="dh-sub">الأكثر مساهمة:</p><div class="dh-chips">${r.top.map((x,i)=>`<span class="dh-chip on">${i===0?em('crown'):''} ${esc(x.n)} <small>${esc(x.c)} · ${AR(x.v)}</small></span>`).join('')}</div>`:''}</div>`};
+   $('#dhWx',m).onclick=()=>this.modal('');
+   const post=async wk=>{msg('جارٍ الحفظ…');const r=await Online.api('config',{cfg:{wk}},S.key);if(!r.ok){msg(this.err(r));return false}S.cfg=r.cfg;msg(wk.on?'بدأ التحدّي ✓ ويصل إلى الطلاب خلال دقيقة تقريبًا.':'أُنهي التحدّي.');load();return true};
+   $('#dhWs',m).onclick=()=>{const cls=$$('[data-wc]',m).filter(x=>x.checked).map(x=>x.dataset.wc);if(!cls.length){msg('اختر فصلًا واحدًا على الأقل.');return}post({on:true,t:$('#dhWt',m).value,goal:+$('#dhWg',m).value||300,days:+$('#dhWd',m).value||7,cls:cls.length===S.classes.length?[]:cls})};
+   $('#dhWe',m).onclick=()=>post({on:false});
+   load()})},
+
  /* ---------- the lesson's content: questions, texts, game difficulty, challenge bonuses (kept in the database, applied to every student) ---------- */
  content(tab){const S=this.S;tab=tab||this.ctab||'q';this.ctab=tab;const C=Content.get();
-  const TB=[['q','الأسئلة'],['tx','النصوص'],['nm','الأسماء والعناوين'],['gd','المحقّق والنيازك'],['gm','الصعوبة والتحديات']];
+  const TB=[['q','الأسئلة'],['tx','النصوص'],['nm','الأسماء والعناوين'],['gd','محتوى الألعاب'],['gm','الصعوبة والتحديات']];
   const head=`<h3>${em('books')} محتوى الدرس</h3><p class="dh-sub">تُحفظ التعديلات في قاعدة البيانات وتصل إلى الطلاب خلال نصف دقيقة تقريبًا.</p><nav class="dh-tabs" role="tablist" aria-label="أقسام المحتوى">${TB.map(([k,t])=>`<button type="button" role="tab" data-ct="${k}" aria-selected="${k===tab}" class="${k===tab?'on':''}">${t}</button>`).join('')}</nav>`;
   const foot=`<p class="dh-msg" id="dhCtm" role="status"></p><div class="row"><button class="btn ghost sm" id="dhCtx" type="button">إغلاق</button></div>`;
   let body='';
@@ -4981,7 +5183,16 @@ const Dash={
     ${mw.map((wv,wi)=>`<details class="dh-card dh-adm" data-wave="${wi}"${wi===0?' open':''}><summary>الموجة ${AR(wi+1)} (${AR(wv.length)} كلمة) — ${esc(MW[wi].rule.replace(/<[^>]+>/g,''))}</summary>
      ${wv.map((it,ii)=>`<div class="dh-cr" data-i="${ii}"><input class="inp mw-w" maxlength="30" value="${esc(it[0])}" aria-label="الكلمة">${sel(KD,it[1],'mw-k','aria-label="النوع"')}${sel([['r','مرفوع'],['a','منصوب']],it[2]||'a','mw-c','aria-label="الحالة"')}<button type="button" class="btn ghost sm" data-mx="${wi}:${ii}" aria-label="احذف الكلمة">×</button></div>`).join('')}
      <div class="row"><button type="button" class="btn ghost sm" data-ma="${wi}">+ كلمة</button></div></details>`).join('')}
-    <div class="row"><button type="button" class="btn go sm" id="dhMs">حفظ كلمات النيازك</button><button type="button" class="btn ghost sm" id="dhMr">أعد الكلمات الأصلية</button></div></div>`}
+    <div class="row"><button type="button" class="btn go sm" id="dhMs">حفظ كلمات النيازك</button><button type="button" class="btn ghost sm" id="dhMr">أعد الكلمات الأصلية</button></div></div>
+    <div class="dh-set"><b>المفعول الهارب: الجمل</b><small>جملة في كل سطر. ضع <b>*</b> قبل المفعول به (مثل: قرأَ الطالبُ *الدرسَ). والجملة التي بلا نجمة تعني «لا يوجد مفعول به». ٤ جمل على الأقل وواحدة فيها مفعول به.</small>
+     <textarea class="inp dh-ta" id="dhFl" rows="8" dir="rtl" aria-label="جمل المفعول الهارب">${esc(XFL.join('\n'))}</textarea>
+     <div class="row"><button type="button" class="btn go sm" id="dhFls">حفظ الجمل</button><button type="button" class="btn ghost sm" id="dhFlr">أعد الجمل الأصلية</button></div></div>
+    <div class="dh-set"><b>ورشة التصحيح: الجمل الخاطئة</b><small>في كل سطر أربع خانات تفصل بينها <b>|</b>: الجملة بالخطأ | الكلمة الخاطئة | تصحيحها | سبب التصحيح. (٣ أسطر على الأقل، والكلمة الخاطئة يجب أن تكون في الجملة.)</small>
+     <textarea class="inp dh-ta" id="dhFx" rows="8" dir="rtl" aria-label="جمل ورشة التصحيح">${esc(XFX.map(x=>x.join(' | ')).join('\n'))}</textarea>
+     <div class="row"><button type="button" class="btn go sm" id="dhFxs">حفظ الجمل</button><button type="button" class="btn ghost sm" id="dhFxr">أعد الجمل الأصلية</button></div></div>
+    <div class="dh-set"><b>ابنِ جملتك: الجولات</b><small>كل سطر جولة، وفيه مجموعات تفصل بينها <b>/</b> بهذا الترتيب: أفعال / فاعلون / مفاعيل به / كلمات مشتّتة (اختيارية). الكلمات داخل المجموعة تفصل بينها مسافة. مثال: كتبَ قرأَ / الطالبُ المعلمُ / الدرسَ القصةَ / في</small>
+     <textarea class="inp dh-ta" id="dhBd" rows="6" dir="rtl" aria-label="جولات ابنِ جملتك">${esc(XBD.map(r=>[r.v,r.s,r.o,r.x||[]].map(g=>g.join(' ')).filter((g,i)=>g||i<3).join(' / ')).join('\n'))}</textarea>
+     <div class="row"><button type="button" class="btn go sm" id="dhBds">حفظ الجولات</button><button type="button" class="btn ghost sm" id="dhBdr">أعد الجولات الأصلية</button></div></div>`}
   else{const g=C.gm||{},h=C.ch||{},ops=v=>[['auto','تدرّج تلقائي (سهل ← متقدم)'],['1','سهل دائمًا'],['2','متوسط دائمًا'],['3','متقدم دائمًا']].map(([k,t])=>`<option value="${k}"${(v||'auto')===k?' selected':''}>${t}</option>`).join('');
    body=`<div class="dh-set"><b>صعوبة الألعاب</b><small>تُطبَّق على كل الفصول. الأسئلة نفسها من «الأسئلة».</small>
     <label for="dhGh">التنقّل بين الكواكب + مسابقة المليون</label><select id="dhGh" class="inp dh-sel">${ops(g.hop)}</select>
@@ -5001,6 +5212,11 @@ const Dash={
    if(tab==='tx'){$('#dhTxs',m).onclick=()=>{this.close();TxEdit.start(S.key)};const ks=Object.keys(C.tx||{});$$('[data-tr]',m).forEach(b=>b.onclick=async()=>{if(await post({op:'tx',from:ks[+b.dataset.tr],to:''}))this.content('tx')})}
    if(tab==='nm')$$('[data-nm]',m).forEach(i=>i.onchange=async()=>{const k=i.dataset.nm,v=i.value.trim();if(await post({op:'nm',k,v:v===Content.base.nm[k]?'':v})){msg(v?'حُفظ ✓':'أُعيد الأصل ✓')}});
    if(tab==='gd'){const D=this.gdD,rd=()=>{D.det=$$('[data-case]',m).map(c=>({t:$('.dc-t',c).value,lv:+$('.dc-l',c).value,sec:+$('.dc-s',c).value||60,w:$$('[data-w]',c).map(r=>[$('.dc-w',r).value.trim(),$('.dc-r',r).value,$('.dc-p',r).value]).filter(x=>x[0])}));D.mw=$$('[data-wave]',m).map(w=>$$('[data-i]',w).map(r=>{const k=$('.mw-k',r).value;return[$('.mw-w',r).value.trim(),k,k==='verb'?'':$('.mw-c',r).value]}).filter(x=>x[0]))},re=()=>{rd();this.content('gd')};
+    const sv=async(game,data,ok)=>{const r=await post({op:'gd',game,data});if(r)msg(ok)};
+    $('#dhFls',m).onclick=()=>sv('fl',$('#dhFl',m).value.split('\n').map(x=>x.trim()).filter(Boolean),'حُفظت الجمل ✓');
+    $('#dhFxs',m).onclick=()=>sv('fx',$('#dhFx',m).value.split('\n').map(x=>x.split('|').map(y=>y.trim())).filter(x=>x.length>=3),'حُفظت الجمل ✓');
+    $('#dhBds',m).onclick=()=>sv('bd',$('#dhBd',m).value.split('\n').map(l=>l.split('/').map(g=>g.trim().split(/\s+/).filter(Boolean))).filter(g=>g.length>=3).map(g=>({v:g[0],s:g[1],o:g[2],x:g[3]||[]})),'حُفظت الجولات ✓');
+    [['Fl','fl'],['Fx','fx'],['Bd','bd']].forEach(([id,k])=>$('#dh'+id+'r',m).onclick=async()=>{if(await post({op:'gd',game:k,data:[]})){this.gdD=null;this.content('gd')}});
     $$('[data-dw]',m).forEach(b=>b.onclick=()=>{rd();const[c,w]=b.dataset.dw.split(':').map(Number);D.det[c].w.splice(w,1);this.content('gd')});
     $$('[data-aw]',m).forEach(b=>b.onclick=()=>{rd();D.det[+b.dataset.aw].w.push(['','s','']);this.content('gd')});
     $$('[data-dc]',m).forEach(b=>b.onclick=()=>{rd();if(D.det.length>1){D.det.splice(+b.dataset.dc,1);this.content('gd')}else msg('اترك قضية واحدة على الأقل.')});
@@ -5271,14 +5487,14 @@ const Online={
   const sg=this.sig();if(!o.force&&sg===this.lastSig)return{ok:true,status:'same'};
   this.busy=1;
   try{try{saveST()}catch(e){}
-   const snap=store.snapshot(),body={aid:a.aid,sk:a.sk,bv:a.bv,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),snap:JSON.stringify(snap),ts:snap.ts||0,code:Code.make(),detail:this.detail()};
+   const snap=store.snapshot(),body={aid:a.aid,sk:a.sk,bv:a.bv,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),snap:JSON.stringify(snap),ts:snap.ts||0,code:Code.make(),detail:this.detail(),wk:typeof Week!=='undefined'?Week.report():undefined};
    const r=await this.api('sync',body,'',JSON.stringify(body).length<60000);
    if(r.ok){const a2=this.acct()||a;if(r.rv!==undefined&&a2.bv!==r.rv){a2.bv=r.rv;this.setAcct(a2)}
     if(r.status==='old'&&r.snap){   // another device saved in between: both versions are merged (nothing of either is lost) and the merged one is sent
      try{store.load(store.merge(store.snapshot(),JSON.parse(r.snap)));Prof.rehydrate();toast(em('check_mark_button')+' جمعتُ تقدّمك من جهازك ومن حسابك معًا')}catch(e){}
      this.lastSig='';this.again=1}
     else this.lastSig=sg;
-    this.stat={ok:true,at:Date.now()};if(r.cfg)Ctl.apply(r.cfg);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);
+    this.stat={ok:true,at:Date.now()};if(r.cfg)Ctl.apply(r.cfg);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);if(r.wk!==undefined&&typeof Week!=='undefined')Week.set(r.wk);
     let fin=false;try{fin=Incomplete.list().count===0}catch(e){}
     if(fin&&!a2.fin){a2.fin=1;this.setAcct(a2);toast(em('trophy')+' أكملتَ الرحلة، ووصل تقريرك النهائي إلى معلمك ✓')}
     else if(!a2.first&&!o.quiet){a2.first=1;this.setAcct(a2);toast(em('check_mark_button')+' تقدّمك محفوظ في حسابك ويصل إلى معلمك تلقائيًا')}}
@@ -5290,7 +5506,7 @@ const Online={
   this.tm=setTimeout(()=>this.sync(),fin?300:6000)},
  async ping(){if(document.visibilityState!=='visible')return;const a=this.acct();
   if(!a){const r=await this.api('config');if(r.ok&&r.cfg)Ctl.apply(r.cfg);return}
-  const r=await this.api('sync',{aid:a.aid,sk:a.sk,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where()});if(r.ok&&r.cfg){Ctl.apply(r.cfg);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw)}else if(r.error==='bad_session'||r.error==='no_account')this.expired()},
+  const r=await this.api('sync',{aid:a.aid,sk:a.sk,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),wk:typeof Week!=='undefined'?Week.report():undefined});if(r.ok&&r.cfg){Ctl.apply(r.cfg);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);if(r.wk!==undefined&&typeof Week!=='undefined')Week.set(r.wk)}else if(r.error==='bad_session'||r.error==='no_account')this.expired()},
  /* the saved login no longer works (password reset by the teacher, or an old account): sign in again; progress on this device is kept */
  expired(){if(this._exp)return;this._exp=1;this.setAcct(null);setTimeout(()=>{this._exp=0;if($('#dlg').hidden)Gate.open('old',this.why.session)},300)},
  paintSave(){const b=$('#saveBtn');if(!b)return;const bad=this.acct()&&this.stat.ok===false;b.classList.toggle('warn',!!bad);
@@ -5490,7 +5706,7 @@ const Gate={
    if(!r.ok&&r.error!=='busy'){$('#gtS',d).textContent='لم يُحفظ تقدّمك في الإنترنت ('+Online.err(r)+'). لن أمسح شيئًا حتى يُحفظ.';b.disabled=false;sure=false;b.textContent='تسجيل الخروج: طالب آخر على هذا الجهاز';return}
    Online.setAcct(null);try{localStorage.removeItem('mf_last')}catch(e){}Online.lastSig='';Online.stat={ok:null,at:0};Prof.reset();this.open('first')};
   setTimeout(()=>{try{$('#gtSn',d).focus()}catch(e){}},60)}};
-Object.assign(Online.why,{session:'انتهت جلسة حسابك على هذا الجهاز؛ اكتب رقم هاتفك وكلمة المرور (إن غيّر معلمك كلمة مرورك فاكتب الجديدة).',name_taken:'هذا الاسم مسجَّل بهذا الرقم بكلمة مرور أخرى. اختر «لدي حساب» واكتب كلمة المرور الصحيحة.',bad_session:'انتهت جلسة حسابك.',bad_login:'بيانات الدخول غير صحيحة؛ تحقق منها وأعد المحاولة.',login:'انتهت جلسة الدخول؛ سجّل الدخول من جديد.',slow_down:'محاولات كثيرة؛ انتظر عشر دقائق ثم أعد المحاولة.',bad_user:'اسم المستخدم قصير (٣ أحرف على الأقل).',bad_pass:'كلمة المرور من ٦ أحرف على الأقل.',exists:'هذا المستخدم موجود بالفعل.',self:'لا يمكنك إزالة حسابك وأنت داخل به.',reg_closed:'التسجيل مغلق الآن؛ اطلب من معلمك فتحه.',no_report:'هذا الرابط غير صالح أو انتهى.',has_students:'في هذا الفصل طلاب.'});
+Object.assign(Online.why,{few:'لم يُحفظ: تأكد من الصيغة، ومن أن عدد الأسطر الصحيحة يبلغ الحدّ الأدنى المذكور.',no_backup:'لا توجد نسخة احتياطية.',session:'انتهت جلسة حسابك على هذا الجهاز؛ اكتب رقم هاتفك وكلمة المرور (إن غيّر معلمك كلمة مرورك فاكتب الجديدة).',name_taken:'هذا الاسم مسجَّل بهذا الرقم بكلمة مرور أخرى. اختر «لدي حساب» واكتب كلمة المرور الصحيحة.',bad_session:'انتهت جلسة حسابك.',bad_login:'بيانات الدخول غير صحيحة؛ تحقق منها وأعد المحاولة.',login:'انتهت جلسة الدخول؛ سجّل الدخول من جديد.',slow_down:'محاولات كثيرة؛ انتظر عشر دقائق ثم أعد المحاولة.',bad_user:'اسم المستخدم قصير (٣ أحرف على الأقل).',bad_pass:'كلمة المرور من ٦ أحرف على الأقل.',exists:'هذا المستخدم موجود بالفعل.',self:'لا يمكنك إزالة حسابك وأنت داخل به.',reg_closed:'التسجيل مغلق الآن؛ اطلب من معلمك فتحه.',no_report:'هذا الرابط غير صالح أو انتهى.',has_students:'في هذا الفصل طلاب.'});
 /* settings the teacher controls from the dashboard: they live in the database and reach the student's page with every heartbeat */
 const Ctl={
  cfg:null,
@@ -5583,7 +5799,7 @@ Online.init();
 const Content={
  data:null,ver:0,base:null,
  /* what the code ships with, so a teacher's change can always be taken back */
- snap0(){if(this.base)return;this.base={qb:JSON.stringify(QB),hop:HOP_LV.slice(),boss:BOSS_LV.slice(),fin:FIN_LV.slice(),det:JSON.stringify(DET),mw:JSON.stringify(MW.map(w=>w.items)),nm:{}};this.reg().forEach(e=>this.base.nm[e.k]=e.o)},
+ snap0(){if(this.base)return;this.base={qb:JSON.stringify(QB),hop:HOP_LV.slice(),boss:BOSS_LV.slice(),fin:FIN_LV.slice(),det:JSON.stringify(DET),mw:JSON.stringify(MW.map(w=>w.items)),fl:JSON.stringify(XFL),fx:JSON.stringify(XFX),bd:JSON.stringify(XBD),nm:{}};this.reg().forEach(e=>this.base.nm[e.k]=e.o)},
  /* every name / title the teacher may rename: planets, topics, the book's titles, badges, ranks, games */
  reg(){const L=[];
   TABS.forEach(t=>L.push({g:'الكواكب',k:'tab.'+t.id+'.title',l:'اسم الكوكب',o:t.title,set:v=>{t.title=v}}));
@@ -5592,6 +5808,7 @@ const Content={
   BADGES.forEach(b=>{L.push({g:'الأوسمة',k:'badge.'+b.id+'.n',l:'اسم الوسام',o:b.n,set:v=>{b.n=v}});L.push({g:'الأوسمة',k:'badge.'+b.id+'.d',l:'شرط الوسام',o:b.d,set:v=>{b.d=v}})});
   RANKS.forEach((r,i)=>L.push({g:'الرتب',k:'rank.'+i+'.n',l:'اسم الرتبة',o:r.n,set:v=>{r.n=v}}));
   GAMES.forEach(g=>{L.push({g:'الألعاب',k:'game.'+g.id+'.t',l:'اسم اللعبة',o:g.t,set:v=>{g.t=v}});L.push({g:'الألعاب',k:'game.'+g.id+'.d',l:'وصف اللعبة',o:g.d,set:v=>{g.d=v}})});
+  EXTRA.forEach(g=>{L.push({g:'الألعاب',k:'game.'+g.id+'.t',l:'اسم اللعبة الإضافية',o:g.t,set:v=>{g.t=v}});L.push({g:'الألعاب',k:'game.'+g.id+'.d',l:'وصف اللعبة الإضافية',o:g.d,set:v=>{g.d=v}})});
   return L},
  get(){return this.data||{v:0,qo:{},qh:[],qn:[],tx:{},gm:{},ch:{}}},
  ch(k,d){const v=this.get().ch||{};return typeof v[k]==='number'?v[k]:d},
@@ -5610,6 +5827,7 @@ const Content={
   fill(HOP_LV,this.base.hop,'hop');fill(BOSS_LV,this.base.boss,'boss');fill(FIN_LV,this.base.fin,'final');
   const nm=this.get().nm||{};this.reg().forEach(e=>{const v=nm[e.k];e.set(v||this.base.nm[e.k])});
   const gd=this.get().gd||{};DET.splice(0,DET.length,...JSON.parse(gd.det?JSON.stringify(gd.det):this.base.det));
+  const put=(a,x,k)=>a.splice(0,a.length,...JSON.parse(x&&x.length?JSON.stringify(x):this.base[k]));put(XFL,gd.fl,'fl');put(XFX,gd.fx,'fx');put(XBD,gd.bd,'bd');
   const mw0=JSON.parse(this.base.mw);MW.forEach((w,i)=>{const x=gd.mw&&gd.mw[i];w.items=x&&x.length?x:mw0[i]});
   $$('.tabbtn').forEach((b,i)=>{const t=TABS[i],s=b.querySelector('b');if(t&&s&&s.textContent!==t.title)s.textContent=t.title});
   Tx.map=this.get().tx||{};Tx.run()}};

@@ -37,6 +37,13 @@ module.exports = async (req, res) => {
     if (set.length) cmds.push(['HSET', 'mf:acc:' + aid].concat(set));
     await pipeline(cmds);
     let awards = []; try { awards = aw ? JSON.parse(aw) : []; } catch (e) { awards = []; }
-    return send(res, 200, Object.assign({ ok: true, status, rv, cfg: eff(await cfg(), cls), aw: awards }, extra));
+    const ef = eff(await cfg(), cls); let wk = null;
+    if (ef.wk) {   // the weekly class goal: this student's share (correct answers since he joined it, capped) and the whole class's total
+      const key = 'mf:wk:' + ef.wk.id, n = b.wk && b.wk.id === ef.wk.id ? Math.max(0, Math.min(600, Math.floor(+b.wk.n) || 0)) : 0;
+      let [old, tot] = await pipeline([['HGET', key, aid], ['GET', key + ':t']]); old = +old || 0; tot = +tot || 0;
+      if (n > old) { await pipeline([['HSET', key, aid, String(n)], ['INCRBY', key + ':t', String(n - old)], ['EXPIRE', key, 60 * 86400], ['EXPIRE', key + ':t', 60 * 86400]]); tot += n - old; old = n; }
+      wk = Object.assign({}, ef.wk, { tot, n: old });
+    }
+    return send(res, 200, Object.assign({ ok: true, status, rv, cfg: ef, aw: awards, wk }, extra));
   } catch (e) { return send(res, e.code === 'no_db' ? 503 : 500, { error: e.code === 'no_db' ? 'no_db' : 'server' }); }
 };

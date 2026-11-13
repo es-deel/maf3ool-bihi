@@ -105,6 +105,11 @@ function cleanCfg(b, old) {
   if (b.rep && typeof b.rep === 'object') c.rep = cleanRep(b.rep, c.rep);
   if (['off', 'top5', 'top10', 'all'].includes(b.board)) c.board = b.board;
   if (['full', 'first'].includes(b.boardNames)) c.boardNames = b.boardNames;
+  if ('wk' in b) {   // the weekly class goal: {on, t, goal, days, cls:[…]} starts a new one; {on:false} ends it
+    const w = b.wk;
+    if (!w || !w.on) c.wk = null;
+    else c.wk = { id: Date.now().toString(36), t: tx(w.t, 60) || 'تحدّي الفصل الأسبوعي', goal: Math.max(10, Math.min(50000, Math.floor(+w.goal) || 300)), end: Date.now() + Math.max(1, Math.min(30, Math.floor(+w.days) || 7)) * 86400000, cls: (Array.isArray(w.cls) ? w.cls : []).map(x => tx(x, 24)).filter(Boolean).slice(0, 16), from: Date.now() };
+  }
   c.v = Date.now(); return c;
 }
 const REP_SEC = ['compare', 'topics', 'heat', 'wrong', 'plan', 'notes', 'recs', 'students', 'insights'];
@@ -122,6 +127,7 @@ function eff(c, cls) {
   const o = c.byCls && cls ? c.byCls[cls] || {} : {}, r = { v: c.v, reg: c.reg !== false, hints: c.hints !== false, board: c.board || 'off', boardNames: c.boardNames || 'first', sound: c.sound !== false, fx: c.fx !== false, win: c.win || CFG0.win, rep: c.rep || {}, ct: c.ct || 0 };
   SCOPED.forEach(k => { r[k] = k in o ? o[k] : c[k]; });
   if ((o.cheerAt || 0) < (c.cheerAt || 0)) { r.cheer = c.cheer; r.cheerAt = c.cheerAt; }
+  { const w = c.wk; if (w && w.id && w.end > Date.now() && (!w.cls || !w.cls.length || !cls || w.cls.includes(cls))) r.wk = { id: w.id, t: w.t, goal: w.goal, end: w.end }; }
   return r;
 }
 async function saveCfg(c) { await redis(['SET', 'mf:cfg', JSON.stringify(c)]); cfgCache = { at: Date.now(), v: c }; return c; }
