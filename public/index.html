@@ -4082,6 +4082,7 @@ const N_DAYS=['يوم واحد','يومان','أيام','يومًا'];
 /* "3 days in a row" in correct Arabic agreement */
 const dstr=n=>n===1?'يوم واحد':n===2?'يومان متتاليان':n<=10?`${AR(n)} أيام متتالية`:`${AR(n)} يومًا متتاليًا`;
 const DSHORT=['أحد','اثنين','ثلاثاء','أربعاء','خميس','جمعة','سبت'];
+const chv=(k,df)=>{try{return Content.ch(k,df)}catch(e){return df}};   // the teacher's challenge settings (online build), else the defaults
 const Daily={
  on:false,
  get(){return Object.assign({streak:0,best:0,last:'',total:0,days:{},run:null},store.get('dc',null)||{})},
@@ -4109,7 +4110,7 @@ const Daily={
   if(first){o.days[key]={s:sc,n:res.length,r:res.join('')};
    o.streak=o.last===dshift(key,-1)?(o.streak||0)+1:(o.last===key?o.streak:1);
    o.last=key;o.best=Math.max(prevBest,o.streak);o.total=(o.total||0)+1;
-   bonus=3+(sc===res.length?5:0);const c=Combo.get();c.en+=bonus;store.set('cmb',c);Combo.refresh()}
+   bonus=chv('dailyBonus',3)+(sc===res.length?chv('dailyPerfect',5):0);const c=Combo.get();c.en+=bonus;store.set('cmb',c);Combo.refresh()}
   o.run=null;this.put(o);
   return{first,sc,streak:o.streak,best:o.best,bonus,newBest:first&&o.best>prevBest&&o.best>1}},
  refreshCard(){const el=$('.gcard.daily');if(!el)return;const i=+(el.style.getPropertyValue('--d')||0)||0;el.outerHTML=this.card(i).replace(' rise','')},
@@ -4727,11 +4728,11 @@ const Dash={
   const multi=S.scope==='all',sec=S.sec||'over',now=this.now();
   const scopeSel=`<label class="sr" for="dhSc">اختر الفصل</label><select id="dhSc" class="inp dh-sel"><option value="all"${multi?' selected':''}>كل الفصول</option>${S.classes.map(c=>`<option value="${esc(c)}"${S.scope===c?' selected':''}>${esc(c)}</option>`).join('')}</select>`;
   const top=`<div class="dh-top"><b>${em('man_teacher')} لوحة المعلم</b><span>${scopeSel}<button class="btn ghost sm" id="dhR" type="button">تحديث</button><button class="btn ghost sm" id="dhX" type="button">إغلاق</button></span></div>
-   <div class="dh-nav2"><button class="btn gold sm" id="dhG" type="button">${em('bullseye')} التحكم باللعبة</button><button class="btn sky sm" id="dhRd" type="button">${em('closed_book')} تصميم التقارير</button><button class="btn ghost sm" id="dhM2" type="button">إدارة الفصول</button><button class="btn ghost sm" id="dhCm" type="button">وضع الحصة</button><button class="btn ghost sm" id="dhAc" type="button">حسابي</button><button class="btn red sm" id="dhLo" type="button">تسجيل الخروج</button></div>`;
+   <div class="dh-nav2"><button class="btn gold sm" id="dhG" type="button">${em('bullseye')} التحكم باللعبة</button><button class="btn gold sm" id="dhCt" type="button">${em('books')} محتوى الدرس</button><button class="btn sky sm" id="dhRd" type="button">${em('closed_book')} تصميم التقارير</button><button class="btn ghost sm" id="dhM2" type="button">إدارة الفصول</button><button class="btn ghost sm" id="dhCm" type="button">وضع الحصة</button><button class="btn ghost sm" id="dhAc" type="button">حسابي</button><button class="btn red sm" id="dhLo" type="button">تسجيل الخروج</button></div>`;
   const bind=()=>{$('#dhX',d).onclick=()=>this.close();
    $('#dhR',d).onclick=async()=>{const r=await this.load();if(r.ok)this.classView(d)};
    $('#dhSc',d).onchange=async e=>{S.scope=e.target.value;S.q='';S.sel=new Set();const r=await this.load();if(r.ok)this.classView(d)};
-   $('#dhM2',d).onclick=()=>this.manage();$('#dhG',d).onclick=()=>this.ctl();$('#dhRd',d).onclick=()=>this.design();$('#dhAc',d).onclick=()=>this.account();$('#dhLo',d).onclick=()=>Online.teacherLogout();$('#dhCm',d).onclick=()=>{this.close();try{Cls.toggle()}catch(e){toast('وضع الحصة غير متاح')}}};
+   $('#dhM2',d).onclick=()=>this.manage();$('#dhG',d).onclick=()=>this.ctl();$('#dhCt',d).onclick=()=>this.content();$('#dhRd',d).onclick=()=>this.design();$('#dhAc',d).onclick=()=>this.account();$('#dhLo',d).onclick=()=>Online.teacherLogout();$('#dhCm',d).onclick=()=>{this.close();try{Cls.toggle()}catch(e){toast('وضع الحصة غير متاح')}}};
   if(!A.regs){d.innerHTML=top+`<div class="dh-wrap"><div class="dh-wait"><p>لا يوجد طلاب مسجّلون ${S.scope==='all'?'بعد':'في هذا الفصل بعد'}. أعطِ طلابك رابط الدرس؛ يسجّل كل طالب اسمه وفصله ورقم هاتفه.</p></div></div>`;bind();return}
   const tile=(v,l,c)=>`<div class="dh-tile"${c?` style="--tc:${c}"`:''}><b>${v}</b><small>${l}</small></div>`;
   const bar=(l,pct,txt,col)=>`<div class="dh-bar"><span>${l}</span><i><u style="width:${Math.max(pct,pct>0?3:0)}%;background:${col}"></u></i><em>${txt}</em></div>`;
@@ -4789,6 +4790,7 @@ const Dash={
   const q=$('#dhQ',d);if(q)q.oninput=e=>{S.q=e.target.value;const y=d.scrollTop,p=e.target.selectionStart;this.classView(d);d.scrollTop=y;const q2=$('#dhQ',d);q2.focus();try{q2.setSelectionRange(p,p)}catch(x){}};
   const bm=$('#dhBm',d);if(bm)bm.onclick=async()=>{const to=$('#dhBt',d).value,ids=[...S.sel];if(!ids.length)return;msg.textContent='جارٍ النقل…';const r=await Online.api('admin',{op:'bulk',act:'move',aids:ids,to},S.key);if(!r.ok){msg.textContent=this.err(r);return}S.sel=new Set();await this.load();this.classView(d);toast('نُقل '+AR(r.n)+' طالبًا إلى '+to+' ✓')};
   const bd=$('#dhBx',d);if(bd){let sure=false;bd.onclick=async()=>{if(!sure){sure=true;bd.textContent='اضغط مرة أخرى لحذف '+AR(S.sel.size)+' طالبًا نهائيًا';return}const r=await Online.api('admin',{op:'bulk',act:'del',aids:[...S.sel]},S.key);if(!r.ok){msg.textContent=this.err(r);return}S.sel=new Set();await this.load();this.classView(d);toast('حُذف '+AR(r.n)+' طالبًا')}};
+  const ba=$('#dhBa',d);if(ba)ba.onclick=()=>this.awardModal([...S.sel],'');
   const bw=$('#dhBw',d);if(bw)bw.onclick=()=>{this.waAll([...S.sel])};},
  /* ---------- the Students tab: sort, group by class, select, edit ---------- */
  stuTable(A,multi,now){const S=this.S,rows=this.sorted(),grp=multi&&S.group,sel=S.sel;
@@ -4802,7 +4804,7 @@ const Dash={
   if(grp){S.classes.forEach(c=>{const g=rows.filter(r=>r.cls===c);if(!g.length)return;const act=g.filter(r=>!r.empty),avg=act.length?Math.round(act.reduce((s,r)=>s+r.spct,0)/act.length):0,rk=A.act.filter(r=>r.cls===c).map(r=>r.k);
    body+=`<tr class="dh-grp"><td colspan="${cols}"><b>${esc(c)}</b> <small>${NUM(g.length,N_ST)} · متوسط الدرجة ${AR(avg)}٪</small></td></tr>`+g.map(r=>tr(r,rk.indexOf(r.k)+1)).join('')})}
   else body=rows.map(r=>tr(r)).join('');
-  const bulk=sel.size?`<div class="dh-bulk" role="status"><b>حُدّد ${AR(sel.size)}</b><select id="dhBt" class="inp dh-sel" aria-label="انقل إلى فصل">${S.classes.map(c=>`<option>${esc(c)}</option>`).join('')}</select><button class="btn sky sm" id="dhBm" type="button">انقل المحدَّدين</button><button class="btn go sm" id="dhBw" type="button">واتساب للمحدَّدين</button><button class="btn red sm" id="dhBx" type="button">احذف المحدَّدين</button></div>`:'';
+  const bulk=sel.size?`<div class="dh-bulk" role="status"><b>حُدّد ${AR(sel.size)}</b><select id="dhBt" class="inp dh-sel" aria-label="انقل إلى فصل">${S.classes.map(c=>`<option>${esc(c)}</option>`).join('')}</select><button class="btn sky sm" id="dhBm" type="button">انقل المحدَّدين</button><button class="btn go sm" id="dhBw" type="button">واتساب للمحدَّدين</button><button class="btn gold sm" id="dhBa" type="button">جائزة للمحدَّدين</button><button class="btn red sm" id="dhBx" type="button">احذف المحدَّدين</button></div>`:'';
   return`<section class="dh-card"><h3>الطلاب وحساباتهم</h3>
    <div class="dh-tool"><label class="sr" for="dhQ">بحث باسم الطالب أو رقمه</label><input id="dhQ" class="bk-ta dh-q" placeholder="ابحث باسم الطالب أو رقم هاتفه" value="${esc(S.q)}" autocomplete="off">
     <label class="sr" for="dhSo">ترتيب الطلاب حسب</label><select id="dhSo" class="inp dh-sel">${OPT.map(([k,t])=>`<option value="${k}"${S.sort===k?' selected':''}>ترتيب: ${t}</option>`).join('')}</select>
@@ -4937,6 +4939,98 @@ const Dash={
    $('#dhDs',m).onclick=async()=>{msg('جارٍ الحفظ…');const body={cfg:{rep:read()}};if(logoChanged)body.logo=logo;const r=await Online.api('config',body,S.key);if(!r.ok){msg(r.error==='logo_big'?'الشعار كبير.':this.err(r));return}
     S.cfg=r.cfg;RepCfg.rep=r.cfg.rep||{};RepCfg.logo=logo;try{localStorage.removeItem('mf_logo')}catch(e){}msg('حُفظ التصميم ✓ — يُطبَّق على كل التقارير.')};
    setTimeout(preview,80)})},
+
+ /* ---------- the lesson's content: questions, texts, game difficulty, challenge bonuses (kept in the database, applied to every student) ---------- */
+ content(tab){const S=this.S;tab=tab||this.ctab||'q';this.ctab=tab;const C=Content.get();
+  const TB=[['q','الأسئلة'],['tx','النصوص'],['gm','الألعاب والتحديات']];
+  const head=`<h3>${em('books')} محتوى الدرس</h3><p class="dh-sub">تُحفظ التعديلات في قاعدة البيانات وتصل إلى الطلاب خلال نصف دقيقة تقريبًا.</p><nav class="dh-tabs" role="tablist" aria-label="أقسام المحتوى">${TB.map(([k,t])=>`<button type="button" role="tab" data-ct="${k}" aria-selected="${k===tab}" class="${k===tab?'on':''}">${t}</button>`).join('')}</nav>`;
+  const foot=`<p class="dh-msg" id="dhCtm" role="status"></p><div class="row"><button class="btn ghost sm" id="dhCtx" type="button">إغلاق</button></div>`;
+  let body='';
+  if(tab==='q'){const f=this.cf||(this.cf={tp:'',lv:'',q:'',h:false});const all=Content.qAll();
+   const tps=Object.keys(TOPIC).filter(k=>all.some(q=>q.tp===k));
+   const rows=all.filter(q=>(!f.tp||q.tp===f.tp)&&(!f.lv||String(q.lv)===f.lv)&&(!f.q||((q.q||'')+' '+((q.o||[]).join(' '))+' '+((q.w||[]).join(' '))).includes(f.q))&&(!f.h||q.hid));
+   const TT={mcq:'اختيار',tap:'اضغط',order:'ترتيب'};
+   body=`<div class="dh-tool"><label class="sr" for="dhQf">بحث في الأسئلة</label><input id="dhQf" class="bk-ta dh-q" placeholder="ابحث في نص السؤال" value="${esc(f.q)}"><select id="dhQt" class="inp dh-sel" aria-label="الموضوع"><option value="">كل الموضوعات</option>${tps.map(k=>`<option value="${k}"${f.tp===k?' selected':''}>${esc(TOPIC[k].n)}</option>`).join('')}</select><select id="dhQl" class="inp dh-sel" aria-label="المستوى"><option value="">كل المستويات</option>${[1,2,3].map(l=>`<option value="${l}"${f.lv===String(l)?' selected':''}>${LV_NAME[l]}</option>`).join('')}</select><label class="dh-sw"><input type="checkbox" id="dhQh"${f.h?' checked':''}> المخفية فقط</label></div>
+    <p class="dh-sub">${AR(rows.length)} سؤال · ${AR(all.filter(q=>q.hid).length)} مخفي · ${AR((C.qn||[]).length)} أضفتَه · هذه الأسئلة تُستخدم في تدريبات الكواكب والألعاب.</p>
+    <div class="dh-sc dh-ql"><table class="dh-tab"><tr><th>السؤال</th><th>النوع</th><th>المستوى</th><th></th></tr>${rows.map(q=>`<tr class="${q.hid?'dh-hid':''}"><td>${esc(String(q.q||'').slice(0,90))}${q.t==='tap'||q.t==='order'?` <small>${esc((q.w||[]).join(' '))}</small>`:''}${q.custom?' <small class="dh-new">جديد</small>':q.edited?' <small class="dh-new">معدَّل</small>':''}</td><td>${TT[q.t]||q.t}</td><td>${LV_NAME[q.lv]||''}</td><td class="dh-ac"><button type="button" class="btn ghost sm" data-qe="${q.id}">تعديل</button><button type="button" class="btn ghost sm" data-qh="${q.id}" data-on="${q.hid?0:1}">${q.hid?'أظهِر':'أخفِ'}</button></td></tr>`).join('')||'<tr><td colspan="4">لا نتائج.</td></tr>'}</table></div>
+    <div class="row"><button class="btn go sm" id="dhQa" type="button">+ أضف سؤال اختيار من متعدد</button></div>`}
+  else if(tab==='tx'){const ks=Object.keys(C.tx||{});
+   body=`<div class="dh-set"><b>تحرير النصوص على الشاشة</b><small>تفتح شاشات الدرس نفسها، ثم تضغط على أي نص (شرح، عنوان، سؤال، رسالة في لعبة) وتكتب صياغتك الجديدة. يُستبدل النص أينما ظهر.</small><div class="row"><button class="btn gold sm" id="dhTxs" type="button">${em('pencil')} ابدأ تحرير النصوص</button></div></div>
+    <div class="dh-set"><b>النصوص المعدَّلة (${AR(ks.length)})</b>${ks.length?`<div class="dh-sc dh-ql"><table class="dh-tab"><tr><th>الأصل</th><th>الجديد</th><th></th></tr>${ks.map((k,i)=>`<tr><td><small>${esc(k.slice(0,70))}</small></td><td>${esc(C.tx[k].slice(0,70))}</td><td class="dh-ac"><button type="button" class="btn ghost sm" data-tr="${i}">أعد الأصل</button></td></tr>`).join('')}</table></div>`:'<small>لم تعدّل أي نص بعد.</small>'}</div>`}
+  else{const g=C.gm||{},h=C.ch||{},ops=v=>[['auto','تدرّج تلقائي (سهل ← متقدم)'],['1','سهل دائمًا'],['2','متوسط دائمًا'],['3','متقدم دائمًا']].map(([k,t])=>`<option value="${k}"${(v||'auto')===k?' selected':''}>${t}</option>`).join('');
+   body=`<div class="dh-set"><b>صعوبة الألعاب</b><small>تُطبَّق على كل الفصول. الأسئلة نفسها من «الأسئلة».</small>
+    <label for="dhGh">التنقّل بين الكواكب + مسابقة المليون</label><select id="dhGh" class="inp dh-sel">${ops(g.hop)}</select>
+    <label for="dhGb">تحدّي الروبوت</label><select id="dhGb" class="inp dh-sel">${ops(g.boss)}</select>
+    <label for="dhGf">المعركة الأخيرة</label><select id="dhGf" class="inp dh-sel">${ops(g.final)}</select></div>
+    <div class="dh-set"><b>تحدّي اليوم</b><small>نقاط بونص يأخذها الطالب عند إنهاء التحدي لأول مرة في اليوم.</small>
+    <label for="dhCb">نقاط الإنجاز</label><input id="dhCb" class="inp" type="number" min="0" max="30" value="${typeof h.dailyBonus==='number'?h.dailyBonus:3}">
+    <label for="dhCp">نقاط إضافية للإجابات الكاملة</label><input id="dhCp" class="inp" type="number" min="0" max="30" value="${typeof h.dailyPerfect==='number'?h.dailyPerfect:5}"></div>
+    <div class="row"><button class="btn go sm" id="dhGsv" type="button">حفظ</button></div><small>لإغلاق لعبة بعينها أو إخفاء كوكب افتح «التحكم باللعبة».</small>`}
+  this.modal(head+body+foot,m=>{
+   const msg=t=>{$('#dhCtm',m).textContent=t},post=async b=>{const r=await Online.api('content',b,S.key);if(!r.ok){msg(this.err(r));return null}Content.set(r.content);return r};
+   $('#dhCtx',m).onclick=()=>this.modal();$$('[data-ct]',m).forEach(b=>b.onclick=()=>this.content(b.dataset.ct));
+   if(tab==='q'){const f=this.cf,re=()=>this.content('q');
+    $('#dhQf',m).onchange=e=>{f.q=e.target.value.trim();re()};$('#dhQt',m).onchange=e=>{f.tp=e.target.value;re()};$('#dhQl',m).onchange=e=>{f.lv=e.target.value;re()};$('#dhQh',m).onchange=e=>{f.h=e.target.checked;re()};
+    $$('[data-qh]',m).forEach(b=>b.onclick=async()=>{if(await post({op:'qhide',id:+b.dataset.qh,on:b.dataset.on==='1'}))re()});
+    $$('[data-qe]',m).forEach(b=>b.onclick=()=>this.qEdit(+b.dataset.qe));$('#dhQa',m).onclick=()=>this.qEdit(0)}
+   if(tab==='tx'){$('#dhTxs',m).onclick=()=>{this.close();TxEdit.start(S.key)};const ks=Object.keys(C.tx||{});$$('[data-tr]',m).forEach(b=>b.onclick=async()=>{if(await post({op:'tx',from:ks[+b.dataset.tr],to:''}))this.content('tx')})}
+   if(tab==='gm')$('#dhGsv',m).onclick=async()=>{const a=await post({op:'gm',gm:{hop:$('#dhGh',m).value,boss:$('#dhGb',m).value,final:$('#dhGf',m).value}});if(!a)return;const r=await post({op:'ch',ch:{dailyBonus:+$('#dhCb',m).value,dailyPerfect:+$('#dhCp',m).value}});if(r)msg('حُفظ ✓ ويصل إلى الطلاب خلال نصف دقيقة.')}})},
+ /* edit one question (id 0 = a new multiple-choice question) */
+ qEdit(id,draft){const S=this.S,all=Content.qAll(),q=draft||(id?all.find(x=>x.id===id):{t:'mcq',tp:'s',lv:1,q:'',o:['','',''],a:0,e:'',h:''});if(!q)return;
+  const base=id&&!q.custom?JSON.parse(Content.base.qb).find(x=>x.id===id):null,tps=Object.keys(TOPIC);
+  const words=q.t==='mcq'?(q.o||[]):(q.w||[]);
+  this.modal(`<h3>${id?'تعديل السؤال':'سؤال جديد'}</h3>
+   <div class="dh-set"><label for="dhEq">${q.t==='tap'?'التعليمة':q.t==='order'?'نص التعليمة':'نص السؤال'}</label><textarea id="dhEq" class="bk-ta" rows="2" maxlength="300">${esc(q.q||'')}</textarea>
+    <b>${q.t==='mcq'?'الاختيارات (اختر الإجابة الصحيحة)':q.t==='tap'?'الكلمات (اختر الكلمة المطلوبة)':'الكلمات بالترتيب الصحيح'}</b>
+    ${words.map((w,i)=>`<div class="dh-cr">${q.t==='order'?`<span>${AR(i+1)}</span>`:`<input type="radio" name="dhEa" value="${i}" aria-label="الصحيحة"${q.a===i?' checked':''}>`}<input class="inp dh-ow" data-i="${i}" maxlength="${q.t==='mcq'?120:40}" value="${esc(w)}" aria-label="العنصر ${AR(i+1)}"></div>`).join('')}
+    ${q.t==='mcq'&&words.length<5?'<button class="btn ghost sm" id="dhEadd" type="button">+ اختيار آخر</button>':''}
+    <label for="dhEe">التوضيح بعد الإجابة</label><textarea id="dhEe" class="bk-ta" rows="2" maxlength="300">${esc(q.e||'')}</textarea>
+    ${q.t==='mcq'?`<label for="dhEh">تلميح (اختياري)</label><input id="dhEh" class="inp" maxlength="200" value="${esc(q.h||'')}">`:''}
+    <div class="dh-cr"><label for="dhEl2">المستوى</label><select id="dhEl2" class="inp dh-sel">${[1,2,3].map(l=>`<option value="${l}"${q.lv===l?' selected':''}>${LV_NAME[l]}</option>`).join('')}</select><label for="dhEt">الموضوع</label><select id="dhEt" class="inp dh-sel">${tps.map(k=>`<option value="${k}"${q.tp===k?' selected':''}>${esc(TOPIC[k].n)}</option>`).join('')}</select></div></div>
+   <p class="dh-msg" id="dhEqm" role="status"></p>
+   <div class="row"><button class="btn go sm" id="dhEqs" type="button">حفظ</button>${base&&q.edited?'<button class="btn ghost sm" id="dhEqr" type="button">أعد الأصل</button>':''}${id&&q.custom?'<button class="btn red sm" id="dhEqd" type="button">احذف السؤال</button>':''}<button class="btn ghost sm" id="dhEqx" type="button">رجوع</button></div>`,m=>{
+   const msg=t=>{$('#dhEqm',m).textContent=t},back=()=>this.content('q');
+   $('#dhEqx',m).onclick=back;
+   if($('#dhEadd',m))$('#dhEadd',m).onclick=()=>{const cur=$$('.dh-ow',m).map(x=>x.value);cur.push('');q.o=cur;q.q=$('#dhEq',m).value;q.e=$('#dhEe',m).value;q.h=$('#dhEh',m)?$('#dhEh',m).value:'';const ck=m.querySelector('[name=dhEa]:checked');q.a=ck?+ck.value:0;this.qEdit(id,q)};
+   const call=async b=>{const r=await Online.api('content',b,S.key);if(!r.ok){msg(r.error==='bad_q'?'اكتب السؤال واختيارين على الأقل وحدّد الصحيحة.':this.err(r));return false}Content.set(r.content);return true};
+   $('#dhEqs',m).onclick=async()=>{const w=$$('.dh-ow',m).map(x=>x.value.trim()),ck=m.querySelector('[name=dhEa]:checked'),a=ck?+ck.value:0;
+    const patch={q:$('#dhEq',m).value,e:$('#dhEe',m).value,lv:+$('#dhEl2',m).value,tp:$('#dhEt',m).value};
+    if(q.t==='mcq'){const o=w.filter(Boolean);if(o.length<2||!w[a]){msg('اكتب اختيارين على الأقل وحدّد الصحيحة.');return}patch.o=o;patch.a=w.slice(0,a).filter(Boolean).length;patch.h=$('#dhEh',m).value}
+    else{if(w.some(x=>!x)){msg('لا تترك كلمة فارغة.');return}patch.w=w;if(q.t==='tap')patch.a=a}
+    if(!patch.q.trim()){msg('اكتب نص السؤال.');return}
+    const ok=id?await call({op:'q',id,patch}):await call({op:'qadd',q:patch});if(ok)back()};
+   if($('#dhEqr',m))$('#dhEqr',m).onclick=async()=>{if(await call({op:'qreset',id}))back()};
+   if($('#dhEqd',m)){let sure=false;$('#dhEqd',m).onclick=async e=>{if(!sure){sure=true;e.currentTarget.textContent='اضغط للتأكيد';return}if(await call({op:'qdel',id}))back()}}})},
+
+ /* ---------- the student's whole file: performance, titles, badges, challenges, games, the teacher's awards ---------- */
+ async studentFile(r,box){const S=this.S;const j2=await Online.api('report?aid='+encodeURIComponent(r.aid)+'&full=1',undefined,S.key);
+  if(!box.isConnected)return;if(!j2.ok){box.innerHTML=`<section class="dh-card"><h3>ملف الطالب</h3><p class="dh-sub">لا توجد بيانات محفوظة لهذا الطالب بعد.</p></section>`;return}
+  const D=(j2.snap&&j2.snap.d)||{},st=D.st||{},gb=D.gb||{},bdg=D.bdg||{},dc=D.dc||{},fb=D.fb||{},done=D.done||{},gift=D.gift||{},aw=j2.aw||[],dt=t=>t?new Date(t).toLocaleDateString('ar-EG',{day:'numeric',month:'short'}):'';
+  const tile=(v,l,c)=>`<div class="dh-tile"${c?` style="--tc:${c}"`:''}><b>${v}</b><small>${l}</small></div>`;
+  const perf=`<section class="dh-card"><h3>${em('ringed_planet')} الأداء الشامل</h3><div class="dh-tiles">${tile(AR(r.pts)+'/'+AR(r.max),'الدرجة · '+AR(r.spct)+'٪','#a78bfa')}${tile(AR(r.acc)+'٪','دقة الإجابات ('+AR(r.c)+' من '+AR(r.n)+')','#38bdf8')}${tile(AR(r.done)+'/'+AR(r.total),'الكواكب المنجزة','#4ade80')}${tile(AR(r.stars)+'/'+AR(r.smax),'النجوم','#fbbf24')}${tile(AR(r.mins),'دقيقة تعلّم','#fb923c')}${tile(AR(st.best||0),'أطول سلسلة إجابات صحيحة','#f472b6')}${tile(AR(st.fixed||0),'أخطاء صحّحها','#2dd4bf')}${tile(AR(r.bp||0),'نقاط إضافية (بونص)','#facc15')}</div></section>`;
+  const rk=`<section class="dh-card"><h3>${em('crown')} الرتبة والألقاب</h3><div class="dh-chips">${RANKS.map((x,k)=>`<span class="dh-chip${k<=r.rk?' on':''}${k===r.rk?' cur':''}">${em(x.ic)} ${x.n}</span>`).join('')}</div><p class="dh-sub">ألقاب كتاب القواعد (تُنال عند إنجاز كل كوكب):</p><div class="dh-chips">${PAGES.filter(p=>TABS.some(t=>t.id===p.id)).map(p=>{const got=!!done[p.id];return`<span class="dh-chip${got?' on':''}" title="${esc(got?(gift[p.id]?'فتح الطالب صندوق اللقب':'لم يفتح الصندوق بعد'):'لم يُنجَز')}">${em(got?p.ic:'locked')} ${got?esc(p.t):'—'}</span>`}).join('')}</div></section>`;
+  const bd=`<section class="dh-card"><h3>${em('1st_place_medal')} الأوسمة (${AR(BADGES.filter(b=>bdg[b.id]).length)} من ${AR(BADGES.length)})</h3><div class="dh-chips">${BADGES.map(b=>{const t=bdg[b.id];return`<span class="dh-chip${t?' on':''}" title="${esc(b.d)}">${em(t?b.ic:'locked')} ${esc(b.n)}${t&&t>1e9?` <small>${dt(t)}</small>`:''}</span>`}).join('')}</div></section>`;
+  const days=[];for(let i=13;i>=0;i--){const k=dshift(dkey(),-i),x=(dc.days||{})[k];days.push(`<span class="dh-dd${x?' ok':''}" title="${esc(dlabel(k))}${x?` · ${AR(x.s)} من ${AR(x.n)}`:''}">${x?AR(x.s):''}</span>`)}
+  const ch=`<section class="dh-card"><h3>${em('fire')} التحديات والألعاب</h3><div class="dh-tiles">${tile(AR(dc.total||0),'أيام أنجز فيها تحدّي اليوم','#fb923c')}${tile(AR(dc.best||0),'أفضل سلسلة أيام','#f472b6')}${tile(fb.won?dt(fb.won):'لم يهزمه بعد','هازم الروبوت'+(fb.n?' · '+AR(fb.n)+' مرة':''),'#4ade80')}</div>
+    <p class="dh-sub">آخر ١٤ يومًا (الرقم = الإجابات الصحيحة في تحدّي اليوم):</p><div class="dh-days">${days.join('')}</div>
+    <p class="dh-sub">نجوم الألعاب:</p><div class="dh-chips">${GAMES.map(g=>{const s=gb[g.id]|0;return`<span class="dh-chip${s?' on':''}">${em(g.ic||'joystick')} ${esc(g.t)} ${'★'.repeat(s)}${'☆'.repeat(Math.max(0,3-s))}</span>`}).join('')}</div></section>`;
+  const aws=`<section class="dh-card"><h3>${em('trophy')} جوائز المعلم (${AR(aw.length)})</h3>${aw.length?`<div class="dh-chips">${aw.map(a=>`<span class="dh-chip on" title="${esc(a.n||'')}">${em(IMG[a.ic]?a.ic:'trophy')} ${esc(a.t)} <small>${dt(a.at)}</small> <button type="button" class="dh-x" data-ua="${esc(a.id)}" aria-label="احذف الجائزة ${esc(a.t)}">×</button></span>`).join('')}</div>`:'<p class="dh-sub">لم تمنح هذا الطالب جوائز بعد.</p>'}<div class="row"><button class="btn gold sm" id="dhAw" type="button">${em('trophy')} امنح جائزة أو لقبًا</button></div></section>`;
+  box.innerHTML=perf+aws+rk+bd+ch;
+  $('#dhAw',box).onclick=()=>this.awardModal([r.aid],r.name,()=>this.studentFile(r,box));
+  $$('[data-ua]',box).forEach(b=>b.onclick=async()=>{const x=await Online.api('admin',{op:'unaward',aid:r.aid,id:b.dataset.ua},S.key);if(x.ok)this.studentFile(r,box)})},
+ /* give a title / medal to one or several students: they see it as a banner and in their cabinet */
+ awardModal(aids,label,done){const S=this.S,PRE=[['نجم الأسبوع','star'],['المتفوّق','crown'],['الأكثر مثابرة','fire'],['الأكثر تحسّنًا','rocket'],['بطل التحدّي','trophy'],['المساعد الذكي','light_bulb'],['إجابات مبهرة','gem_stone'],['روح الفريق','party_popper']],IC=['trophy','star','glowing_star','crown','fire','rocket','light_bulb','gem_stone','party_popper','1st_place_medal','flexed_biceps','sparkles'];
+  this.modal(`<h3>${em('trophy')} جائزة ${aids.length>1?'لـ '+AR(aids.length)+' طلاب':'للطالب '+esc(label||'')}</h3>
+   <div class="dh-set"><b>اختر لقبًا جاهزًا أو اكتب لقبك</b><div class="dh-chips">${PRE.map(([t,i])=>`<button type="button" class="dh-chip" data-pre="${esc(t)}" data-ic="${i}">${em(i)} ${t}</button>`).join('')}</div>
+    <label for="dhAwT">اللقب</label><input id="dhAwT" class="inp" maxlength="40" placeholder="مثال: نجم الأسبوع">
+    <label for="dhAwN">رسالة تشجيع (اختياري)</label><input id="dhAwN" class="inp" maxlength="140" placeholder="مثال: أحسنت! استمر على هذا المستوى">
+    <b>الأيقونة</b><div class="dh-sw-row">${IC.map((i,k)=>`<label class="dh-col" title="${i}"><input type="radio" name="dhAwI" value="${i}"${k===0?' checked':''}><span>${em(i)}</span></label>`).join('')}</div></div>
+   <p class="dh-msg" id="dhAwM" role="status"></p><div class="row"><button class="btn go sm" id="dhAwS" type="button">امنح الجائزة</button><button class="btn ghost sm" id="dhAwX" type="button">إلغاء</button></div>`,m=>{
+   $('#dhAwX',m).onclick=()=>this.modal();
+   $$('[data-pre]',m).forEach(b=>b.onclick=()=>{$('#dhAwT',m).value=b.dataset.pre;const r=m.querySelector('[name=dhAwI][value='+b.dataset.ic+']');if(r)r.checked=true});
+   $('#dhAwS',m).onclick=async()=>{const t=$('#dhAwT',m).value.trim();if(t.length<2){$('#dhAwM',m).textContent='اكتب اللقب (حرفان على الأقل).';return}
+    const ic=(m.querySelector('[name=dhAwI]:checked')||{}).value||'trophy',x=await Online.api('admin',{op:'award',aids,t,ic,n:$('#dhAwN',m).value},S.key);
+    if(!x.ok){$('#dhAwM',m).textContent=this.err(x);return}this.modal();toast('مُنحت الجائزة لـ '+AR(x.n)+' ✓ وتصل الطالب خلال نصف دقيقة');if(done)done()}})},
  waRemind(r){return[`السلام عليكم ورحمة الله، ولي أمر الطالب/ـة ${r.name}`,'نذكّر بإكمال درس «مغامرة المفعول به» (اللغة العربية - الصف الخامس) ليصلنا تقدّم الطالب.',`رابط الدرس: ${location.origin}/`,'يدخل الطالب برقم الهاتف وكلمة المرور التي اختارها.','مع تحيات الأستاذ إسلام قنديل'].join('\n')},
  waText(r,url){return[`السلام عليكم ورحمة الله، ولي أمر الطالب/ـة ${r.name}`,`تقرير أداء ${r.name} في «مغامرة المفعول به» (اللغة العربية - الصف الخامس):`,
   r.empty?'لم يبدأ الحل بعد.':`الدرجة ${AR(r.pts)} من ${AR(r.max)} (${AR(r.spct)}٪) · الرتبة: ${RANKS[r.rk].n} · الكواكب: ${AR(r.done)} من ${AR(r.total)}`,
@@ -4961,9 +5055,10 @@ const Dash={
    <div class="dh-wrap"><p class="dh-sub">${esc(r.cls)} · هاتف ${this.fmtPhone(r.phone)}${r.seen&&this.now()-r.seen<90000?' · <b class="dh-on">يعمل الآن</b>':r.last?' · آخر نشاط '+ago(r.last):''}</p>
    <div class="dh-act"><button class="btn gold sm" id="dhP" type="button">${em('closed_book')} تحميل التقرير PDF</button><button class="btn sky sm" id="dhPr" type="button">${em('pencil')} اطبع</button><button class="btn ghost sm" id="dhS" type="button">انسخ ملخصًا (لولي الأمر)</button><button class="btn ghost sm" id="dhEd2" type="button">تعديل بيانات الطالب</button><button class="btn go sm" id="dhW" type="button">${em('envelope')} أرسل التقرير لولي الأمر (واتساب)</button>
     <button class="btn ghost sm" id="dhPv" type="button"${prev?'':' disabled'}>→ السابق</button><button class="btn ghost sm" id="dhNx" type="button"${next?'':' disabled'}>التالي ←</button></div>
-   <p class="dh-msg" id="dhM" role="status"></p><div id="dhPg" class="dh-pages"><div class="dh-wait"><p>جارٍ تجهيز التقرير…</p></div></div>
+   <p class="dh-msg" id="dhM" role="status"></p><div id="dhFile"><div class="dh-wait"><p>جارٍ تحميل ملف الطالب…</p></div></div><div id="dhPg" class="dh-pages"><div class="dh-wait"><p>جارٍ تجهيز التقرير…</p></div></div>
    <details class="dh-card dh-adm"><summary>إدارة الطالب</summary><div class="dh-act"><label class="sr" for="dhMv">انقل إلى فصل</label><select id="dhMv" class="inp dh-sel">${S.classes.map(c=>`<option value="${esc(c)}"${c===r.cls?' selected':''}>${esc(c)}</option>`).join('')}</select><button class="btn sky sm" id="dhMb" type="button">انقل إلى هذا الفصل</button><button class="btn red sm" id="dhDl" type="button">احذف الطالب وبياناته</button></div><div class="dh-cr"><label class="sr" for="dhPw2">كلمة مرور جديدة للطالب</label><input id="dhPw2" class="inp" dir="ltr" maxlength="40" placeholder="كلمة مرور جديدة للطالب (٤ أحرف على الأقل)" autocomplete="off"><button class="btn sky sm" id="dhPb" type="button">تعيين كلمة المرور</button></div><p class="dh-sub" id="dhDm"></p></details></div>`;
   $('#dhX',d).onclick=()=>this.close();$('#dhBk',d).onclick=()=>this.show('class');$('#dhEd2',d).onclick=()=>this.editStudent(r);
+  this.studentFile(r,$('#dhFile',d));
   const go=x=>()=>this.show('student',x.k);if(prev)$('#dhPv',d).onclick=go(prev);if(next)$('#dhNx',d).onclick=go(next);
   $('#dhPb',d).onclick=async()=>{const j=await Online.api('admin',{op:'setpw',aid:r.aid,pass:$('#dhPw2',d).value},S.key);$('#dhDm',d).textContent=j.ok?'عُيّنت كلمة المرور؛ أخبر الطالب بها (يدخل بها برقم هاتفه).':(j.error==='bad_pass'?'كلمة المرور من ٤ أحرف على الأقل.':this.err(j));if(j.ok)$('#dhPw2',d).value=''};
   /* admin: move / delete */
@@ -5061,6 +5156,11 @@ body.dash-on{overflow:hidden}
 .dh-tbl{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px}.dh-tr{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:4px 8px;border-radius:10px;background:#ffffff0a}
 .dh-sw-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.dh-col{display:flex;gap:5px;align-items:center;cursor:pointer;padding:4px 8px;border-radius:12px;border:1.5px solid var(--line)}.dh-col i{width:20px;height:20px;border-radius:50%;display:inline-block;border:1px solid #fff4}.dh-col input{accent-color:var(--gold2)}
 .dh-prev{position:relative;overflow:hidden;border-radius:12px;background:#fff;min-height:120px}#dhLg{max-height:56px;max-width:140px;background:#fff;border-radius:8px;padding:3px}
+.dh-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px}
+.dh-chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.dh-chip{display:inline-flex;gap:5px;align-items:center;padding:.3rem .7rem;border-radius:20px;border:1.5px solid var(--line);background:#ffffff0a;color:inherit;font:600 .9rem var(--f-body);opacity:.55}.dh-chip.on{opacity:1;background:#fbbf2420;border-color:#fbbf2488}.dh-chip.cur{border-color:#fbbf24;box-shadow:0 0 0 2px #fbbf2455}button.dh-chip{cursor:pointer;opacity:1}.dh-chip small{opacity:.8}
+.dh-x{border:0;background:transparent;color:inherit;font-size:1.1rem;cursor:pointer;padding:0 4px}
+.dh-days{display:flex;flex-wrap:wrap;gap:4px}.dh-dd{width:2rem;height:2rem;border-radius:8px;border:1.5px solid var(--line);display:grid;place-items:center;font-weight:700;font-size:.9rem}.dh-dd.ok{background:#4ade8033;border-color:#4ade80}
+.dh-ql{max-height:46vh}.dh-hid{opacity:.5}.dh-new{color:#fbbf24}
 .dh-adm summary{cursor:pointer;font-weight:700}
 @media(max-width:560px){.dh-bar{grid-template-columns:1fr 1fr}.dh-bar i{grid-column:1/-1;order:3}}
 @media print{body.printing #dash{display:none!important}}
@@ -5096,7 +5196,7 @@ const Online={
   try{try{saveST()}catch(e){}
    const snap=store.snapshot(),body={aid:a.aid,sk:a.sk,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),snap:JSON.stringify(snap),ts:snap.ts||0,code:Code.make(),detail:this.detail()};
    const r=await this.api('sync',body,'',JSON.stringify(body).length<60000);
-   if(r.ok){this.lastSig=sg;this.stat={ok:true,at:Date.now()};if(r.cfg)Ctl.apply(r.cfg);
+   if(r.ok){this.lastSig=sg;this.stat={ok:true,at:Date.now()};if(r.cfg)Ctl.apply(r.cfg);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);
     let fin=false;try{fin=Incomplete.list().count===0}catch(e){}
     if(fin&&!a.fin){a.fin=1;this.setAcct(a);toast(em('trophy')+' أكملتَ الرحلة، ووصل تقريرك النهائي إلى معلمك ✓')}
     else if(!a.first&&!o.quiet){a.first=1;this.setAcct(a);toast(em('check_mark_button')+' تقدّمك محفوظ في حسابك ويصل إلى معلمك تلقائيًا')}}
@@ -5108,7 +5208,7 @@ const Online={
   this.tm=setTimeout(()=>this.sync(),fin?300:15000)},
  async ping(){if(document.visibilityState!=='visible')return;const a=this.acct();
   if(!a){const r=await this.api('config');if(r.ok&&r.cfg)Ctl.apply(r.cfg);return}
-  const r=await this.api('sync',{aid:a.aid,sk:a.sk,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where()});if(r.ok&&r.cfg)Ctl.apply(r.cfg);else if(r.error==='bad_session'||r.error==='no_account')this.expired()},
+  const r=await this.api('sync',{aid:a.aid,sk:a.sk,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where()});if(r.ok&&r.cfg){Ctl.apply(r.cfg);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw)}else if(r.error==='bad_session'||r.error==='no_account')this.expired()},
  /* the saved login no longer works (password reset by the teacher, or an old account): sign in again; progress on this device is kept */
  expired(){if(this._exp)return;this._exp=1;this.setAcct(null);setTimeout(()=>{this._exp=0;if($('#dlg').hidden)Gate.open('old',this.why.session)},300)},
  paintSave(){const b=$('#saveBtn');if(!b)return;const bad=this.acct()&&this.stat.ok===false;b.classList.toggle('warn',!!bad);
@@ -5327,7 +5427,7 @@ const Ctl={
   setInterval(()=>Ctl.paint(),20000);
   const qr=Q.render;Q.render=function(h,q,o){if(Ctl.cfg&&Ctl.cfg.hints===false)o=Object.assign({},o||{},{noHint:true});return qr.call(this,h,q,o)};
   setTimeout(()=>this.paint(),50)},
- apply(c){if(!c||typeof c!=='object')return;const old=this.cfg;this.cfg=c;try{localStorage.setItem('mf_cfg',JSON.stringify(c))}catch(e){}RepCfg.rep=c.rep||{};this.logo(c);this.paint(old);
+ apply(c){if(!c||typeof c!=='object')return;const old=this.cfg;this.cfg=c;try{Content.check(c.ct)}catch(e){}try{localStorage.setItem('mf_cfg',JSON.stringify(c))}catch(e){}RepCfg.rep=c.rep||{};this.logo(c);this.paint(old);
   /* tell the server this device now holds the new settings (the teacher's dashboard counts how many students received them) */
   if((!old||old.v!==c.v)&&Online.acct()){clearTimeout(this.ak);this.ak=setTimeout(()=>{const a=Online.acct();if(a)Online.api('sync',{aid:a.aid,sk:a.sk,cv:c.v,w:Online.where()})},400)}},
  /* the report logo is stored apart (it is large): fetched once per version and kept on the device */
@@ -5383,6 +5483,73 @@ const Viewer={
   $('#dhP',d).onclick=e=>Dash.pdf(build,'تقرير '+j.name,'تقرير_'+Dash.fn(j.name)+'_مغامرة_المفعول_به.pdf',e.currentTarget,msg);
   $('#dhPr',d).onclick=()=>Dash.print(build,msg)}};
 Online.init();
+
+/* ===== the lesson's content, kept in the database: questions, texts, game difficulty, challenge bonuses + the teacher's awards ===== */
+const Content={
+ data:null,ver:0,base:null,
+ /* what the code ships with, so a teacher's change can always be taken back */
+ snap0(){if(this.base)return;this.base={qb:JSON.stringify(QB),hop:HOP_LV.slice(),boss:BOSS_LV.slice(),fin:FIN_LV.slice()}},
+ get(){return this.data||{v:0,qo:{},qh:[],qn:[],tx:{},gm:{},ch:{}}},
+ ch(k,d){const v=this.get().ch||{};return typeof v[k]==='number'?v[k]:d},
+ init(){this.snap0();let c=null;try{c=JSON.parse(localStorage.getItem('mf_content')||'null')}catch(e){}if(c&&typeof c==='object')this.set(c,true)},
+ /* the settings carry a version; when it differs from what this device holds, fetch the content once */
+ check(ct){ct=ct|0;if(ct===this.ver||this.busy)return;this.fetch()},
+ async fetch(){this.busy=true;try{const r=await Online.api('content');if(r.ok&&r.content)this.set(r.content)}finally{this.busy=false}},
+ set(c,quiet){this.data=c;this.ver=c.v|0;if(!quiet){try{localStorage.setItem('mf_content',JSON.stringify(c))}catch(e){}}this.apply();if(typeof Dash!=='undefined'&&Dash.onContent)Dash.onContent()},
+ /* the question bank as the students see it: shipped questions + the teacher's edits − hidden ones + the teacher's new ones */
+ qAll(){this.snap0();const base=JSON.parse(this.base.qb),c=this.get(),hid=new Set(c.qh||[]);
+  base.forEach(q=>{Object.assign(q,(c.qo||{})[q.id]||{});q.hid=hid.has(q.id);q.edited=!!(c.qo||{})[q.id]});
+  (c.qn||[]).forEach(q=>base.push(Object.assign({},q,{hid:hid.has(q.id),custom:1})));return base},
+ apply(){this.snap0();const q=this.qAll().filter(x=>!x.hid).map(x=>{const y=Object.assign({},x);delete y.hid;delete y.edited;delete y.custom;return y});
+  QB.length=0;QB.push(...q);
+  const g=this.get().gm||{},fill=(arr,orig,k)=>{const v=g[k];if(v&&v!=='auto')arr.fill(+v);else orig.forEach((x,i)=>arr[i]=x)};
+  fill(HOP_LV,this.base.hop,'hop');fill(BOSS_LV,this.base.boss,'boss');fill(FIN_LV,this.base.fin,'final');
+  Tx.map=this.get().tx||{};Tx.run()}};
+/* ---- replacing texts on the screen: a text is matched by its exact words, wherever it appears ---- */
+const Tx={map:{},obs:null,t:0,
+ key(s){return String(s).replace(/\s+/g,' ').trim()},
+ skip(n){const p=n.parentElement;return!p||p.closest('#dash,#txBar,#txEd,script,style,textarea,input,select,.no-tx')},
+ apply(root){const m=this.map,w=document.createTreeWalker(root||document.body,NodeFilter.SHOW_TEXT);let n,list=[];while((n=w.nextNode()))list.push(n);
+  list.forEach(n=>{if(this.skip(n))return;const fresh=n.__v===undefined||n.nodeValue!==n.__v;if(fresh){n.__o=n.nodeValue;n.__v=undefined}
+   const o=n.__o===undefined?n.nodeValue:n.__o,k=this.key(o);if(k.length<2)return;const to=m[k];
+   if(to){const lead=o.match(/^\s*/)[0],trail=o.match(/\s*$/)[0],v=lead+to+trail;if(n.nodeValue!==v){n.__o=o;n.nodeValue=v}n.__v=n.nodeValue}
+   else if(n.__v!==undefined&&n.nodeValue===n.__v&&n.__o!==undefined){n.nodeValue=n.__o;n.__v=undefined}})},
+ run(){if(!this.obs&&document.body){this.obs=new MutationObserver(()=>{clearTimeout(this.t);this.t=setTimeout(()=>this.go(),150)});this.obs.observe(document.body,{childList:true,subtree:true,characterData:true})}this.go()},
+ go(){if(!this.obs)return;const any=Object.keys(this.map).length>0;if(!any&&!this.had)return;this.had=any;this.obs.disconnect();try{this.apply()}finally{this.obs.observe(document.body,{childList:true,subtree:true,characterData:true})}}};
+/* ---- the teacher edits texts straight on the lesson's screens ---- */
+const TxEdit={on:false,pick:true,key:'',
+ CSS:`body.tx-edit.tx-pick *:not(#txBar):not(#txBar *):not(#txEd):not(#txEd *):hover{outline:2px dashed #fbbf24;outline-offset:2px;cursor:text}
+  #txBar{position:fixed;inset:auto 0 0 0;z-index:100000;display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:center;padding:.6rem 1rem;background:#1b1240;color:#fff;border-top:2px solid #fbbf24;font:700 .95rem var(--f-body,system-ui)}
+  #txBar b{color:#fbbf24}#txEd{position:fixed;inset:0;z-index:100001;display:grid;place-items:center;background:#0009;padding:16px}
+  #txEd .box{width:min(560px,100%);background:#1b1240;color:#fff;border:2px solid #fbbf24;border-radius:18px;padding:16px;display:grid;gap:8px;max-height:92vh;overflow:auto}
+  #txEd textarea{width:100%;min-height:96px;border-radius:12px;padding:10px;font:inherit;background:#0e0a28;color:#fff;border:1.5px solid #6d5bd0}#txEd small{opacity:.8}#txEd .row{display:flex;gap:8px;flex-wrap:wrap}`,
+ start(key){this.key=key;if(this.on)return;this.on=true;this.pick=true;
+  if(!$('#txCss')){const s=document.createElement('style');s.id='txCss';s.textContent=this.CSS;document.head.appendChild(s)}
+  document.body.classList.add('tx-edit','tx-pick');
+  const bar=document.createElement('div');bar.id='txBar';bar.innerHTML=`<span>وضع تحرير النصوص: <b id="txMode">اضغط على أي نص لتعديله</b></span><button class="btn gold sm" id="txTg" type="button">تصفّح الدرس</button><button class="btn ghost sm" id="txN" type="button">${AR(Object.keys(Tx.map).length)} تعديل</button><button class="btn red sm" id="txX" type="button">إنهاء</button>`;document.body.appendChild(bar);
+  $('#txTg').onclick=()=>{this.pick=!this.pick;document.body.classList.toggle('tx-pick',this.pick);$('#txTg').textContent=this.pick?'تصفّح الدرس':'عودة للتحرير';$('#txMode').textContent=this.pick?'اضغط على أي نص لتعديله':'تصفّح بحرّية (التحرير متوقف)'};
+  $('#txX').onclick=()=>this.stop();$('#txN').onclick=()=>{this.stop();Dash.content('tx')};
+  this.h=e=>{if(!this.on||!this.pick)return;if(e.target.closest('#txBar,#txEd'))return;const n=this.at(e);e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();if(n)this.edit(n)};
+  document.addEventListener('click',this.h,true);['pointerdown','mousedown','touchstart'].forEach(t=>document.addEventListener(t,this.blk=this.blk||(e=>{if(this.on&&this.pick&&!e.target.closest('#txBar,#txEd'))e.stopPropagation()}),true))},
+ stop(){this.on=false;document.body.classList.remove('tx-edit','tx-pick');document.removeEventListener('click',this.h,true);const b=$('#txBar');if(b)b.remove();const e=$('#txEd');if(e)e.remove();Dash.open(this.key,true)},
+ /* the text node under the finger/mouse */
+ at(e){let n=null;try{if(document.caretPositionFromPoint){const p=document.caretPositionFromPoint(e.clientX,e.clientY);n=p&&p.offsetNode}else if(document.caretRangeFromPoint){const r=document.caretRangeFromPoint(e.clientX,e.clientY);n=r&&r.startContainer}}catch(x){}
+  if(!n||n.nodeType!==3||Tx.skip(n)||Tx.key(n.__o===undefined?n.nodeValue:n.__o).length<2){const el=e.target,w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);let t;n=null;while((t=w.nextNode())){if(!Tx.skip(t)&&Tx.key(t.__o===undefined?t.nodeValue:t.__o).length>=2){n=t;break}}}
+  return n},
+ edit(n){const orig=Tx.key(n.__o===undefined?n.nodeValue:n.__o),cur=Tx.map[orig]||orig;let m=$('#txEd');if(m)m.remove();m=document.createElement('div');m.id='txEd';
+  m.innerHTML=`<div class="box" role="dialog" aria-modal="true" aria-labelledby="txT"><b id="txT">تعديل النص</b><small>النص الأصلي: ${esc(orig)}</small><textarea id="txV" maxlength="400" aria-label="النص الجديد">${esc(cur)}</textarea>
+   <small>يُستبدل هذا النص أينما ظهر في الدرس، ويصل إلى الطلاب خلال نصف دقيقة. لا يغيّر الإجابات الصحيحة، بل صياغة الكلام فقط.</small><div class="row"><button class="btn go sm" id="txS" type="button">حفظ</button>${Tx.map[orig]?'<button class="btn ghost sm" id="txR" type="button">إعادة النص الأصلي</button>':''}<button class="btn ghost sm" id="txC" type="button">إلغاء</button></div><small id="txM" role="status"></small></div>`;document.body.appendChild(m);
+  const send=async to=>{$('#txM').textContent='جارٍ الحفظ…';const r=await Online.api('content',{op:'tx',from:orig,to},this.key);if(!r.ok){$('#txM').textContent='تعذّر الحفظ؛ حاول مرة أخرى.';return}Content.set(r.content);$('#txN').textContent=AR(Object.keys(Tx.map).length)+' تعديل';m.remove()};
+  $('#txS').onclick=()=>send($('#txV').value);if($('#txR'))$('#txR').onclick=()=>send('');$('#txC').onclick=()=>m.remove();setTimeout(()=>$('#txV').focus(),50)}};
+/* ---- the teacher's awards: shown to the student as a banner and in his cabinet ---- */
+const Awards={list:[],
+ init(){try{this.list=JSON.parse(localStorage.getItem('mf_aw')||'[]')||[]}catch(e){this.list=[]}
+  const o=Cab.open;Cab.open=function(){const r=o.apply(this,arguments);try{Awards.paint()}catch(e){}return r}},
+ set(l){if(!Array.isArray(l))return;const seen=new Set(this.list.map(x=>x.id)),first=!localStorage.getItem('mf_aw_s');this.list=l;try{localStorage.setItem('mf_aw',JSON.stringify(l));localStorage.setItem('mf_aw_s','1')}catch(e){}
+  if(!first)l.filter(x=>!seen.has(x.id)).reverse().forEach(a=>{try{Banner.show({ic:IMG[a.ic]?a.ic:'trophy',k:'جائزة من معلمك!',t:a.t,s:a.n||'',sfx:'win',conf:44,cls:'badge'})}catch(e){}})},
+ paint(){const c=$('#dlg .cab-body')||$('#dlg .cab');if(!c||!this.list.length||$('.cab-aw',c))return;const h=document.createElement('div');h.className='cab-aw';
+  h.innerHTML=`<h4>${em('trophy')} جوائز من معلمك</h4><div class="cab-g">${this.list.map(a=>`<div class="cab-t bd on" title="${esc(a.n||'')}"><span class="cab-ic">${em(IMG[a.ic]?a.ic:'trophy','lg')}</span><b>${esc(a.t)}</b><small>${esc(a.n||'')}</small></div>`).join('')}</div>`;c.appendChild(h)}};
+Content.init();Awards.init();
 
 ;boot();
 </script></body></html>

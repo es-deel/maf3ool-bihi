@@ -7,7 +7,7 @@ module.exports = async (req, res) => {
   const b = await body(req), aid = String(b.aid || '').slice(0, 200);
   if (!aid) return send(res, 400, { error: 'bad_account' });
   try {
-    const [name, cls, phone, ts0, sk] = await redis(['HMGET', 'mf:acc:' + aid, 'name', 'cls', 'phone', 'ts', 'sk']);
+    const [name, cls, phone, ts0, sk, aw] = await redis(['HMGET', 'mf:acc:' + aid, 'name', 'cls', 'phone', 'ts', 'sk', 'aw']);
     if (!name) return send(res, 404, { error: 'no_account' });
     if (!sk || !same(b.sk || '', sk)) return send(res, 401, { error: 'bad_session' });
     const now = Date.now(), w = String(b.w || '').slice(0, 40), cmds = [['HSET', 'mf:seen:' + cls, aid, JSON.stringify({ t: now, w, cv: Math.floor(+b.cv || 0) })]];
@@ -28,6 +28,7 @@ module.exports = async (req, res) => {
     }
     if (set.length) cmds.push(['HSET', 'mf:acc:' + aid].concat(set));
     await pipeline(cmds);
-    return send(res, 200, { ok: true, status, cfg: eff(await cfg(), cls) });
+    let awards = []; try { awards = aw ? JSON.parse(aw) : []; } catch (e) { awards = []; }
+    return send(res, 200, { ok: true, status, cfg: eff(await cfg(), cls), aw: awards });
   } catch (e) { return send(res, e.code === 'no_db' ? 503 : 500, { error: e.code === 'no_db' ? 'no_db' : 'server' }); }
 };

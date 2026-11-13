@@ -87,6 +87,20 @@ module.exports = async (req, res) => {
       if (!vt || b.renew) { if (vt) await redis(['DEL', 'mf:vt:' + vt]); vt = crypto.randomBytes(12).toString('hex'); await pipeline([['HSET', 'mf:acc:' + aid, 'vt', vt], ['SET', 'mf:vt:' + vt, aid]]); }
       return send(res, 200, { ok: true, vt });
     }
+    if (op === 'award' || op === 'unaward') {   // a title / medal the teacher gives to one or several students: {aids:[…]|aid, t, ic, n} or {aid, id}
+      const list = op === 'award' ? (Array.isArray(b.aids) ? b.aids : [aid]).map(x => String(x || '').slice(0, 200)).filter(Boolean).slice(0, 120) : [aid];
+      const t = String(b.t || '').replace(/\s+/g, ' ').trim().slice(0, 40), ic = String(b.ic || 'trophy').replace(/[^a-z_]/g, '').slice(0, 40) || 'trophy', n = String(b.n || '').replace(/\s+/g, ' ').trim().slice(0, 140);
+      if (op === 'award' && t.length < 2) return send(res, 400, { error: 'bad_title' });
+      let k = 0;
+      for (const a of list) {
+        const cur = await redis(['HGET', 'mf:acc:' + a, 'aw']); if (cur === null && !(await redis(['HEXISTS', 'mf:acc:' + a, 'name']))) continue;
+        let aw = []; try { aw = JSON.parse(cur || '[]'); } catch (e) { aw = []; }
+        if (op === 'award') { aw.unshift({ id: crypto.randomBytes(4).toString('hex'), t, ic, n, at: Date.now() }); aw = aw.slice(0, 30); }
+        else aw = aw.filter(x => x.id !== String(b.id || ''));
+        await redis(['HSET', 'mf:acc:' + a, 'aw', JSON.stringify(aw)]); k++;
+      }
+      return send(res, 200, { ok: true, n: k });
+    }
     return send(res, 400, { error: 'bad_op' });
   } catch (e) { const x = err(e); return send(res, x.code, x.o); }
 };

@@ -73,7 +73,7 @@ async function deny(req, res) {
    global keys: reg, hints, board ('off' | 'top5' | 'top10' | 'all'), boardNames ('full' | 'first')
    scoped keys (global, or overridden for one class in byCls[class]): notice, pause, pauseMsg, lock[], cheer + cheerAt */
 const SCOPED = ['notice', 'pause', 'pauseMsg', 'lock', 'hide', 'gamesOff', 'cheer', 'cheerAt'];
-const CFG0 = { v: 0, notice: '', lock: [], pause: false, pauseMsg: '', hide: [], gamesOff: [], reg: true, hints: true, sound: true, fx: true, win: { on: false, from: '08:00', to: '14:00' }, rep: {}, cheer: '', cheerAt: 0, board: 'off', boardNames: 'first', byCls: {} };
+const CFG0 = { v: 0, ct: 0, notice: '', lock: [], pause: false, pauseMsg: '', hide: [], gamesOff: [], reg: true, hints: true, sound: true, fx: true, win: { on: false, from: '08:00', to: '14:00' }, rep: {}, cheer: '', cheerAt: 0, board: 'off', boardNames: 'first', byCls: {} };
 let cfgCache = { at: 0, v: CFG0 };
 async function cfg(fresh) {
   if (!fresh && Date.now() - cfgCache.at < 8000) return cfgCache.v;
@@ -119,7 +119,7 @@ function cleanRep(b, old) {
 }
 /* what one student's page receives: the global values with his class's overrides on top */
 function eff(c, cls) {
-  const o = c.byCls && cls ? c.byCls[cls] || {} : {}, r = { v: c.v, reg: c.reg !== false, hints: c.hints !== false, board: c.board || 'off', boardNames: c.boardNames || 'first', sound: c.sound !== false, fx: c.fx !== false, win: c.win || CFG0.win, rep: c.rep || {} };
+  const o = c.byCls && cls ? c.byCls[cls] || {} : {}, r = { v: c.v, reg: c.reg !== false, hints: c.hints !== false, board: c.board || 'off', boardNames: c.boardNames || 'first', sound: c.sound !== false, fx: c.fx !== false, win: c.win || CFG0.win, rep: c.rep || {}, ct: c.ct || 0 };
   SCOPED.forEach(k => { r[k] = k in o ? o[k] : c[k]; });
   if ((o.cheerAt || 0) < (c.cheerAt || 0)) { r.cheer = c.cheer; r.cheerAt = c.cheerAt; }
   return r;
