@@ -4694,7 +4694,7 @@ const Dash={
   const j=await Online.api('board?cls='+encodeURIComponent(S.scope),undefined,S.key);
   if(!j.ok)return{ok:false,error:j.error||'server'};
   S.classes=j.classes||[];S.cfg=j.cfg||{};S.user=j.user||S.user;RepCfg.rep=S.cfg.rep||{};Ctl.logo(S.cfg);S.skew=(j.now||Date.now())-Date.now();
-  S.rows=(j.students||[]).map(s=>this.mkRow(s)).filter(Boolean);S.cl=this.analyse(S.rows);S.cache={};S.at=Date.now();
+  S.rows=(j.students||[]).map(s=>{try{return this.mkRow(s)}catch(e){return this.mkRow(Object.assign({},s,{code:''}))}}).filter(Boolean);S.cl=this.analyse(S.rows);S.cache={};S.at=Date.now();
   return{ok:true}},
  async detail(r){const S=this.S;if(!r.det)return null;if(S.cache[r.k]!==undefined)return S.cache[r.k];
   const j=await Online.api('report?aid='+encodeURIComponent(r.k),undefined,S.key);S.cache[r.k]=j.ok?j.detail:null;return S.cache[r.k]},
@@ -5314,8 +5314,12 @@ const Online={
  /* ---------- the teacher's button ---------- */
  teacherKey(){let k='';try{k=localStorage.getItem(this.TK)||sessionStorage.getItem(this.TK)||''}catch(e){}return k},
  async teacherOpen(){
-  const k=this.teacherKey();if(!k){this.teacherAsk();return}
-  const r=await Dash.open(k,true);if(!r.ok){if(r.error==='login')this.teacherForget();this.teacherAsk(r.error==='login'?this.why.login:this.err(r))}},
+  if(this.tBusy)return;this.tBusy=true;
+  try{const k=this.teacherKey();if(!k){await this.teacherAsk();return}
+   const r=await Dash.open(k,true);if(!r.ok){if(r.error==='login')this.teacherForget();await this.teacherAsk(r.error==='login'?this.why.login:this.err(r));return}
+   const d=$('#dlg');if(d&&!$('#olU',d)){d.hidden=true;d.innerHTML=''}}
+  catch(e){/* never leave the teacher on a silent page: show the sign-in form with the reason */this.teacherForget();try{Dash.close()}catch(x){}await this.teacherAsk('تعذّر فتح اللوحة؛ سجّل الدخول من جديد.')}
+  finally{this.tBusy=false}},
  teacherForget(){try{localStorage.removeItem(this.TK);sessionStorage.removeItem(this.TK)}catch(e){}},
  async teacherLogout(){const k=this.teacherKey()||Dash.S.key;try{await this.api('auth',{op:'logout'},k)}catch(e){}this.teacherForget();Dash.close();Dash.modal();toast('سُجّل خروج المعلم'); Ctl.paint()},
  /* sign in with user name + password (kept in the database); the first time, the account is created with the server's setup key */
@@ -5394,6 +5398,7 @@ const Gate={
 @media(max-width:520px){.tch-btn span{display:none}}`,
  async classList(){if(this.classes)return this.classes;const r=await Online.api('config');if(r.ok&&r.classes&&r.classes.length){this.classes=r.classes;return this.classes}return null},
  open(mode,note){
+  if(Online.tBusy||document.body.classList.contains('dash-on')||$('#olU'))return;   // the teacher is signing in / working: never cover that
   const d=$('#dlg'),link=mode==='link',cur=NAME(),old=mode==='old';d.hidden=false;
   d.innerHTML=`<div class="dlg-card zoom-in gt" role="dialog" aria-modal="true" aria-labelledby="gtT"><img class="dlg-m" src="${IMG.boyA}" alt="">
    <h2 id="gtT">${link?'سجّل بياناتك لتُحفظ نتائجك':'أهلًا بك في مغامرة المفعول به!'}</h2>
@@ -5410,8 +5415,8 @@ const Gate={
     <label for="gtW2">كلمة المرور</label><input id="gtW2" class="inp" type="password" dir="ltr" maxlength="40" autocomplete="current-password" placeholder="كلمة المرور">
     <div class="gt-ch" id="gtCh"></div><p class="dlg-err bk-msg ${note?'on bad':''}" id="gtM2" role="status">${note||''}</p>
     <div class="row dlg-row"><button class="btn gold" type="button" id="gtLog">استعِد تقدّمي</button></div></div>
-   <div class="gt-tc"><button class="btn ghost sm" type="button" id="gtT">${em('man_teacher')} دخول المعلم</button></div></div>`;
-  $('#gtT',d).onclick=()=>{d.hidden=true;d.innerHTML='';Online.teacherOpen()};
+   <div class="gt-tc"><button class="btn ghost sm" type="button" id="gtTch">${em('man_teacher')} دخول المعلم</button></div></div>`;
+  $('#gtTch',d).onclick=()=>{Online.teacherOpen()};
   /* the header's «المعلم» button sits under this dialog's backdrop: a tap on it is passed on, so the teacher is never stuck on the registration page */
   d.onclick=e=>{if(e.target.closest('button,input,select,a,label,textarea'))return;const b=$('#tchBtn');if(!b)return;const r=b.getBoundingClientRect(),m=6;if(e.clientX>=r.left-m&&e.clientX<=r.right+m&&e.clientY>=r.top-m&&e.clientY<=r.bottom+m){d.hidden=true;d.innerHTML='';Online.teacherOpen()}};
   const tab=t=>{$$('.gt-tabs button',d).forEach(b=>b.classList.toggle('on',b.dataset.t===t));$('#gtNew',d).hidden=t!=='new';$('#gtOld',d).hidden=t!=='old';setTimeout(()=>{try{$(t==='new'?'#gtN':'#gtP2',d).focus()}catch(e){}},30)};
