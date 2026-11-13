@@ -11,7 +11,7 @@ function parseCode(code) {
   const v = a.slice(2); if (!v.every(x => Number.isInteger(x) && x >= 0 && x <= 1e9)) return null;
   const [t, pts, max, stars, smax, done, total, n, c] = v;
   if (t < 2e7 || t > 8e7 || max < 1 || max > 9999 || pts > max || smax < 1 || smax > 999 || stars > smax || total < 1 || total > 99 || done > total || c > n || n > 1e6) return null;
-  return { name, t, pts };
+  return { name, t, pts, max, stars, n, c };
 }
 const nameKey = n => String(n).replace(/[ً-ٰ؟ـ]/g, '').replace(/[أإآٱ]/g, 'ا').replace(/ى/g, 'ي').replace(/ة/g, 'ه').replace(/\s+/g, ' ').trim().toLowerCase();
 const normCls = s => String(s || '').normalize('NFKC').toLowerCase().replace(/[^a-z0-9؀-ۿ\- ]/g, '').replace(/\s+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30);
@@ -63,24 +63,49 @@ async function deny(req, res) {
   try { const u = await redis(['GET', 'mf:tok:' + t]); if (!u) { send(res, 401, { error: 'login' }); return true; } req.teacher = u; return false; }
   catch (e) { send(res, e.code === 'no_db' ? 503 : 500, { error: e.code === 'no_db' ? 'no_db' : 'server' }); return true; }
 }
-/* ---------- game settings the teacher controls (applied to every student's page within ~40 s) ---------- */
-const CFG0 = { v: 0, notice: '', lock: [], pause: false, pauseMsg: '', reg: true, hints: true, cheer: '', cheerAt: 0 };
+/* ---------- game settings the teacher controls (applied to every student's page within ~30 s) ----------
+   global keys: reg, hints, board ('off' | 'top5' | 'top10' | 'all'), boardNames ('full' | 'first')
+   scoped keys (global, or overridden for one class in byCls[class]): notice, pause, pauseMsg, lock[], cheer + cheerAt */
+const SCOPED = ['notice', 'pause', 'pauseMsg', 'lock', 'cheer', 'cheerAt'];
+const CFG0 = { v: 0, notice: '', lock: [], pause: false, pauseMsg: '', reg: true, hints: true, cheer: '', cheerAt: 0, board: 'off', boardNames: 'first', byCls: {} };
 let cfgCache = { at: 0, v: CFG0 };
 async function cfg(fresh) {
   if (!fresh && Date.now() - cfgCache.at < 8000) return cfgCache.v;
   let o = {}; try { const r = await redis(['GET', 'mf:cfg']); if (r) o = JSON.parse(r); } catch (e) { if (e.code === 'no_db') throw e; }
   cfgCache = { at: Date.now(), v: Object.assign({}, CFG0, o) }; return cfgCache.v;
 }
+const tx = (x, n) => String(x == null ? '' : x).replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, n);
+function cleanScoped(b, c) {
+  if ('notice' in b) c.notice = tx(b.notice, 200);
+  if ('pauseMsg' in b) c.pauseMsg = tx(b.pauseMsg, 120);
+  if ('lock' in b) c.lock = (Array.isArray(b.lock) ? b.lock : []).map(x => tx(x, 20)).filter(x => /^[a-z]{2,20}$/.test(x)).slice(0, 20);
+  if ('pause' in b) c.pause = !!b.pause;
+  if (b.cheer) { c.cheer = tx(b.cheer, 100); c.cheerAt = Date.now(); }
+  return c;
+}
+/* b.scope: a class name changes only that class's overrides; otherwise the global values */
 function cleanCfg(b, old) {
-  const t = (x, n) => String(x == null ? '' : x).replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, n), c = Object.assign({}, old);
-  if ('notice' in b) c.notice = t(b.notice, 200);
-  if ('pauseMsg' in b) c.pauseMsg = t(b.pauseMsg, 120);
-  if ('lock' in b) c.lock = (Array.isArray(b.lock) ? b.lock : []).map(x => t(x, 20)).filter(x => /^[a-z]{2,20}$/.test(x)).slice(0, 20);
-  ['pause', 'reg', 'hints'].forEach(k => { if (k in b) c[k] = !!b[k]; });
-  if (b.cheer) { c.cheer = t(b.cheer, 100); c.cheerAt = Date.now(); }
+  const c = Object.assign({}, CFG0, old), scope = tx(b.scope, 24);
+  c.byCls = Object.assign({}, c.byCls);
+  if (scope && scope !== 'all') {
+    if (b.reset) delete c.byCls[scope];
+    else { if (Object.keys(c.byCls).length >= 20 && !c.byCls[scope]) return c; c.byCls[scope] = cleanScoped(b, Object.assign({}, c.byCls[scope])); }
+  } else cleanScoped(b, c);
+  ['reg', 'hints'].forEach(k => { if (k in b) c[k] = !!b[k]; });
+  if (['off', 'top5', 'top10', 'all'].includes(b.board)) c.board = b.board;
+  if (['full', 'first'].includes(b.boardNames)) c.boardNames = b.boardNames;
   c.v = Date.now(); return c;
 }
+/* what one student's page receives: the global values with his class's overrides on top */
+function eff(c, cls) {
+  const o = c.byCls && cls ? c.byCls[cls] || {} : {}, r = { v: c.v, reg: c.reg !== false, hints: c.hints !== false, board: c.board || 'off', boardNames: c.boardNames || 'first' };
+  SCOPED.forEach(k => { r[k] = k in o ? o[k] : c[k]; });
+  if ((o.cheerAt || 0) < (c.cheerAt || 0)) { r.cheer = c.cheer; r.cheerAt = c.cheerAt; }
+  return r;
+}
 async function saveCfg(c) { await redis(['SET', 'mf:cfg', JSON.stringify(c)]); cfgCache = { at: Date.now(), v: c }; return c; }
+/* a rate limit: true when this key has been hit more than max times in 10 minutes */
+async function limited(key, max) { const n = await redis(['INCR', key]); await redis(['EXPIRE', key, '600']); return n > max; }
 const qs = (req, k) => (req.query && req.query[k]) || new URL(req.url, 'http://x').searchParams.get(k);
 const ip = req => String(req.headers['x-forwarded-for'] || '').split(',')[0].trim().slice(0, 45) || 'x';
-module.exports = { parseCode, nameKey, normCls, redis, pipeline, h2o, normPhone, normName, classes, aidOf, DEFAULT_CLASSES, dbConf, body, send, deny, qs, hashPw, checkPw, userKey, same, newToken, cfg, cleanCfg, saveCfg, ip, TOKEN_TTL };
+module.exports = { parseCode, nameKey, normCls, redis, pipeline, h2o, normPhone, normName, classes, aidOf, DEFAULT_CLASSES, dbConf, body, send, deny, qs, hashPw, checkPw, userKey, same, newToken, cfg, cleanCfg, saveCfg, eff, limited, ip, TOKEN_TTL };

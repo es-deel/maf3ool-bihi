@@ -1,5 +1,5 @@
 'use strict';
-const { redis, pipeline, send, deny, body, classes, h2o } = require('./_lib');
+const { redis, pipeline, send, deny, body, classes, h2o, hashPw } = require('./_lib');
 const crypto = require('crypto');
 /* rename a class: every student moves with it, and the class list is updated */
 async function rename(b, res) {
@@ -45,6 +45,10 @@ module.exports = async (req, res) => {
       await pipeline([['HSET', 'mf:acc:' + aid, 'cls', to], ['HDEL', 'mf:cls:' + cls, aid], ['HDEL', 'mf:seen:' + cls, aid], ['HSET', 'mf:cls:' + to, aid, row || JSON.stringify({ n: name, p: phone, c: '', d: 0 })],
         ['HSET', 'mf:ph:' + phone, aid, JSON.stringify({ n: name, c: to })], ['HSET', 'mf:seen:' + to, aid, JSON.stringify({ t: Date.now() })]]);
       return send(res, 200, { ok: true });
+    }
+    if (b.op === 'setpw') {   // forgotten password: the teacher sets a new one (old devices must sign in again)
+      const pass = String(b.pass || ''); if (pass.length < 4 || pass.length > 40) return send(res, 400, { error: 'bad_pass' });
+      await redis(['HSET', 'mf:acc:' + aid, 'pw', hashPw(pass), 'sk', crypto.randomBytes(16).toString('hex')]); return send(res, 200, { ok: true });
     }
     if (b.op === 'share') {   // a private link to the student's report, for the parent (the teacher sends it on WhatsApp)
       let vt = await redis(['HGET', 'mf:acc:' + aid, 'vt']);

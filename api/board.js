@@ -9,7 +9,7 @@ module.exports = async (req, res) => {
     for (const cls of list) {
       const rows = h2o((await redis(['HGETALL', 'mf:cls:' + cls])) || []), seen = h2o((await redis(['HGETALL', 'mf:seen:' + cls])) || []);
       Object.keys(rows).forEach(aid => { let r = {}, s = {}; try { r = JSON.parse(rows[aid]); } catch (e) { } try { s = JSON.parse(seen[aid] || '{}'); } catch (e) { }
-        out.push({ aid, cls, name: r.n || '', phone: r.p || '', code: r.c || '', det: !!r.d, seen: s.t || 0, w: s.w || '' }); });
+        out.push({ aid, cls, name: r.n || '', phone: r.p || '', code: r.c || '', det: !!r.d, seen: s.t || 0, w: s.w || '', cv: s.cv || 0 }); });
     }
     return send(res, 200, { ok: true, classes: all, students: out, now: Date.now(), cfg: await cfg(true), user: req.teacher });
   } catch (e) { return send(res, e.code === 'no_db' ? 503 : 500, { error: e.code === 'no_db' ? 'no_db' : 'server' }); }

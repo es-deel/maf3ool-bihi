@@ -1,5 +1,5 @@
 'use strict';
-const { redis, send, deny, body, classes, cfg, cleanCfg, saveCfg } = require('./_lib');
+const { redis, send, deny, body, classes, cfg, cleanCfg, saveCfg, eff } = require('./_lib');
 /* GET (public): the class list the students choose from + the game settings.
    POST (teacher token): {classes:[...]} replaces the class list; {cfg:{...}} changes the game settings. */
 module.exports = async (req, res) => {
@@ -15,6 +15,6 @@ module.exports = async (req, res) => {
       if (b.cfg && typeof b.cfg === 'object') out.cfg = await saveCfg(cleanCfg(b.cfg, await cfg(true)));
       return send(res, 200, Object.assign({ ok: true }, out));
     }
-    return send(res, 200, { ok: true, classes: await classes(), cfg: await cfg() });
+    return send(res, 200, { ok: true, classes: await classes(), cfg: eff(await cfg(), null) });
   } catch (e) { return send(res, e.code === 'no_db' ? 503 : 500, { error: e.code === 'no_db' ? 'no_db' : 'server' }); }
 };
