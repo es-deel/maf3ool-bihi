@@ -4496,16 +4496,23 @@ Eng.ih.push(()=>Mine.dot());
 /* TEACHER DASHBOARD (Vercel build only): class analysis + a detailed report for every student, on screen and as PDF.
    Data: /api/board (every student's result code) and /api/report (the detailed snapshot a student's page sends along with the code). */
 const Dash={
- S:{rows:[],cl:null,sort:'pos',asc:true,q:'',view:'class',cur:null,cache:{}},
+ S:{rows:[],cl:null,sort:'pos',asc:true,q:'',view:'class',cur:null,cache:{},scope:'all',classes:[],skew:0},
  DAY:864e5,
  /* ---------- data ---------- */
- mkRow(it){const x=Code.parse(it.code);if(!x)return null;
+ now(){return Date.now()+(this.S.skew||0)},
+ scopeLabel(){return this.S.scope==='all'?'كل الفصول':this.S.scope},
+ /* one student of the board: with a result code, or just registered (nothing sent yet) */
+ mkRow(st){const x=st.code?Code.parse(st.code):null,base={k:st.aid,aid:st.aid,cls:st.cls,phone:st.phone,det:!!st.det,seen:st.seen||0,w:st.w||''};
+  if(!x){const T=TABS.filter(t=>t.id!=='report').length;
+   return Object.assign({},base,{name:st.name,empty:true,t:0,pts:0,max:Score.max(),stars:0,smax:Score.starsMax(),done:0,total:T,n:0,c:0,bd:0,dc:0,won:0,mins:0,inc:1,tp:[],bp:0,bs:0,code:'',spct:0,acc:0,rk:0,tps:TP_ORDER.map(k=>({k,n:0,c:0,a:0})),last:st.seen||0,weak:[]})}
   const tps=x.tp.map((t,i)=>({k:TP_ORDER[i],n:t[0],c:t[1],a:pc(t[1],t[0])}));
-  return Object.assign(x,{k:it.k,det:!!it.det,spct:pc(x.pts,x.max),acc:pc(x.c,x.n),rk:Rank.at(x.pts,x.max),tps,last:x.t*60000,
+  return Object.assign(x,base,{name:st.name||x.name,spct:pc(x.pts,x.max),acc:pc(x.c,x.n),rk:Rank.at(x.pts,x.max),tps,last:Math.max(x.t*60000,st.seen||0),
    weak:tps.filter(t=>t.n>=MINN&&t.a<65).sort((a,b)=>a.a-b.a)})},
  analyse(rows){
-  const N=rows.length,sum=f=>rows.reduce((s,r)=>s+f(r),0),avg=f=>N?Math.round(sum(f)/N):0,now=Date.now();
+  const all=rows,empties=all.filter(r=>r.empty);rows=all.filter(r=>!r.empty);
+  const N=rows.length,sum=f=>rows.reduce((s,r)=>s+f(r),0),avg=f=>N?Math.round(sum(f)/N):0,now=this.now();
   const by=rows.slice().sort((a,b)=>b.spct-a.spct||b.acc-a.acc||b.stars-a.stars||a.name.localeCompare(b.name,'ar'));by.forEach((r,i)=>r.pos=i+1);
+  empties.sort((a,b)=>a.name.localeCompare(b.name,'ar')).forEach((r,i)=>r.pos=N+i+1);
   const sp=by.map(r=>r.spct).sort((a,b)=>a-b),med=N?(N%2?sp[(N-1)/2]:Math.round((sp[N/2-1]+sp[N/2])/2)):0;
   const bands=[['ممتاز','٩٠٪ فأكثر',r=>r.spct>=90,'#16a34a'],['جيد جدًا','٧٥–٨٩٪',r=>r.spct>=75&&r.spct<90,'#65a30d'],['جيد','٦٠–٧٤٪',r=>r.spct>=60&&r.spct<75,'#f59e0b'],['يحتاج إلى دعم','أقل من ٦٠٪',r=>r.spct<60,'#dc2626']]
    .map(b=>({t:b[0],r:b[1],n:rows.filter(b[2]).length,c:b[3]}));
@@ -4513,22 +4520,25 @@ const Dash={
   const ranked=topics.filter(t=>t.st!=='na').sort((a,b)=>a.a-b.a);
   const ranks=RANKS.map((r,i)=>({n:r.n,ic:r.ic,k:rows.filter(x=>x.rk===i).length})).filter(x=>x.k);
   const mins=avg(r=>r.mins),support=by.filter(r=>r.n>=8&&(r.acc<65||r.spct<35)),
-   enrich=by.filter(r=>r.n>=8&&r.acc>=85&&r.spct>=75),fresh=by.filter(r=>r.n<3),
+   enrich=by.filter(r=>r.n>=8&&r.acc>=85&&r.spct>=75),fresh=by.filter(r=>r.n<3).concat(empties),
    idle=by.filter(r=>r.inc>0&&now-r.last>7*this.DAY&&r.n>=3),active=by.filter(r=>now-r.last<this.DAY),week=by.filter(r=>now-r.last<7*this.DAY),
    fin=by.filter(r=>r.inc===0),effort=by.filter(r=>r.mins>=Math.max(20,mins)&&r.n>=8&&r.acc<65),bonus=by.filter(r=>r.bp>0).sort((a,b)=>b.bp-a.bp);
-  const A={N,by,avg:avg(r=>r.spct),med,acc:avg(r=>r.acc),mins,planets:avg(r=>r.done),total:N?rows[0].total:0,stars:avg(r=>r.stars),smax:N?rows[0].smax:0,bands,topics,ranked,ranks,
+  const byClass=this.S.classes.map(c=>{const a=rows.filter(r=>r.cls===c),g=all.filter(r=>r.cls===c),av=f=>a.length?Math.round(a.reduce((s,r)=>s+f(r),0)/a.length):0;return{cls:c,N:a.length,regs:g.length,avg:av(r=>r.spct),acc:av(r=>r.acc),fin:a.filter(r=>r.inc===0).length}}).filter(c=>c.regs);
+  const A={N,regs:all.length,empties,byClass,by:by.concat(empties),act:by,avg:avg(r=>r.spct),med,acc:avg(r=>r.acc),mins,planets:avg(r=>r.done),total:N?rows[0].total:(all[0]?all[0].total:0),stars:avg(r=>r.stars),smax:N?rows[0].smax:0,bands,topics,ranked,ranks,
    weakest:ranked[0]&&ranked[0].a<80?ranked[0]:null,strongest:ranked.length?ranked[ranked.length-1]:null,support,enrich,fresh,idle,active,week,fin,effort,bonus,won:rows.filter(r=>r.won).length,
-   spread:N?sp[N-1]-sp[0]:0};
+   spread:N?sp[N-1]-sp[0]:0,live:all.filter(r=>r.seen&&now-r.seen<90000).sort((a,b)=>b.seen-a.seen)};
   A.insights=this.insights(A);return A},
  /* the written analysis of the whole class (third person, for the teacher) */
  insights(A){const L=[],nm=(a,k=6)=>a.slice(0,k).map(r=>r.name).join('، ')+(a.length>k?` و${AR(a.length-k)} آخرين`:'');
-  if(!A.N)return L;
+  if(!A.regs)return L;
+  if(!A.N){L.push({k:'warn',s:`سجّل ${NUM(A.regs,N_ST)} ولم يبدأ أحد الحل بعد.`});return L}
+  if(A.regs>A.N)L.push({k:'info',s:`المسجّلون ${AR(A.regs)}، وأرسل منهم نتائج ${AR(A.N)} فقط؛ البقية سجّلوا ولم يبدؤوا.`});
   const lv=A.avg>=75?'مرتفع':A.avg>=60?'جيد':'يحتاج إلى تعزيز';
   L.push({k:A.avg>=75?'good':A.avg>=60?'info':'warn',s:`مستوى الفصل ${lv}: متوسط الدرجة ${AR(A.avg)}٪ (الوسيط ${AR(A.med)}٪) ومتوسط دقة الإجابات ${AR(A.acc)}٪، من ${NUM(A.N,N_ST)} أرسلوا نتائجهم.`});
   if(A.strongest&&A.strongest.a>=80)L.push({k:'good',s:`أقوى موضوع في الفصل: «${A.strongest.name}» بدقة ${AR(A.strongest.a)}٪.`});
   if(A.weakest){const w=A.weakest;L.push({k:'warn',s:`أضعف موضوع: «${w.name}» بدقة ${AR(w.a)}٪${w.weak?`، ويقع ${NUM(w.weak,N_ST)} دون ٦٥٪ فيه`:''}. يُنصح بإعادة شرحه في الحصة القادمة (كوكب «${tabTitle(w.tab)}»).`})}
   const w2=A.ranked[1];if(w2&&w2!==A.weakest&&w2.a<75)L.push({k:'info',s:`موضوع «${w2.name}» يحتاج أيضًا إلى تثبيت (${AR(w2.a)}٪).`});
-  if(A.spread>=50&&A.N>=4)L.push({k:'info',s:`التفاوت بين الطلاب كبير (من ${AR(A.by[A.N-1].spct)}٪ إلى ${AR(A.by[0].spct)}٪)؛ يناسبه التدريس المتمايز بمجموعات: دعم وإثراء.`});
+  if(A.spread>=50&&A.N>=4)L.push({k:'info',s:`التفاوت بين الطلاب كبير (من ${AR(A.act[A.N-1].spct)}٪ إلى ${AR(A.act[0].spct)}٪)؛ يناسبه التدريس المتمايز بمجموعات: دعم وإثراء.`});
   if(A.support.length)L.push({k:'warn',s:`${NUM(A.support.length,N_ST)} قد يحتاجون دعمًا مباشرًا: ${nm(A.support)}.`});
   if(A.effort.length)L.push({k:'warn',s:`يبذلون وقتًا طويلًا لكن دقتهم منخفضة: ${nm(A.effort)}؛ يحتاجون شرحًا مباشرًا لا مجرد تكرار.`});
   if(A.enrich.length)L.push({k:'good',s:`متميّزون يمكن إسناد مهام إثرائية لهم أو جعلهم مساعدين لزملائهم: ${nm(A.enrich)}.`});
@@ -4538,7 +4548,7 @@ const Dash={
   if(A.bonus.length)L.push({k:'good',s:`أكثر المثابرين في البونص: ${A.bonus.slice(0,3).map(r=>`${r.name} (${AR(r.bp)})`).join('، ')}.`});
   if(A.won)L.push({k:'good',s:`${NUM(A.won,N_ST)} هزموا الروبوت الأكبر في المعركة الأخيرة.`});
   return L},
- actions(A){const L=[];if(!A.N)return L;
+ actions(A){const L=[];if(!A.regs)return L;
   if(A.weakest)L.push(`ابدأ الحصة القادمة بمراجعة «${A.weakest.name}» بأمثلة جديدة، ثم اختبر الفصل بأسئلة قصيرة من كوكب «${tabTitle(A.weakest.tab)}».`);
   if(A.support.length)L.push(`اجمع مجموعة دعم صغيرة (${NUM(A.support.length,N_ST)}) لجلسة قصيرة تركّز على أضعف موضوع لدى كل منهم.`);
   if(A.enrich.length)L.push('أسند إلى المتميّزين تحديات أصعب (الألعاب على المستوى المتقدّم) أو دور «المساعد» في المجموعات.');
@@ -4605,10 +4615,10 @@ const Dash={
  list(title,sub,items,cls){const B=[];items.forEach((h,i)=>B.push(i?h:`<div class="pp-first">${PH(title,sub)}${h}</div>`));return B},
  heat(a){const c=a>=80?'#bbf7d0':a>=65?'#fde68a':'#fecaca';return c},
  studentBlocks(r,R,cl,nt){const B=[],pos=cl?`${AR(r.pos)} من ${AR(cl.N)}`:'—',today=dateAr();
-  B.push(`<div class="pp-id"><div class="pp-cell"><small>اسم الطالب</small><b>${esc(r.name)}</b></div><div class="pp-cell"><small>الفصل</small><b>${esc(this.S.cls||'')}</b></div><div class="pp-cell"><small>تاريخ التقرير</small><b>${today}</b></div></div>`);
+  B.push(`<div class="pp-id"><div class="pp-cell"><small>اسم الطالب</small><b>${esc(r.name)}</b></div><div class="pp-cell"><small>الفصل</small><b>${esc(r.cls||'')}</b></div><div class="pp-cell"><small>تاريخ التقرير</small><b>${today}</b></div></div>`);
   B.push(`<div class="pp-rate" style="border-color:${R.rate.c}"><img class="pp-ic" src="${IMG[R.rate.ic]}" alt=""><div class="pp-rt"><h2>${R.rate.t}</h2><span class="pp-g" style="background:${R.rate.c}">${R.rate.g}</span><p>الرتبة الفضائية: ${esc(R.rank)} · ترتيبه في الفصل: ${pos}</p></div><div class="pp-pct" style="border-color:${R.n?(R.spct>=75?'#16a34a':R.spct>=50?'#f59e0b':'#dc2626'):'#cbd5e1'}"><b>${R.n?AR(R.spct)+'٪':'—'}</b><small>التقييم العام</small></div></div>`);
   B.push(`<div class="pp-tiles"><div class="pp-tile"><b>${fa(R.pts,R.max)}</b><span>الدرجة</span></div><div class="pp-tile"><b>${fa(R.stars,R.smax)}</b><span>النجوم</span></div><div class="pp-tile"><b>${R.n?AR(R.acc)+'٪':'—'}</b><span>دقة الإجابات${R.n?` (${fa(R.c,R.n)})`:''}</span></div><div class="pp-tile"><b>${fa(R.done,R.total)}</b><span>الكواكب المنجزة</span></div></div>`);
-  B.push(`<div class="pp-pls">${R.parts.length?`<b>تفصيل الدرجة:</b> ${partsTxt(R)}<br>`:''}<b>آخر نشاط:</b> ${ago(r.last)} · <b>مدة التعلّم:</b> ${fmtTime(R.mins*60)}${R.qa!=null?` · <b>أسئلة الدروس المحلولة:</b> ${fa(R.qa,R.qt)}`:''}</div>`);
+  B.push(`<div class="pp-pls">${R.parts.length?`<b>تفصيل الدرجة:</b> ${partsTxt(R)}<br>`:''}${r.phone?`<b>هاتف:</b> <bdi dir="ltr">${esc(r.phone)}</bdi> · `:''}<b>آخر نشاط:</b> ${ago(r.last)} · <b>مدة التعلّم:</b> ${fmtTime(R.mins*60)}${R.qa!=null?` · <b>أسئلة الدروس المحلولة:</b> ${fa(R.qa,R.qt)}`:''}</div>`);
   if(cl&&cl.N>=2)B.push(`<div class="pp-item"><span class="q">مقارنة بالفصل (${NUM(cl.N,N_ST)})</span><span class="e">درجته ${AR(r.spct)}٪ مقابل متوسط الفصل ${AR(cl.avg)}٪ (الوسيط ${AR(cl.med)}٪) · دقته ${AR(r.acc)}٪ مقابل ${AR(cl.acc)}٪ · الكواكب ${AR(r.done)} مقابل متوسط ${AR(cl.planets)}.</span></div>`);
   if(R.bp>0)B.push(`<div class="pp-bonus"><div class="pp-bn-h"><b>التقييم الإضافي (بونص)</b><span>منفصل عن الدرجة والنجوم الأساسية</span></div><div class="pp-bn-v"><b>${NUM(R.bp,N_BPT)}</b>${R.bs?` · <b>${NUM(R.bs,N_BSTAR)}</b>`:''}</div>${R.hasDetail?`<small>من سلسلة الإجابات الصحيحة: ${AR(R.bc)} · من تكرار الحل: ${AR(R.br)}</small>`:''}</div>`);
   if(R.bd.length)B.push(`<div class="pp-pls"><b>الأوسمة (${AR(R.bd.length)}):</b> ${R.bd.map(esc).join('، ')}</div>`);
@@ -4625,12 +4635,13 @@ const Dash={
   B.push(`<div>${PH('توصيات للمعلم')}<ol class="pp-plan">${nt.A.map((p,i)=>`<li><span>${AR(i+1)}</span>${esc(p)}</li>`).join('')}</ol></div>`);
   B.push(`<div class="pp-note">${PH('ملاحظات المعلم')}<div class="pp-line"></div><div class="pp-line"></div><div class="pp-line"></div><div class="pp-sign"><span>توقيع المعلم: ....................</span><span>التاريخ: ....................</span></div></div>`);
   return B},
- studentPages(r,R,cl,nt){return this.flow(this.studentBlocks(r,R,cl,nt),{title:'تقرير أداء الطالب',sub:`مغامرة المفعول به · اللغة العربية · الصف الخامس الابتدائي · الفصل: ${esc(this.S.cls||'')} · الأستاذ إسلام قنديل`,mini:'تقرير أداء الطالب: '+esc(r.name),foot:'مغامرة المفعول به · '+r.name})},
- classBlocks(A){const B=[],cls=this.S.cls||'';
-  B.push(`<div class="pp-id"><div class="pp-cell"><small>الفصل</small><b>${esc(cls)}</b></div><div class="pp-cell"><small>عدد الطلاب</small><b>${AR(A.N)}</b></div><div class="pp-cell"><small>تاريخ التقرير</small><b>${dateAr()}</b></div></div>`);
+ studentPages(r,R,cl,nt){return this.flow(this.studentBlocks(r,R,cl,nt),{title:'تقرير أداء الطالب',sub:`مغامرة المفعول به · اللغة العربية · الصف الخامس الابتدائي · الفصل: ${esc(r.cls||'')} · الأستاذ إسلام قنديل`,mini:'تقرير أداء الطالب: '+esc(r.name),foot:'مغامرة المفعول به · '+r.name})},
+ classBlocks(A){const B=[],cls=this.scopeLabel();
+  B.push(`<div class="pp-id"><div class="pp-cell"><small>الفصل</small><b>${esc(cls)}</b></div><div class="pp-cell"><small>عدد الطلاب (أرسلوا / مسجّلون)</small><b>${AR(A.N)} / ${AR(A.regs)}</b></div><div class="pp-cell"><small>تاريخ التقرير</small><b>${dateAr()}</b></div></div>`);
   B.push(`<div class="pp-tiles"><div class="pp-tile"><b>${AR(A.avg)}٪</b><span>متوسط الدرجة (الوسيط ${AR(A.med)}٪)</span></div><div class="pp-tile"><b>${AR(A.acc)}٪</b><span>متوسط دقة الإجابات</span></div><div class="pp-tile"><b>${AR(A.fin.length)} / ${AR(A.N)}</b><span>أنهوا كل الأجزاء</span></div><div class="pp-tile"><b>${AR(A.week.length)} / ${AR(A.N)}</b><span>نشطون آخر ٧ أيام</span></div></div>`);
   B.push(`<div>${PH('توزيع مستويات الطلاب','حسب الدرجة من المجموع الكلي')}${A.bands.map(b=>this.bar(b.t+' · '+b.r,A.N?pc(b.n,A.N):0,`${AR(b.n)} ${b.n===1?'طالب':'طلاب'}`,b.c)).join('')}</div>`);
   B.push(`<div>${PH('الأداء حسب موضوعات الدرس','دقة الفصل كله وعدد من هم دون ٦٥٪')}${A.topics.map(t=>this.bar(t.name,t.n?t.a:0,t.n?`${AR(t.a)}٪${t.weak?` <span class="ph-c">${AR(t.weak)} دون ٦٥٪</span>`:''}<span class="pp-chip" style="background:${ST_CH[t.st]}">${ST_TXT[t.st]}</span>`:'—',ST_PP[t.st])).join('')}</div>`);
+  if(A.byClass.length>1)B.push(`<div>${PH('مقارنة بين الفصول','متوسط الدرجة')}${A.byClass.map(c=>this.bar(c.cls,c.avg,`${AR(c.avg)}٪ <span class="ph-c">${AR(c.N)} من ${AR(c.regs)}</span>`,'#6d4aff')).join('')}</div>`);
   this.list('تحليل شامل لنتائج الفصل','',A.insights.map(x=>`<div class="pp-item ${x.k==='good'?'good':x.k==='warn'?'weak':''}">${esc(x.s)}</div>`)).forEach(h=>B.push(h));
   B.push(`<div>${PH('توصيات للحصة القادمة')}<ol class="pp-plan">${this.actions(A).map((p,i)=>`<li><span>${AR(i+1)}</span>${esc(p)}</li>`).join('')}</ol></div>`);
   const grp=(t,a,c)=>a.length?`<div class="pp-item ${c}"><span class="q">${t} (${AR(a.length)})</span><span class="e">${a.map(r=>esc(r.name)).join('، ')}</span></div>`:'';
@@ -4640,10 +4651,10 @@ const Dash={
   B.push(`<div class="pp-first">${PH('مفتاح الموضوعات')}<div class="ph-key">${A.topics.map((t,i)=>`<span><b>${AR(i+1)}</b> ${esc(t.name)}</span>`).join('')}</div></div>`);
   const cell=t=>`<td style="background:${t.n>=MINN?this.heat(t.a):'#f1f5f9'}">${t.n>=MINN?AR(t.a):'—'}</td>`;
   for(let i=0;i<A.by.length;i+=13){const ch=A.by.slice(i,i+13);
-   B.push(`<div class="${i?'':'pp-first'}">${i?'':PH('جدول الطلاب وخريطة المواضيع','دقة كل موضوع ٪ (أخضر ٨٠+ · أصفر ٦٥+ · أحمر دون ذلك)')}<table class="ph-t"><tr><th>#</th><th>الطالب</th><th>الدرجة</th><th>٪</th><th>الدقة</th><th>كواكب</th>${A.topics.map((t,k)=>`<th>${AR(k+1)}</th>`).join('')}</tr>${ch.map(r=>`<tr><td>${AR(r.pos)}</td><td class="nm">${esc(r.name)}</td><td>${AR(r.pts)}</td><td>${AR(r.spct)}</td><td>${r.n?AR(r.acc)+'٪':'—'}</td><td>${AR(r.done)}/${AR(r.total)}</td>${r.tps.map(cell).join('')}</tr>`).join('')}</table></div>`)}
+   B.push(`<div class="${i?'':'pp-first'}">${i?'':PH('جدول الطلاب وخريطة المواضيع','دقة كل موضوع ٪ (أخضر ٨٠+ · أصفر ٦٥+ · أحمر دون ذلك)')}<table class="ph-t"><tr><th>#</th><th>الطالب</th><th>الدرجة</th><th>٪</th><th>الدقة</th><th>كواكب</th>${A.topics.map((t,k)=>`<th>${AR(k+1)}</th>`).join('')}</tr>${ch.map(r=>`<tr><td>${r.empty?'—':AR(r.pos)}</td><td class="nm">${esc(r.name)}${A.byClass.length>1?` <small>${esc(r.cls)}</small>`:''}</td><td>${AR(r.pts)}</td><td>${AR(r.spct)}</td><td>${r.n?AR(r.acc)+'٪':'—'}</td><td>${AR(r.done)}/${AR(r.total)}</td>${r.tps.map(cell).join('')}</tr>`).join('')}</table></div>`)}
   B.push(`<div class="pp-note">${PH('ملاحظات المعلم')}<div class="pp-line"></div><div class="pp-line"></div><div class="pp-sign"><span>توقيع المعلم: ....................</span><span>التاريخ: ....................</span></div></div>`);
   return B},
- classPages(A){return this.flow(this.classBlocks(A),{title:'تقرير تحليل نتائج الفصل',sub:`مغامرة المفعول به · اللغة العربية · الصف الخامس الابتدائي · الفصل: ${esc(this.S.cls||'')} · الأستاذ إسلام قنديل`,mini:'تحليل نتائج الفصل: '+esc(this.S.cls||''),foot:'مغامرة المفعول به · الفصل '+(this.S.cls||'')})},
+ classPages(A){return this.flow(this.classBlocks(A),{title:'تقرير تحليل نتائج الفصل',sub:`مغامرة المفعول به · اللغة العربية · الصف الخامس الابتدائي · الفصل: ${esc(this.scopeLabel())} · الأستاذ إسلام قنديل`,mini:'تحليل نتائج الفصل: '+esc(this.scopeLabel()),foot:'مغامرة المفعول به · '+this.scopeLabel()})},
  /* ---------- PDF / print ---------- */
  async pdf(build,title,file,btn,msg){const set=t=>{if(msg)msg.textContent=t};if(btn)btn.disabled=true;set('جارٍ تجهيز الملف… لحظات من فضلك.');
   try{const imgs=await capturePages(null,(i,n)=>set(`جارٍ تجهيز الصفحة ${AR(i)} من ${AR(n)}…`),build),blob=pdfBlob(imgs,title),r=await saveFile(blob,file);
@@ -4653,88 +4664,119 @@ const Dash={
  async print(build,msg){try{try{await document.fonts.ready}catch(e){}build();document.body.classList.add('printing');
   const end=()=>{document.body.classList.remove('printing');window.removeEventListener('afterprint',end)};window.addEventListener('afterprint',end);setTimeout(end,60000);setTimeout(()=>{try{window.print()}catch(e){end()}},150)}catch(e){if(msg)msg.textContent='تعذّرت الطباعة.'}},
  fn(t){return t.replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,40)},
- csv(A){const q=v=>'"'+String(v).replace(/"/g,'""')+'"',H=['#','الطالب','الدرجة','الدرجة العظمى','النسبة ٪','النجوم','الدقة ٪','الإجابات','الصحيحة','الكواكب المنجزة','الأجزاء الناقصة','بونص','دقائق التعلّم','الرتبة','آخر نشاط'];
+ csv(A){const q=v=>'"'+String(v).replace(/"/g,'""')+'"',H=['#','الطالب','الفصل','الهاتف','الدرجة','الدرجة العظمى','النسبة ٪','النجوم','الدقة ٪','الإجابات','الصحيحة','الكواكب المنجزة','الأجزاء الناقصة','بونص','دقائق التعلّم','الرتبة','آخر نشاط'];
   TP_ORDER.forEach(k=>H.push(TOPIC[k].n+' (٪)'));
-  const L=[H.map(q).join(',')];A.by.forEach(r=>L.push([r.pos,r.name,r.pts,r.max,r.spct,r.stars,r.acc,r.n,r.c,r.done,r.inc,r.bp,r.mins,RANKS[r.rk].n,new Date(r.last).toISOString().slice(0,16).replace('T',' ')].concat(r.tps.map(t=>t.n>=MINN?t.a:'')).map(q).join(',')));
+  const L=[H.map(q).join(',')];A.by.forEach(r=>L.push([r.empty?'':r.pos,r.name,r.cls,r.phone,r.pts,r.max,r.spct,r.stars,r.acc,r.n,r.c,r.done,r.inc,r.bp,r.mins,RANKS[r.rk].n,new Date(r.last).toISOString().slice(0,16).replace('T',' ')].concat(r.tps.map(t=>t.n>=MINN?t.a:'')).map(q).join(',')));
   return new Blob(['﻿'+L.join('\r\n')],{type:'text/csv;charset=utf-8'})},
  /* ---------- loading ---------- */
  async load(){const S=this.S;
-  const r=await fetch('/api/board?cls='+encodeURIComponent(S.cls),{headers:{'x-key':S.key}}),j=await r.json().catch(()=>({}));
-  if(!r.ok||!j.ok)return{ok:false,error:j.error||'server'};
-  const items=j.items||(j.codes||[]).map(c=>({k:c,code:c,det:false}));
-  S.rows=items.map(it=>this.mkRow(it)).filter(Boolean);S.cl=this.analyse(S.rows);S.cache={};S.at=Date.now();
-  try{Board.ingest(S.rows.map(r=>r.code).join('\n'))}catch(e){}
+  const j=await Online.api('board?cls='+encodeURIComponent(S.scope),undefined,S.key);
+  if(!j.ok)return{ok:false,error:j.error||'server'};
+  S.classes=j.classes||[];S.skew=(j.now||Date.now())-Date.now();
+  S.rows=(j.students||[]).map(s=>this.mkRow(s)).filter(Boolean);S.cl=this.analyse(S.rows);S.cache={};S.at=Date.now();
   return{ok:true}},
  async detail(r){const S=this.S;if(!r.det)return null;if(S.cache[r.k]!==undefined)return S.cache[r.k];
-  try{const x=await fetch('/api/report?cls='+encodeURIComponent(S.cls)+'&k='+encodeURIComponent(r.k),{headers:{'x-key':S.key}}),j=await x.json().catch(()=>({}));S.cache[r.k]=x.ok&&j.ok?j.detail:null}catch(e){S.cache[r.k]=null}
-  return S.cache[r.k]},
+  const j=await Online.api('report?aid='+encodeURIComponent(r.k),undefined,S.key);S.cache[r.k]=j.ok?j.detail:null;return S.cache[r.k]},
  /* ---------- screen ---------- */
  inject(){if($('#dashCss'))return;const s=document.createElement('style');s.id='dashCss';s.textContent=this.CSS;document.head.appendChild(s)},
  root(){let d=$('#dash');if(!d){d=document.createElement('div');d.id='dash';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label','لوحة المعلم');document.body.appendChild(d);
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!d.hidden){if(this.S.view==='student')this.show('class');else this.close()}})}return d},
- close(){const d=$('#dash');if(d){d.hidden=true;d.innerHTML=''}document.body.classList.remove('dash-on')},
- async open(cls,key,pre){this.inject();const S=this.S;S.cls=cls;S.key=key;const d=this.root();d.hidden=false;document.body.classList.add('dash-on');S.q='';S.sort='pos';S.asc=true;
-  let r={ok:true};if(!pre){d.innerHTML=`<div class="dh-wait">${em('rocket','xl')}<p>جارٍ تحميل نتائج الفصل…</p></div>`;r=await this.load()}
-  if(!r.ok){d.innerHTML=`<div class="dh-wait"><p>${esc(Online.why[r.error]||Online.why.server)}</p><button class="btn ghost" type="button" id="dhX">إغلاق</button></div>`;$('#dhX',d).onclick=()=>this.close();return r}
-  this.show('class');return r},
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!d.hidden){if($('.dh-modal',d))this.modal();else if(this.S.view==='student')this.show('class');else this.close()}})}return d},
+ close(){clearInterval(this.ti);const d=$('#dash');if(d){d.hidden=true;d.innerHTML=''}document.body.classList.remove('dash-on')},
+ /* key: the teacher key. quiet: do not draw an error screen (the caller asks for the key again) */
+ async open(key,quiet){this.inject();const S=this.S;S.key=key;S.q='';S.sort='pos';S.asc=true;
+  const r=await this.load();if(!r.ok)return r;
+  const d=this.root();d.hidden=false;document.body.classList.add('dash-on');this.show('class');
+  clearInterval(this.ti);this.ti=setInterval(()=>this.tick(),20000);return r},
+ /* every 20 s: new data (who is writing now, new results); the class page is redrawn unless the teacher is typing */
+ async tick(){const d=$('#dash');if(!d||d.hidden||document.visibilityState!=='visible'){return}
+  const r=await this.load();if(!r.ok||this.S.view!=='class'||$('.dh-modal',d))return;
+  const a=document.activeElement;if(a&&/INPUT|SELECT|TEXTAREA/.test(a.tagName))return;
+  const y=d.scrollTop;this.classView(d);d.scrollTop=y},
  show(v,k){const S=this.S;S.view=v;if(v==='student'&&k!=null)S.cur=k;const d=this.root();d.scrollTop=0;if(v==='class')this.classView(d);else this.studentView(d)},
- sorted(){const S=this.S,A=S.cl,q=Board.key(S.q||'');let a=A.by.filter(r=>!q||Board.key(r.name).includes(q));
-  const f={pos:r=>r.pos,name:r=>r.name,pts:r=>-r.pts,acc:r=>-(r.n?r.acc:-1),done:r=>-r.done,last:r=>-r.last,inc:r=>r.inc}[S.sort]||(r=>r.pos);
+ sorted(){const S=this.S,A=S.cl,q=Board.key(S.q||'');let a=A.by.filter(r=>!q||Board.key(r.name).includes(q)||(r.phone||'').includes(q));
+  const f={pos:r=>r.pos,name:r=>r.name,pts:r=>-r.pts,acc:r=>-(r.n?r.acc:-1),done:r=>-r.done,last:r=>-r.last,inc:r=>r.inc,cls:r=>r.cls}[S.sort]||(r=>r.pos);
   a=a.slice().sort((x,y)=>{const p=f(x),q2=f(y);const c=typeof p==='string'?p.localeCompare(q2,'ar'):p-q2;return(S.asc?c:-c)||x.pos-y.pos});return a},
- classView(d){const S=this.S,A=S.cl,self=this;
-  if(!A.N){d.innerHTML=`<div class="dh-top"><b>لوحة المعلم · الفصل «${esc(S.cls)}»</b><span><button class="btn ghost sm" id="dhR" type="button">تحديث</button><button class="btn ghost sm" id="dhX" type="button">إغلاق</button></span></div><div class="dh-wait"><p>لا توجد نتائج مرسلة لهذا الفصل بعد. أرسل «رابط الفصل» لطلابك.</p></div>`;
-   $('#dhX',d).onclick=()=>this.close();$('#dhR',d).onclick=()=>this.open(S.cls,S.key);return}
+ waLink(phone,text){let p=String(phone||'').replace(/\D/g,'');if(/^0[0-9]{10}$/.test(p))p='20'+p.slice(1);return'https://wa.me/'+p+(text?'?text='+encodeURIComponent(text):'')},
+ /* a small window inside the dashboard (manage classes) */
+ modal(html,setup){const d=$('#dash'),o=$('.dh-modal',d);if(o)o.remove();if(!html)return;
+  const m=document.createElement('div');m.className='dh-modal';m.innerHTML=`<div class="dh-md" role="dialog" aria-modal="true">${html}</div>`;d.appendChild(m);m.onclick=e=>{if(e.target===m)this.modal()};if(setup)setup(m)},
+ classView(d){const S=this.S,A=S.cl;
+  const scopeSel=`<label class="sr" for="dhSc">اختر الفصل</label><select id="dhSc" class="inp dh-sel"><option value="all"${S.scope==='all'?' selected':''}>كل الفصول</option>${S.classes.map(c=>`<option value="${esc(c)}"${S.scope===c?' selected':''}>${esc(c)}</option>`).join('')}</select>`;
+  const top=`<div class="dh-top"><b>${em('man_teacher')} لوحة المعلم</b><span>${scopeSel}<button class="btn ghost sm" id="dhR" type="button">تحديث</button><button class="btn ghost sm" id="dhM2" type="button">إدارة الفصول</button><button class="btn ghost sm" id="dhX" type="button">إغلاق</button></span></div>`;
+  const bind=()=>{$('#dhX',d).onclick=()=>this.close();
+   $('#dhR',d).onclick=async()=>{const r=await this.load();if(r.ok)this.classView(d)};
+   $('#dhSc',d).onchange=async e=>{S.scope=e.target.value;S.q='';const r=await this.load();if(r.ok)this.classView(d)};
+   $('#dhM2',d).onclick=()=>this.manage()};
+  if(!A.regs){d.innerHTML=top+`<div class="dh-wrap"><div class="dh-wait"><p>لا يوجد طلاب مسجّلون ${S.scope==='all'?'بعد':'في هذا الفصل بعد'}. أعطِ طلابك رابط الدرس؛ يسجّل كل طالب اسمه وفصله ورقم هاتفه.</p></div></div>`;bind();return}
   const tile=(v,l,c)=>`<div class="dh-tile"${c?` style="--tc:${c}"`:''}><b>${v}</b><small>${l}</small></div>`;
   const bar=(l,pct,txt,col)=>`<div class="dh-bar"><span>${l}</span><i><u style="width:${Math.max(pct,pct>0?3:0)}%;background:${col}"></u></i><em>${txt}</em></div>`;
-  const rows=this.sorted(),th=(k,t)=>`<th><button type="button" data-s="${k}" class="${S.sort===k?'on':''}">${t}${S.sort===k?(S.asc?' ▲':' ▼'):''}</button></th>`;
+  const rows=this.sorted(),th=(k,t)=>`<th><button type="button" data-s="${k}" class="${S.sort===k?'on':''}">${t}${S.sort===k?(S.asc?' ▲':' ▼'):''}</button></th>`,multi=S.scope==='all';
   const chips=(a,c)=>a.map(r=>`<button type="button" class="dh-chip ${c}" data-o="${esc(r.k)}">${esc(r.name)}</button>`).join('');
-  d.innerHTML=`<div class="dh-top"><b>${em('man_teacher')} لوحة المعلم · الفصل «${esc(S.cls)}»</b><span><button class="btn ghost sm" id="dhR" type="button">تحديث</button><button class="btn ghost sm" id="dhX" type="button">إغلاق</button></span></div>
-  <div class="dh-wrap">
-   <p class="dh-sub">آخر تحديث ${ago(S.at)} · ${NUM(A.N,N_ST)} في الفصل. اضغط اسم أي طالب لترى تقريره المفصّل وتحمّله PDF.</p>
-   <div class="dh-act"><button class="btn gold sm" id="dhP" type="button">${em('closed_book')} تحميل تقرير الفصل PDF</button><button class="btn sky sm" id="dhPr" type="button">${em('pencil')} اطبع تقرير الفصل</button><button class="btn ghost sm" id="dhC" type="button">جدول Excel (CSV)</button><button class="btn ghost sm" id="dhT" type="button">انسخ ترتيب الفصل</button><button class="btn ghost sm" id="dhB" type="button">${em('crown')} لوحة الشرف</button></div>
-   <p class="dh-msg" id="dhM" role="status"></p>
-   <div class="dh-tiles">${tile(AR(A.avg)+'٪','متوسط الدرجة · الوسيط '+AR(A.med)+'٪','#a78bfa')}${tile(AR(A.acc)+'٪','متوسط دقة الإجابات','#38bdf8')}${tile(AR(A.fin.length)+'/'+AR(A.N),'أنهوا كل الأجزاء','#4ade80')}${tile(AR(A.week.length)+'/'+AR(A.N),'نشطون آخر ٧ أيام','#fbbf24')}${tile(AR(A.planets)+'/'+AR(A.total),'متوسط الكواكب المنجزة','#f472b6')}${tile(fmtTime(A.mins*60),'متوسط وقت التعلّم','#fb923c')}</div>
-   <section class="dh-card"><h3>${em('light_bulb')} تحليل شامل لنتائج الفصل</h3><ul class="dh-ins">${A.insights.map(x=>`<li class="${x.k}">${esc(x.s)}</li>`).join('')}</ul>
+  const now=this.now(),live=A.live,
+   liveH=`<section class="dh-card dh-live" id="dhLive"><h3><i class="dh-dot${live.length?' on':''}"></i> يعملون الآن${live.length?` (${AR(live.length)})`:''}</h3>${live.length?`<div class="dh-chips">${live.map(r=>`<button type="button" class="dh-chip g" data-o="${esc(r.k)}">${esc(r.name)}${multi?` <small>${esc(r.cls)}</small>`:''}${r.w?` <small>· ${esc(r.w)}</small>`:''}</button>`).join('')}</div>`:'<p class="dh-sub">لا أحد متصل في هذه اللحظة. تتحدّث القائمة تلقائيًا كل ٢٠ ثانية.</p>'}</section>`;
+  const body=!A.N?`${liveH}<section class="dh-card"><h3>${em('thinking_face')} لم يبدأ أحد الحل بعد</h3><div class="dh-chips">${chips(A.empties,'o')}</div></section>`:`
+   ${liveH}
+   <div class="dh-tiles">${tile(AR(A.avg)+'٪','متوسط الدرجة · الوسيط '+AR(A.med)+'٪','#a78bfa')}${tile(AR(A.acc)+'٪','متوسط دقة الإجابات','#38bdf8')}${tile(AR(A.fin.length)+'/'+AR(A.regs),'أنهوا كل الأجزاء','#4ade80')}${tile(AR(A.week.length)+'/'+AR(A.regs),'نشطون آخر ٧ أيام','#fbbf24')}${tile(AR(A.planets)+'/'+AR(A.total),'متوسط الكواكب المنجزة','#f472b6')}${tile(fmtTime(A.mins*60),'متوسط وقت التعلّم','#fb923c')}</div>
+   <section class="dh-card"><h3>${em('light_bulb')} تحليل شامل لنتائج ${multi?'الفصول':'الفصل'}</h3><ul class="dh-ins">${A.insights.map(x=>`<li class="${x.k}">${esc(x.s)}</li>`).join('')}</ul>
     <h4>توصيات للحصة القادمة</h4><ol class="dh-rec">${this.actions(A).map(s=>`<li>${esc(s)}</li>`).join('')}</ol></section>
+   ${A.byClass.length>1?`<section class="dh-card"><h3>مقارنة بين الفصول</h3>${A.byClass.map(c=>bar(esc(c.cls),c.avg,`${AR(c.avg)}٪ <small>· ${AR(c.N)}/${AR(c.regs)}</small>`,'#a78bfa')).join('')}</section>`:''}
    <div class="dh-two"><section class="dh-card"><h3>توزيع المستويات</h3>${A.bands.map(b=>bar(`${b.t} <small>${b.r}</small>`,pc(b.n,A.N),AR(b.n),b.c)).join('')}
      <h4>الرتب الفضائية</h4><div class="dh-rk">${A.ranks.map(r=>`<span>${em(r.ic)} ${r.n} <b>${AR(r.k)}</b></span>`).join('')}</div></section>
     <section class="dh-card"><h3>الأداء حسب الموضوعات</h3>${A.topics.map(t=>bar(esc(t.name),t.n?t.a:0,t.n?`${AR(t.a)}٪${t.weak?` <small>· ${AR(t.weak)} دون ٦٥٪</small>`:''}`:'—',ST_UI[t.st])).join('')}</section></div>
    <section class="dh-card"><h3>خريطة الموضوعات لكل طالب</h3><p class="dh-sub">كل خانة = دقة الطالب في الموضوع (أخضر ٨٠٪+، أصفر ٦٥٪+، أحمر أقل). الرقم يشير إلى الموضوع.</p>
     <div class="dh-key">${A.topics.map((t,i)=>`<span><b>${AR(i+1)}</b> ${esc(t.name)}</span>`).join('')}</div>
-    <div class="dh-sc"><table class="dh-heat"><tr><th>الطالب</th>${A.topics.map((t,i)=>`<th>${AR(i+1)}</th>`).join('')}</tr>${A.by.map(r=>`<tr><td><button type="button" data-o="${esc(r.k)}">${esc(r.name)}</button></td>${r.tps.map(t=>`<td style="--h:${t.n>=MINN?this.heat(t.a):'#475569'}" class="${t.n>=MINN?'h':'x'}">${t.n>=MINN?AR(t.a):'—'}</td>`).join('')}</tr>`).join('')}</table></div></section>
+    <div class="dh-sc"><table class="dh-heat"><tr><th>الطالب</th>${A.topics.map((t,i)=>`<th>${AR(i+1)}</th>`).join('')}</tr>${A.act.map(r=>`<tr><td><button type="button" data-o="${esc(r.k)}">${esc(r.name)}</button></td>${r.tps.map(t=>`<td style="--h:${t.n>=MINN?this.heat(t.a):'#475569'}" class="${t.n>=MINN?'h':'x'}">${t.n>=MINN?AR(t.a):'—'}</td>`).join('')}</tr>`).join('')}</table></div></section>
    <div class="dh-two">${A.support.length?`<section class="dh-card"><h3>${em('bullseye')} قد يحتاجون دعمًا</h3><div class="dh-chips">${chips(A.support,'w')}</div></section>`:''}
     ${A.enrich.length?`<section class="dh-card"><h3>${em('trophy')} متميّزون للإثراء</h3><div class="dh-chips">${chips(A.enrich,'g')}</div></section>`:''}
-    ${A.idle.length||A.fresh.length?`<section class="dh-card"><h3>${em('thinking_face')} للمتابعة</h3><div class="dh-chips">${chips(A.idle,'o')}${chips(A.fresh,'o')}</div></section>`:''}</div>
-   <section class="dh-card"><h3>الطلاب</h3><label class="sr" for="dhQ">بحث باسم الطالب</label><input id="dhQ" class="bk-ta dh-q" placeholder="ابحث باسم الطالب" value="${esc(S.q)}" autocomplete="off">
-    <div class="dh-sc"><table class="dh-tab"><tr>${th('pos','#')}${th('name','الطالب')}${th('pts','الدرجة')}${th('acc','الدقة')}${th('done','الكواكب')}${th('inc','ناقص')}${th('last','آخر نشاط')}<th></th></tr>
-    ${rows.map(r=>`<tr><td>${AR(r.pos)}</td><td><button type="button" class="nm" data-o="${esc(r.k)}">${esc(r.name)}</button><small>${em(RANKS[r.rk].ic)} ${RANKS[r.rk].n}${r.det?'':' · بلا تفاصيل'}</small></td>
-     <td><b>${AR(r.pts)}</b> <small>(${AR(r.spct)}٪)</small><i class="dh-mini"><u style="width:${Math.max(3,r.spct)}%"></u></i></td><td>${r.n?AR(r.acc)+'٪':'—'}</td><td>${AR(r.done)}/${AR(r.total)}</td><td>${r.inc?AR(r.inc):'✓'}</td><td>${ago(r.last)}</td>
-     <td><button type="button" class="btn sky sm" data-o="${esc(r.k)}">التقرير ←</button></td></tr>`).join('')||'<tr><td colspan="8">لا نتائج مطابقة.</td></tr>'}</table></div></section>
-   <p class="dh-sub">النتائج تأتي من «رمز النتيجة» الذي يولّده الدرس نفسه، وتُرسَل تلقائيًا من أجهزة الطلاب. الغرض المتابعة والتشجيع لا الاختبارات الرسمية.</p>
+    ${A.idle.length||A.fresh.length?`<section class="dh-card"><h3>${em('thinking_face')} للمتابعة</h3><div class="dh-chips">${chips(A.idle,'o')}${chips(A.fresh.filter(r=>!A.idle.includes(r)),'o')}</div></section>`:''}</div>`;
+  d.innerHTML=top+`<div class="dh-wrap">
+   <p class="dh-sub">${NUM(A.regs,N_ST)} مسجّلون${A.regs>A.N?`، أرسل ${AR(A.N)} منهم نتائج`:''} · آخر تحديث ${ago(S.at)}. اضغط اسم أي طالب لترى تقريره المفصّل وتحمّله PDF.</p>
+   <div class="dh-act"><button class="btn gold sm" id="dhP" type="button">${em('closed_book')} تحميل تقرير ${multi?'الفصول':'الفصل'} PDF</button><button class="btn sky sm" id="dhPr" type="button">${em('pencil')} اطبع التقرير</button><button class="btn ghost sm" id="dhC" type="button">جدول Excel (CSV)</button><button class="btn ghost sm" id="dhT" type="button">انسخ ترتيب الفصل</button></div>
+   <p class="dh-msg" id="dhM" role="status"></p>
+   ${body}
+   <section class="dh-card"><h3>الطلاب</h3><label class="sr" for="dhQ">بحث باسم الطالب أو رقمه</label><input id="dhQ" class="bk-ta dh-q" placeholder="ابحث باسم الطالب أو رقم هاتفه" value="${esc(S.q)}" autocomplete="off">
+    <div class="dh-sc"><table class="dh-tab"><tr>${th('pos','#')}${th('name','الطالب')}${multi?th('cls','الفصل'):''}${th('pts','الدرجة')}${th('acc','الدقة')}${th('done','الكواكب')}${th('inc','ناقص')}${th('last','آخر نشاط')}<th></th></tr>
+    ${rows.map(r=>{const on=r.seen&&now-r.seen<90000;return`<tr><td>${r.empty?'—':AR(r.pos)}</td><td><button type="button" class="nm" data-o="${esc(r.k)}">${on?'<i class="dh-dot on"></i> ':''}${esc(r.name)}</button><small>${em(RANKS[r.rk].ic)} ${RANKS[r.rk].n}${r.empty?' · سجّل ولم يبدأ':r.det?'':' · بلا تفاصيل'}</small></td>${multi?`<td>${esc(r.cls)}</td>`:''}
+     <td><b>${AR(r.pts)}</b> <small>(${AR(r.spct)}٪)</small><i class="dh-mini"><u style="width:${Math.max(3,r.spct)}%"></u></i></td><td>${r.n?AR(r.acc)+'٪':'—'}</td><td>${AR(r.done)}/${AR(r.total)}</td><td>${r.empty?'—':r.inc?AR(r.inc):'✓'}</td><td>${on?'الآن':r.last?ago(r.last):'—'}</td>
+     <td><button type="button" class="btn sky sm" data-o="${esc(r.k)}">التقرير ←</button></td></tr>`}).join('')||`<tr><td colspan="9">لا نتائج مطابقة.</td></tr>`}</table></div></section>
+   <p class="dh-sub">النتائج تأتي من الحسابات المسجّلة وتُرسَل تلقائيًا من أجهزة الطلاب. الغرض المتابعة والتشجيع لا الاختبارات الرسمية.</p>
   </div>`;
-  const msg=$('#dhM',d);
-  $('#dhX',d).onclick=()=>this.close();$('#dhR',d).onclick=async()=>{msg.textContent='جارٍ التحديث…';const r=await this.load();if(!r.ok){msg.textContent=Online.why[r.error]||Online.why.server;return}this.classView(d)};
-  $('#dhP',d).onclick=e=>this.pdf(()=>this.classPages(A),'تحليل نتائج الفصل '+S.cls,'تحليل_الفصل_'+this.fn(S.cls)+'.pdf',e.currentTarget,msg);
+  bind();const msg=$('#dhM',d);
+  $('#dhP',d).onclick=e=>this.pdf(()=>this.classPages(A),'تحليل نتائج '+this.scopeLabel(),'تحليل_'+this.fn(this.scopeLabel())+'.pdf',e.currentTarget,msg);
   $('#dhPr',d).onclick=()=>this.print(()=>this.classPages(A),msg);
-  $('#dhC',d).onclick=async()=>{const r=await saveFile(this.csv(A),'نتائج_الفصل_'+this.fn(S.cls)+'.csv');msg.textContent=r==='declined'?'أُلغي الحفظ.':'حُفظ جدول النتائج ✓'};
-  $('#dhT',d).onclick=async()=>{const ok=await copyTxt(Board.text({rows:A.by,N:A.N,avg:A.avg,weakest:A.weakest&&{name:A.weakest.name,a:A.weakest.a}}));toast(ok?'نُسخ ترتيب الفصل ✓ (الخمسة الأوائل فقط)':'تعذّر النسخ تلقائيًا')};
-  $('#dhB',d).onclick=()=>{this.close();Board.open()};
+  $('#dhC',d).onclick=async()=>{const r=await saveFile(this.csv(A),'نتائج_'+this.fn(this.scopeLabel())+'.csv');msg.textContent=r==='declined'?'أُلغي الحفظ.':'حُفظ جدول النتائج ✓'};
+  $('#dhT',d).onclick=async()=>{const ok=await copyTxt(Board.text({rows:A.act,N:A.N,avg:A.avg,weakest:A.weakest&&{name:A.weakest.name,a:A.weakest.a}}));toast(ok?'نُسخ ترتيب الفصل ✓ (الخمسة الأوائل فقط)':'تعذّر النسخ تلقائيًا')};
   d.onclick=e=>{const b=e.target.closest('[data-o]');if(b){this.show('student',b.dataset.o);return}const s=e.target.closest('[data-s]');if(s){const k=s.dataset.s;S.asc=S.sort===k?!S.asc:true;S.sort=k;const y=d.scrollTop;this.classView(d);d.scrollTop=y}};
-  $('#dhQ',d).oninput=e=>{S.q=e.target.value;const y=d.scrollTop,p=e.target.selectionStart;this.classView(d);d.scrollTop=y;const q=$('#dhQ',d);q.focus();try{q.setSelectionRange(p,p)}catch(x){}}},
+  const q=$('#dhQ',d);if(q)q.oninput=e=>{S.q=e.target.value;const y=d.scrollTop,p=e.target.selectionStart;this.classView(d);d.scrollTop=y;const q2=$('#dhQ',d);q2.focus();try{q2.setSelectionRange(p,p)}catch(x){}}},
+ /* the classes the students choose from */
+ manage(){const S=this.S;this.modal(`<h3>إدارة الفصول</h3><p class="dh-sub">اكتب كل فصل في سطر. هذه هي القائمة التي يختار منها الطالب فصله عند التسجيل. (لا يُحذف طلاب فصل يُزال من القائمة، لكنه لن يظهر للاختيار.)</p>
+   <label class="sr" for="dhCl">قائمة الفصول</label><textarea id="dhCl" class="bk-ta" rows="6">${esc(S.classes.join('\n'))}</textarea><p class="dh-msg" id="dhCm" role="status"></p>
+   <div class="row"><button class="btn go sm" id="dhCs" type="button">حفظ الفصول</button><button class="btn ghost sm" id="dhCx" type="button">إغلاق</button></div>`,m=>{
+   $('#dhCx',m).onclick=()=>this.modal();
+   $('#dhCs',m).onclick=async()=>{const list=$('#dhCl',m).value.split('\n').map(x=>x.trim()).filter(Boolean),c=$('#dhCm',m);c.textContent='جارٍ الحفظ…';
+    const r=await Online.api('config',{classes:list},S.key);if(!r.ok){c.textContent=Online.err(r);return}
+    Gate.classes=null;const l=await this.load();this.modal();if(l.ok)this.classView($('#dash'));toast('حُفظت قائمة الفصول ✓')}})},
  async studentView(d){const S=this.S,A=S.cl,r=A.by.find(x=>x.k===S.cur);if(!r){this.show('class');return}
   const list=this.sorted(),i=list.findIndex(x=>x.k===r.k),prev=list[i-1],next=list[i+1];
   d.innerHTML=`<div class="dh-top"><b>${em('student')} ${esc(r.name)}</b><span><button class="btn ghost sm" id="dhBk" type="button">← كل الفصل</button><button class="btn ghost sm" id="dhX" type="button">إغلاق</button></span></div>
-   <div class="dh-wrap"><div class="dh-act"><button class="btn gold sm" id="dhP" type="button">${em('closed_book')} تحميل التقرير PDF</button><button class="btn sky sm" id="dhPr" type="button">${em('pencil')} اطبع</button><button class="btn ghost sm" id="dhS" type="button">انسخ ملخصًا (لولي الأمر)</button>
+   <div class="dh-wrap"><p class="dh-sub">${esc(r.cls)} · هاتف <bdi dir="ltr">${esc(r.phone||'—')}</bdi>${r.seen&&this.now()-r.seen<90000?' · <b class="dh-on">يعمل الآن</b>':r.last?' · آخر نشاط '+ago(r.last):''}</p>
+   <div class="dh-act"><button class="btn gold sm" id="dhP" type="button">${em('closed_book')} تحميل التقرير PDF</button><button class="btn sky sm" id="dhPr" type="button">${em('pencil')} اطبع</button><button class="btn ghost sm" id="dhS" type="button">انسخ ملخصًا (لولي الأمر)</button><a class="btn go sm" id="dhW" target="_blank" rel="noopener" href="#">راسل ولي الأمر عبر واتساب</a>
     <button class="btn ghost sm" id="dhPv" type="button"${prev?'':' disabled'}>→ السابق</button><button class="btn ghost sm" id="dhNx" type="button"${next?'':' disabled'}>التالي ←</button></div>
-   <p class="dh-msg" id="dhM" role="status"></p><div id="dhPg" class="dh-pages"><div class="dh-wait"><p>جارٍ تجهيز التقرير…</p></div></div></div>`;
+   <p class="dh-msg" id="dhM" role="status"></p><div id="dhPg" class="dh-pages"><div class="dh-wait"><p>جارٍ تجهيز التقرير…</p></div></div>
+   <details class="dh-card dh-adm"><summary>إدارة الطالب</summary><div class="dh-act"><label class="sr" for="dhMv">انقل إلى فصل</label><select id="dhMv" class="inp dh-sel">${S.classes.map(c=>`<option value="${esc(c)}"${c===r.cls?' selected':''}>${esc(c)}</option>`).join('')}</select><button class="btn sky sm" id="dhMb" type="button">انقل إلى هذا الفصل</button><button class="btn red sm" id="dhDl" type="button">احذف الطالب وبياناته</button></div><p class="dh-sub" id="dhDm"></p></details></div>`;
   $('#dhX',d).onclick=()=>this.close();$('#dhBk',d).onclick=()=>this.show('class');
   const go=x=>()=>this.show('student',x.k);if(prev)$('#dhPv',d).onclick=go(prev);if(next)$('#dhNx',d).onclick=go(next);
+  /* admin: move / delete */
+  $('#dhMb',d).onclick=async()=>{const to=$('#dhMv',d).value;if(to===r.cls)return;const j=await Online.api('admin',{op:'move',aid:r.aid,to},S.key);$('#dhDm',d).textContent=j.ok?'نُقل الطالب ✓':Online.err(j);if(j.ok){await this.load();this.show('class')}};
+  let sure=false;$('#dhDl',d).onclick=async e=>{if(!sure){sure=true;e.currentTarget.textContent='اضغط مرة أخرى للتأكيد';$('#dhDm',d).textContent='سيُحذف حساب الطالب وتقدّمه المحفوظ نهائيًا من قاعدة البيانات.';return}
+   const j=await Online.api('admin',{op:'del',aid:r.aid},S.key);if(j.ok){await this.load();this.show('class');toast('حُذف الطالب')}else $('#dhDm',d).textContent=Online.err(j)};
+  if(r.empty){$('#dhPg',d).innerHTML=`<div class="dh-wait"><p>سجّل ${esc(r.name)} ولم يُرسل أي نتيجة بعد.</p></div>`;['dhP','dhPr','dhS'].forEach(k=>{const b=$('#'+k,d);if(b)b.disabled=true});$('#dhW',d).href=this.waLink(r.phone,'');return}
   const det=await this.detail(r);if(S.view!=='student'||S.cur!==r.k)return;
   const R=this.R(r,det),nt=this.notes(r,R,A),msg=$('#dhM',d);
+  $('#dhW',d).href=this.waLink(r.phone,this.summary(r,R,nt));
   if(r.det&&!det)msg.textContent='تعذّر تحميل التفاصيل؛ التقرير مبنيّ على رمز النتيجة فقط.';
   const build=()=>this.studentPages(r,R,A,nt),pages=build(),box=$('#dhPg',d);box.innerHTML='';
-  const fit=()=>{const w=Math.min(794,box.clientWidth||794),k=w/794;box.querySelectorAll('.dh-pgbox').forEach(b=>{b.style.width=Math.round(794*k)+'px';b.style.height=Math.round(1123*k)+'px';b.firstChild.style.transform=`scale(${k})`})};
-  pages.forEach(p=>{const b=document.createElement('div');b.className='dh-pgbox';const c=p.cloneNode(true);c.style.position='absolute';c.style.top='0';c.style.right='0';c.style.transformOrigin='top right';b.appendChild(c);box.appendChild(b)});fit();
+  pages.forEach(p=>{const b=document.createElement('div');b.className='dh-pgbox';const c=p.cloneNode(true);c.style.position='absolute';c.style.top='0';c.style.right='0';c.style.transformOrigin='top right';b.appendChild(c);box.appendChild(b)});this.fitPages();
   if(!this.rz){this.rz=1;window.addEventListener('resize',()=>{const b=$('#dhPg');if(b&&!$('#dash').hidden)Dash.fitPages()})}
   const fl=this.fn(r.name);
   $('#dhP',d).onclick=e=>this.pdf(build,'تقرير '+r.name,'تقرير_'+fl+'_مغامرة_المفعول_به.pdf',e.currentTarget,msg);
@@ -4795,95 +4837,218 @@ body.dash-on{overflow:hidden}
 .ph-t{width:100%;border-collapse:collapse;font-size:12px}.ph-t th{background:#ece8fb;color:#3b1fa8;padding:4px 3px;text-align:center;font-weight:700}
 .ph-t td{padding:3px;border-bottom:1px solid #ece8fb;text-align:center}.ph-t td.nm{text-align:right;font-weight:700;white-space:nowrap}
 .ph-key{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:#3d3566}.ph-key b{color:#3b1fa8}
+.dh-sel{width:auto;min-width:130px;padding:.3rem .6rem}
+.dh-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:#64748b;vertical-align:middle}.dh-dot.on{background:#4ade80;box-shadow:0 0 0 4px #4ade8040;animation:dhp 1.6s infinite}
+@keyframes dhp{50%{box-shadow:0 0 0 8px #4ade8010}}.dh-on{color:var(--good)}
+.dh-live h3{margin-bottom:6px}
+.dh-modal{position:fixed;inset:0;z-index:5;background:#0009;display:grid;place-items:center;padding:16px}.dh-md{width:min(520px,100%);max-height:90vh;overflow:auto;padding:16px;border-radius:18px;background:var(--bg2);border:1.5px solid var(--line);display:grid;gap:10px}
+.dh-md h3{margin:0;font:400 1.2rem var(--f-display)}.dh-md textarea{width:100%}
+.dh-adm summary{cursor:pointer;font-weight:700}
 @media(max-width:560px){.dh-bar{grid-template-columns:1fr 1fr}.dh-bar i{grid-column:1/-1;order:3}}
 @media print{body.printing #dash{display:none!important}}
 `};
 
-/* ONLINE layer (Vercel build only): the student links to a class code and the result code is sent to /api/submit;
-   the teacher loads the whole class from /api/board with a private key. Nothing here runs in the offline / artifact builds. */
+/* ONLINE layer (Vercel build only): student account (name + class + phone), progress saved in the database, automatic sending to the teacher,
+   live presence, and the teacher's button. Nothing here runs in the offline / artifact builds. */
 const Online={
- K:'mf_online',
- cfg(){try{return JSON.parse(localStorage.getItem(this.K)||'{}')||{}}catch(e){return{}}},
- save(o){try{localStorage.setItem(this.K,JSON.stringify(o))}catch(e){}},
- norm(s){return String(s||'').normalize('NFKC').toLowerCase().replace(/[^a-z0-9\u0600-\u06ff\- ]/g,'').replace(/\s+/g,'-').replace(/^-+|-+$/g,'').slice(0,30)},
- sig(){try{return[Score.total(),Bonus.pts(),Incomplete.answered(),NAME()].join('|')}catch(e){return''}},
- why:{bad_class:'اكتب رمز الفصل (حروف أو أرقام).',bad_code:'تعذّر تجهيز النتيجة.',class_full:'اكتمل عدد طلاب هذا الفصل.',no_db:'قاعدة البيانات لم تُربط بعد؛ أخبر معلمك.',server:'تعذّر الحفظ الآن، حاول لاحقًا.',bad_key:'مفتاح المعلم غير صحيح.',no_teacher_key:'لم يُضبط مفتاح المعلم على الخادم.'},
- async send(manual){
-  const c=this.cfg();if(!c.cls)return{ok:false,error:'bad_class'};if(!NAME())return{ok:false,error:'bad_code'};
-  const sg=this.sig();if(!manual&&sg===c.sig)return{ok:true,status:'same'};
-  if(this.busy)return{ok:true,status:'busy'};this.busy=1;
-  try{const r=await fetch('/api/submit',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({cls:c.cls,code:Code.make(),detail:this.detail()}),keepalive:true});
-   const j=await r.json().catch(()=>({}));
-   if(r.ok&&j.ok){c.sig=sg;c.at=Date.now();let fin=false;try{fin=Incomplete.list().count===0}catch(e){}
-    const first=!c.first,newFin=fin&&!c.fin;c.first=1;if(fin)c.fin=1;this.save(c);
-    if(!manual){if(newFin)toast(em('trophy')+' أكملتَ الرحلة، ووصلت نتيجتك النهائية إلى معلمك ✓');else if(first)toast(em('check_mark_button')+' وصلت نتيجتك إلى معلمك، وتصل تلقائيًا كلما تقدّمت')}}
-   return j.ok?j:{ok:false,error:j.error||'server'}}
-  catch(e){return{ok:false,error:'server'}}finally{this.busy=0}},
+ K:'mf_acct',TK:'mf_tk',
+ stat:{ok:null,at:0},lastSig:'',busy:0,
+ acct(){try{const o=JSON.parse(localStorage.getItem(this.K)||'null');return o&&o.aid?o:null}catch(e){return null}},
+ setAcct(o){try{if(o)localStorage.setItem(this.K,JSON.stringify(o));else localStorage.removeItem(this.K)}catch(e){}},
+ why:{bad_name:'اكتب اسمك بحرفين على الأقل.',bad_phone:'اكتب رقم هاتف صحيحًا (أرقام فقط، ٨ إلى ١٥ رقمًا).',bad_class:'اختر الفصل من القائمة.',class_full:'اكتمل عدد طلاب هذا الفصل؛ أخبر معلمك.',
+  no_db:'قاعدة البيانات لم تُربط بعد؛ أخبر معلمك.',no_account:'لا يوجد حساب بهذا الرقم. جرّب «طالب جديد».',net:'تعذّر الاتصال بالإنترنت. تأكد من الاتصال وحاول مرة أخرى.',server:'تعذّر الحفظ الآن، حاول لاحقًا.',
+  bad_key:'مفتاح المعلم غير صحيح.',no_teacher_key:'لم يُضبط مفتاح المعلم على الخادم.'},
+ async api(path,body,key,keep){
+  try{const r=await fetch('/api/'+path,{method:body===undefined?'GET':'POST',headers:Object.assign({'content-type':'application/json'},key?{'x-key':key}:{}),body:body===undefined?undefined:JSON.stringify(body),keepalive:!!keep});
+   const j=await r.json().catch(()=>({}));return Object.assign({http:r.status},j)}catch(e){return{ok:false,error:'net'}}},
+ err(r){return this.why[r.error]||this.why.server},
+ /* ---------- what the teacher sees about this student ---------- */
+ sig(){try{return[Score.total(),Bonus.pts(),Incomplete.answered(),NAME(),ST.n].join('|')}catch(e){return''}},
+ where(){try{const t=TABS[S.tab];return t?t.title:''}catch(e){return''}},
  /* the detailed snapshot the teacher's page turns into a full report (the result code alone carries only the summary) */
  detail(){try{const R=REP(),A=Ach.get(),cut=(x,n)=>String(x==null?'':x).slice(0,n);
   return{v:1,at:Date.now(),parts:R.parts.map(p=>[p[1],p[2]]),top:R.top.map(t=>[t.n,t.c]),lvs:R.lvs.map(t=>[t.n,t.c]),tys:R.tys.map(t=>[t.k,t.n,t.c]),
    wrong:R.wrong.slice(0,25).map(w=>({q:cut(w.q,160),a:cut(w.a,100),e:cut(w.e,160),k:w.k|0,tp:cut(w.tp,2),lv:w.lv|0})),
    pl:R.planets.map(p=>p.ok?1:0),inc:R.inc.planets.map(p=>({id:p.id,t:cut(p.title,40),i:p.items.slice(0,8).map(i=>[cut(i.t,80),cut(i.note,60)])})),incN:[R.inc.count,R.inc.nQ],
    bc:R.bc,br:R.br,best:R.best,fixed:R.fixed,sec:Math.round(ST.sec),qa:R.qa,qt:R.qt,rank:A.rank,bd:A.badges.map(b=>cut(b.n,30)),pg:[A.pages,A.pagesT],won:A.won?1:0,dc:A.dc}}catch(e){return null}},
- /* send a few seconds after the student's progress is saved (answers, games, finishing) */
- soon(){if(!this.cfg().cls)return;clearTimeout(this.tm);this.tm=setTimeout(()=>this.send(false),4000)},
- /* the teacher's class link: opening it links the student to the class with no typing */
- link(cls){return location.origin+'/#c='+encodeURIComponent(cls)},
- fromLink(){
-  let v='';try{const m=(location.hash||'').match(/^#c=(.+)$/)||(location.search||'').match(/[?&]c=([^&]+)/);if(m)v=decodeURIComponent(m[1])}catch(e){}
-  const cls=this.norm(v);if(!cls)return;
-  const o=this.cfg();if(o.cls!==cls){o.cls=cls;o.sig='';o.first=0;o.fin=0;this.save(o)}
-  try{history.replaceState(null,'',location.pathname)}catch(e){}
-  this.fresh=cls},
- line(){const c=this.cfg();return c.cls?`مرتبط بالفصل «${esc(c.cls)}»${c.at?` · آخر إرسال ${ago(c.at)}`:''}`:'غير مرتبط بفصل بعد'},
- /* the student's box inside «لوحتي» */
+ /* ---------- saving + sending (one call: progress snapshot, result code, detailed report) ---------- */
+ async sync(o){o=o||{};const a=this.acct();if(!a||this.busy)return{ok:false,error:'busy'};
+  const sg=this.sig();if(!o.force&&sg===this.lastSig)return{ok:true,status:'same'};
+  this.busy=1;
+  try{try{saveST()}catch(e){}
+   const snap=store.snapshot(),body={aid:a.aid,w:this.where(),snap:JSON.stringify(snap),ts:snap.ts||0,code:Code.make(),detail:this.detail()};
+   const r=await this.api('sync',body,'',JSON.stringify(body).length<60000);
+   if(r.ok){this.lastSig=sg;this.stat={ok:true,at:Date.now()};
+    let fin=false;try{fin=Incomplete.list().count===0}catch(e){}
+    if(fin&&!a.fin){a.fin=1;this.setAcct(a);toast(em('trophy')+' أكملتَ الرحلة، ووصل تقريرك النهائي إلى معلمك ✓')}
+    else if(!a.first&&!o.quiet){a.first=1;this.setAcct(a);toast(em('check_mark_button')+' تقدّمك محفوظ في حسابك ويصل إلى معلمك تلقائيًا')}}
+   else{this.stat={ok:false,at:Date.now(),err:r.error};if(r.error==='no_account'){this.stat.err='no_account'}}
+   this.paintSave();return r}
+  finally{this.busy=0}},
+ /* a few seconds after progress is saved on the device; when the whole journey is finished it goes at once */
+ soon(){if(!this.acct())return;clearTimeout(this.tm);let fin=false;try{fin=Incomplete.list().count===0&&!this.acct().fin}catch(e){}
+  this.tm=setTimeout(()=>this.sync(),fin?300:15000)},
+ async ping(){const a=this.acct();if(!a||document.visibilityState!=='visible')return;await this.api('sync',{aid:a.aid,w:this.where()})},
+ paintSave(){const b=$('#saveBtn');if(!b)return;const bad=this.acct()&&this.stat.ok===false;b.classList.toggle('warn',!!bad);
+  b.title=!this.acct()?'حسابي':bad?'تعذّر حفظ تقدّمك في الإنترنت الآن؛ سنحاول تلقائيًا':'حسابي: تقدّمك محفوظ في قاعدة البيانات'},
+ line(){const s=this.stat;return s.ok?`✓ تقدّمك محفوظ في حسابك ويصل إلى معلمك · آخر حفظ ${ago(s.at)}`:s.ok===false?'⚠ تعذّر الحفظ في الإنترنت الآن؛ سنحاول مرة أخرى تلقائيًا.':'سيُحفظ تقدّمك تلقائيًا بعد أول إجابة.'},
+ mask(p){p=String(p||'');return p.length>6?p.slice(0,3)+'٭٭٭٭'+p.slice(-3):p},
+ /* ---------- «لوحتي»: the old result-code / backup boxes are replaced by the account box ---------- */
  decorate(){
-  const d=$('#dlg');if(!d||d.hidden)return;const tr=$('.mn-tr',d);if(!tr||$('.mn-ol',d))return;const c=this.cfg();
-  tr.insertAdjacentHTML('beforebegin',`<section class="mn-c mn-ol"><h3>${em('envelope')} أرسل نتيجتي إلى معلمي</h3>
-   <p class="sub">إن فتحتَ رابط معلمك فأنت مرتبط تلقائيًا. وإلا فاكتب رمز الفصل هنا مرة واحدة، وبعدها تصل نتيجتك إلى معلمك تلقائيًا كلما تقدّمت وعند إنهاء الرحلة.</p>
-   <div class="row"><label class="sr" for="olC">رمز الفصل</label><input id="olC" class="bk-ta ol-in" maxlength="30" value="${esc(c.cls||'')}" placeholder="مثال: خامس-أ" autocomplete="off">
-   <button class="btn go sm" type="button" id="olB">${em('check_mark_button')} اربط وأرسل</button></div>
-   <p class="sub ol-st" id="olS" role="status">${this.line()}</p></section>`);
-  const b=$('#olB',d),inp=$('#olC',d),st=$('#olS',d);
-  const go=async()=>{const cls=this.norm(inp.value);if(!cls){st.textContent=this.why.bad_class;return}
-   const o=this.cfg();o.cls=cls;o.sig='';this.save(o);inp.value=cls;st.textContent='جارٍ الإرسال…';b.disabled=true;
-   const r=await this.send(true);b.disabled=false;st.textContent=r.ok?'وصلت نتيجتك إلى معلمك ✓':(this.why[r.error]||this.why.server);if(r.ok)sfx('level')};
-  b.onclick=go;inp.onkeydown=e=>{if(e.key==='Enter')go()};
-  const row=$('.row',tr);if(row&&!$('[data-ol=t]',tr)){row.insertAdjacentHTML('beforeend',`<button class="btn ghost sm" type="button" data-ol="t">${em('crown')} لوحة المعلم (تحليل وتقارير)</button>`);$('[data-ol=t]',tr).onclick=()=>this.teacher()}},
- /* the teacher's window: class code + private key → ingest into the existing board */
- teacher(){
-  const d=$('#dlg'),close=()=>{d.hidden=true;d.innerHTML=''},c=this.cfg();let key='';try{key=sessionStorage.getItem('mf_tk')||''}catch(e){}
-  d.hidden=false;d.innerHTML=`<div class="dlg-card zoom-in" role="dialog" aria-modal="true" aria-labelledby="olT"><h2 id="olT">لوحة المعلم: تحليل الفصل وتقارير الطلاب</h2>
-   <p class="sub">اكتب رمز الفصل ومفتاح المعلم لتُحمَّل نتائج الطلاب الذين أرسلوا نتائجهم، فتظهر لك تقارير مفصّلة وتحليل شامل للفصل.</p>
-   <label class="sr" for="olTC">رمز الفصل</label><input id="olTC" class="bk-ta ol-in" maxlength="30" value="${esc(c.tcls||c.cls||'')}" placeholder="رمز الفصل">
-   <label class="sr" for="olTK">مفتاح المعلم</label><input id="olTK" class="bk-ta ol-in" type="password" dir="ltr" value="${esc(key)}" placeholder="مفتاح المعلم" autocomplete="off">
-   <p class="dlg-err bk-msg" id="olTM" role="status"></p>
-   <div class="row dlg-row"><button class="btn go" type="button" id="olTG">افتح اللوحة</button><button class="btn sky" type="button" id="olTL">${em('link')} انسخ رابط الفصل</button><button class="btn ghost" type="button" id="olTX">إغلاق</button></div>
-   <p class="sub">أرسل «رابط الفصل» لطلابك على واتساب؛ يربطهم بفصلك تلقائيًا بلا كتابة، وتصلك نتائجهم عند كل تقدّم وعند إنهاء الرحلة.</p></div>`;
-  const msg=(t,k='')=>{const m=$('#olTM',d);m.textContent=t;m.className='dlg-err bk-msg on '+k};
-  $('#olTX',d).onclick=close;
-  $('#olTL',d).onclick=async()=>{const cls=this.norm($('#olTC',d).value);if(!cls){msg('اكتب رمز الفصل أولًا.','bad');return}
-   const u=this.link(cls);let ok=false;try{await navigator.clipboard.writeText(u);ok=true}catch(e){}
-   msg(ok?'نُسخ رابط الفصل ✓ الصقه في مجموعة الطلاب:\n'+u:'انسخ هذا الرابط وأرسله للطلاب:\n'+u,ok?'ok':'warn')};
-  $('#olTG',d).onclick=async()=>{const cls=this.norm($('#olTC',d).value),k=$('#olTK',d).value;if(!cls||!k){msg('اكتب رمز الفصل ومفتاح المعلم.','bad');return}
-   msg('جارٍ التحميل…');
-   try{Dash.S.cls=cls;Dash.S.key=k;const r=await Dash.load();
-    if(!r.ok){msg(this.why[r.error]||this.why.server,'bad');return}
-    const c2=this.cfg();c2.tcls=cls;this.save(c2);try{sessionStorage.setItem('mf_tk',k)}catch(e){}
-    close();Dash.open(cls,k,true)}
-   catch(e){msg(this.why.server,'bad')}};
-  setTimeout(()=>{try{$('#olTC',d).focus({preventScroll:true})}catch(e){}},60)},
+  const d=$('#dlg');if(!d||d.hidden)return;const body=$('.mn-body',d);if(!body||$('.mn-ol',d))return;const a=this.acct();
+  $$('.mn-c',d).forEach(s=>{const h=$('h3',s),t=h?h.textContent:'';if(t.includes('رمز نتيجتي للمعلم')||t.includes('حفظ تقدّمي'))s.remove()});
+  const tr=$('.mn-tr',d),sec=`<section class="mn-c mn-ol"><h3>${em('envelope')} حسابي وحفظ التقدّم</h3>
+   ${a?`<p><b>${esc(a.name)}</b> · ${esc(a.cls||'')} · هاتف <bdi dir="ltr">${esc(this.mask(a.phone))}</bdi></p><p class="sub ol-st" id="olS" role="status">${this.line()}</p>
+   <p class="sub">رقم هاتفك هو كود دخولك: اكتبه على أي جهاز لتستعيد تقدّمك.</p>
+   <div class="row"><button class="btn go sm" type="button" data-ol="snd">${em('check_mark_button')} أرسل تقدّمي الآن</button><button class="btn ghost sm" type="button" data-ol="acc">حسابي / طالب آخر</button></div>`
+   :`<p>لم تسجّل بياناتك بعد.</p><div class="row"><button class="btn go sm" type="button" data-ol="acc">سجّل الآن</button></div>`}</section>`;
+  if(tr)tr.insertAdjacentHTML('beforebegin',sec);else body.insertAdjacentHTML('beforeend',sec);
+  const snd=$('[data-ol=snd]',d);if(snd)snd.onclick=async()=>{snd.disabled=true;const st=$('#olS',d);if(st)st.textContent='جارٍ الإرسال…';const r=await this.sync({force:true});snd.disabled=false;if(st)st.textContent=r.ok?this.line():this.err(r);if(r.ok)sfx('level')};
+  const ac=$('[data-ol=acc]',d);if(ac)ac.onclick=()=>Prof.ask('edit');
+  if(tr){const b=$('[data-act=brd]',tr);if(b)b.remove();const row=$('.row',tr);if(row&&!$('[data-ol=t]',tr)){row.insertAdjacentHTML('beforeend',`<button class="btn gold sm" type="button" data-ol="t">${em('crown')} لوحة المعلم</button>`);$('[data-ol=t]',tr).onclick=()=>{d.hidden=true;d.innerHTML='';this.teacherOpen()}}}},
+ /* ---------- the last step of the report: it is sent automatically ---------- */
+ finalStep(sc){const R0=REP(),stat=(t,c='')=>{const e=$('#rpS',sc);if(e){e.textContent=t;e.className='rpt-stat '+c}};let busy=false;
+  const box=()=>{const b=$('#olBox',sc);if(!b)return;const a=this.acct();
+   b.innerHTML=!a?`${em('envelope')} <b>سجّل بياناتك أولًا</b> ليصل تقريرك إلى معلمك.`:this.stat.ok?`${em('check_mark_button')} <b>وصل تقريرك إلى الأستاذ إسلام ✓</b> <span>آخر إرسال ${ago(this.stat.at)}. وسيصله كل تحديث تلقائيًا.</span>`:this.stat.ok===false?`⚠ <b>تعذّر الإرسال الآن</b> <span>تأكد من الاتصال بالإنترنت ثم اضغط «أرسل التقرير الآن».</span>`:'جارٍ إرسال تقريرك إلى معلمك…'};
+  sc.innerHTML=`<p class="lead rise">تقريرك جاهز يا <b>${esc(R0.name)}</b>! يصل إلى معلمك تلقائيًا، ويمكنك حفظ نسخة PDF لنفسك.</p>
+   <div class="rpt-send ol-sent" id="olBox" role="status"></div>
+   ${R0.inc.count?incBanner(R0):''}
+   <div class="rpt-act"><button class="btn gold" data-act="snd" type="button">${em('envelope')} أرسل التقرير الآن</button><button class="btn go" data-act="pdf" type="button">${em('closed_book')} احفظ نسخة PDF</button><button class="btn sky" data-act="print" type="button">${em('pencil')} اطبع التقرير</button></div>
+   <div class="rpt-stat" id="rpS" role="status" aria-live="polite"></div>
+   <h3 class="rpt-h rpt-prevh">معاينة التقرير</h3><div class="rpt-prev" id="rpPrev"></div>`;
+  box();const push=async()=>{const r=await this.sync({force:true,quiet:true});box();return r};push();
+  const lock=on=>{busy=on;$$('[data-act=snd],[data-act=pdf],[data-act=print]',sc).forEach(b=>b.disabled=on)};
+  act(sc,{inc:()=>IncDlg.open('review'),
+   snd:async()=>{if(busy)return;lock(true);stat('جارٍ الإرسال…');const r=await push();stat(r.ok?'وصل تقريرك إلى معلمك ✓':this.err(r),r.ok?'ok':'err');if(r.ok){sfx('win');FX.confetti(30)}lock(false)},
+   pdf:async()=>{if(busy)return;lock(true);stat('جارٍ تجهيز التقرير… لحظات من فضلك.');
+    try{const R=REP(),imgs=await capturePages(R,(i,n)=>stat(`جارٍ تجهيز الصفحة ${AR(i)} من ${AR(n)}…`)),res=await saveFile(pdfBlob(imgs,'تقرير أداء الطالب '+R.name+' - مغامرة المفعول به'),fname(R));
+     stat(res==='saved'||res==='anchor'?'تم حفظ نسخة التقرير ✓':res==='declined'?'أُلغي الحفظ.':'تعذّر حفظ الملف، حاول مرة أخرى.',res==='declined'?'':'ok')}catch(e){stat('تعذّر تجهيز الملف على هذا الجهاز. جرّب مرة أخرى.','err')}lock(false)},
+   print:async()=>{if(busy)return;lock(true);try{try{await document.fonts.ready}catch(e){}buildSheet(REP());document.body.classList.add('printing');
+     const end=()=>{document.body.classList.remove('printing');window.removeEventListener('afterprint',end)};window.addEventListener('afterprint',end);setTimeout(end,60000);setTimeout(()=>{try{window.print()}catch(e){end()}},150)}catch(e){stat('تعذّرت الطباعة.','err')}lock(false)}});
+  const host=$('#rpPrev',sc),pages=buildSheet(R0);pages.forEach(p=>{const w=document.createElement('div');w.className='rpt-sheet';w.appendChild(p.cloneNode(true));host.appendChild(w)});
+  const fit=()=>$$('.rpt-sheet',host).forEach(w=>{const k=w.clientWidth/794;w.style.height=(1123*k)+'px';w.firstChild.style.transform=`scale(${k})`});fit();window.addEventListener('resize',fit);
+  return()=>window.removeEventListener('resize',fit)},
+ /* ---------- the teacher's button ---------- */
+ teacherKey(){let k='';try{k=localStorage.getItem(this.TK)||sessionStorage.getItem(this.TK)||''}catch(e){}return k},
+ async teacherOpen(){
+  const k=this.teacherKey();if(!k){this.teacherAsk();return}
+  const r=await Dash.open(k,true);if(!r.ok)this.teacherAsk(this.err(r))},
+ teacherAsk(msg0){
+  const d=$('#dlg'),close=()=>{d.hidden=true;d.innerHTML=''};d.hidden=false;
+  d.innerHTML=`<div class="dlg-card zoom-in" role="dialog" aria-modal="true" aria-labelledby="olT"><img class="dlg-m" src="${IMG.man_teacher||IMG.crown}" alt="">
+   <h2 id="olT">لوحة المعلم</h2><p class="sub">اكتب مفتاح المعلم لتفتح تقارير الطلاب وتحليل الفصل.</p>
+   <label class="sr" for="olTK">مفتاح المعلم</label><input id="olTK" class="inp ol-in" type="password" dir="ltr" placeholder="مفتاح المعلم" autocomplete="current-password">
+   <label class="ol-rm"><input type="checkbox" id="olRM" checked> تذكّر المفتاح على هذا الجهاز</label>
+   <p class="dlg-err bk-msg ${msg0?'on bad':''}" id="olTM" role="status">${msg0||''}</p>
+   <div class="row dlg-row"><button class="btn go" type="button" id="olTG">دخول</button><button class="btn ghost" type="button" id="olTX">إلغاء</button></div></div>`;
+  const msg=(t,c='bad')=>{const m=$('#olTM',d);m.textContent=t;m.className='dlg-err bk-msg on '+c};
+  $('#olTX',d).onclick=close;d.onkeydown=e=>{if(e.key==='Escape')close()};
+  const go=async()=>{const k=$('#olTK',d).value.trim();if(!k){msg('اكتب مفتاح المعلم.');return}
+   msg('جارٍ التحقق…','ok');const r=await Dash.open(k,true);
+   if(!r.ok){msg(this.err(r));return}
+   try{localStorage.removeItem(this.TK);sessionStorage.removeItem(this.TK);($('#olRM',d).checked?localStorage:sessionStorage).setItem(this.TK,k)}catch(e){}
+   close()};
+  $('#olTG',d).onclick=go;$('#olTK',d).onkeydown=e=>{if(e.key==='Enter')go()};setTimeout(()=>{try{$('#olTK',d).focus()}catch(e){}},60)},
+ header(){const g=$('.tools .grp');if(!g||$('#tchBtn'))return;
+  g.insertAdjacentHTML('beforebegin',`<button class="chip-btn tch-btn" id="tchBtn" type="button" aria-label="لوحة المعلم" title="لوحة المعلم: تقارير الطلاب وتحليل الفصل">${em('man_teacher')}<span>المعلم</span></button>`);
+  $('#tchBtn').onclick=()=>this.teacherOpen();
+  const sv=$('#saveBtn');if(sv){sv.setAttribute('aria-label','حسابي وحفظ التقدّم')}
+  const w=$('#saveWarn');if(w)w.remove()},
  init(){
-  this.fromLink();
+  const st=document.createElement('style');st.textContent=Gate.CSS;document.head.appendChild(st);
+  this.fromOld();
+  Prof.ask=function(mode){if(mode==='edit'&&Online.acct())Gate.account();else Gate.open(mode)};
+  Backup.open=function(){if(Online.acct())Gate.account();else Gate.open('first')};
+  Resume.saveState=function(){return{ok:true,need:false,b:null}};
+  {const rt=TABS.find(t=>t.id==='report');if(rt&&rt.steps.length){const last=rt.steps[rt.steps.length-1];
+   Object.assign(last,{t:'تقريرك وصل إلى معلمك',tip:()=>`أحسنتَ يا ${NAME()||'بطل'}! تقريرك يصل إلى معلمك تلقائيًا، ويمكنك حفظ نسخة PDF لنفسك.`,render:sc=>Online.finalStep(sc)})}}
   const o=Mine.open;Mine.open=function(){const r=o.apply(this,arguments);setTimeout(()=>Online.decorate(),0);return r};
-  /* automatic sending: after each saved step, when the page is hidden/closed, and every 20 s as a safety net (nothing is sent if nothing changed) */
+  this.header();
   try{store.onSave(()=>Online.soon())}catch(e){}
-  const hide=()=>{if(Online.cfg().cls)Online.send(false)};
-  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')hide()});
+  const hide=()=>{if(Online.acct())Online.sync()};
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')hide();else Online.ping()});
   window.addEventListener('pagehide',hide);
-  setInterval(()=>{if(Online.cfg().cls&&document.visibilityState==='visible')Online.send(false)},20000);
-  if(this.fresh)setTimeout(()=>{toast(em('check_mark_button')+' رُبطتَ بفصل «'+esc(this.fresh)+'»؛ تصل نتيجتك إلى معلمك تلقائيًا');Online.send(false)},2500);
-  else setTimeout(()=>{if(Online.cfg().cls)Online.send(false)},3000)}};
+  setInterval(()=>Online.ping(),40000);
+  setInterval(()=>{if(Online.acct()&&document.visibilityState==='visible')Online.sync()},60000);
+  /* a student who already has progress on this device but no account yet is asked to link it (name + class + phone) */
+  setTimeout(()=>{if(NAME()&&!Online.acct()&&$('#dlg').hidden)Gate.open('link');else if(Online.acct()){Online.ping();Online.sync({quiet:true})}},1200)},
+ /* an older build of this page stored a class code here: forget it */
+ fromOld(){try{localStorage.removeItem('mf_online')}catch(e){}}};
+
+/* the sign-in window: new student (name + class + phone) or return with the phone number */
+const Gate={
+ classes:null,
+ dg(s){return String(s||'').replace(/[٠-٩]/g,d=>'٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g,d=>'۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/\D/g,'')},
+ CSS:`.gt-tabs{display:flex;gap:6px;margin:6px 0 10px}.gt-tabs button{flex:1;padding:.45rem .6rem;border-radius:12px;border:1.5px solid var(--line);background:#ffffff10;color:var(--ink);font:700 .95rem var(--f-body);cursor:pointer}
+.gt-tabs button.on{background:var(--gold2);color:#2a1a00;border-color:var(--gold2)}.gt-f{display:grid;gap:8px;text-align:right}.gt-f label{font-size:.88rem;color:var(--muted)}
+.gt-f select.inp,.gt-f input.inp{width:100%}.gt-note{margin:2px 0 0;font-size:.85rem;color:var(--muted);line-height:1.6}.gt-ch{display:grid;gap:6px}.gt-ch button{text-align:right}
+.ol-in{width:100%;margin:6px 0}.ol-rm{display:flex;gap:8px;align-items:center;justify-content:center;font-size:.9rem;color:var(--muted);margin:4px 0}
+.ol-sent{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:12px 14px;border-radius:16px;background:#4ade8018;border:1.5px solid #4ade8066;margin:10px 0}.ol-sent span{color:var(--muted);font-size:.9rem}
+.tch-btn{display:inline-flex;align-items:center;gap:5px;font-weight:700}.tch-btn .em{width:1.2em;height:1.2em}.tch-btn span{font-size:.85rem}#saveWarn{display:none!important}
+@media(max-width:520px){.tch-btn span{display:none}}`,
+ async classList(){if(this.classes)return this.classes;const r=await Online.api('config');if(r.ok&&r.classes&&r.classes.length){this.classes=r.classes;return this.classes}return null},
+ open(mode){
+  const d=$('#dlg'),link=mode==='link',cur=NAME();d.hidden=false;
+  d.innerHTML=`<div class="dlg-card zoom-in gt" role="dialog" aria-modal="true" aria-labelledby="gtT"><img class="dlg-m" src="${IMG.boyA}" alt="">
+   <h2 id="gtT">${link?'سجّل بياناتك لتُحفظ نتائجك':'أهلًا بك في مغامرة المفعول به!'}</h2>
+   <p class="sub">${link?'اكتب فصلك ورقم هاتفك ليُحفَظ تقدّمك في حسابك، ويصل تقريرك إلى معلمك تلقائيًا.':'سجّل بياناتك مرة واحدة، فيُحفَظ تقدّمك ويصل تقريرك إلى معلمك تلقائيًا.'}</p>
+   <div class="gt-tabs" role="tablist"><button type="button" data-t="new" class="on" role="tab">طالب جديد</button><button type="button" data-t="old" role="tab">لدي حساب: استعِد تقدّمي</button></div>
+   <div class="gt-f" id="gtNew"><label for="gtN">اسم الطالب</label><input id="gtN" class="inp" maxlength="40" autocomplete="off" placeholder="اكتب اسمك الثلاثي" value="${esc(cur)}">
+    <label for="gtC">الفصل</label><select id="gtC" class="inp"><option value="">جارٍ تحميل الفصول…</option></select>
+    <label for="gtP">رقم الهاتف (رقمك أو رقم ولي أمرك)</label><input id="gtP" class="inp" type="tel" inputmode="numeric" dir="ltr" maxlength="20" autocomplete="tel" placeholder="01xxxxxxxxx">
+    <p class="gt-note">رقم الهاتف هو كود دخولك: تكتبه من أي جهاز لتستعيد تقدّمك. يراه معلمك فقط.</p>
+    <p class="dlg-err bk-msg" id="gtM" role="status"></p>
+    <div class="row dlg-row"><button class="btn go" type="button" id="gtGo">ابدأ الرحلة ←</button></div></div>
+   <div class="gt-f" id="gtOld" hidden><label for="gtP2">رقم الهاتف الذي سجّلتَ به</label><input id="gtP2" class="inp" type="tel" inputmode="numeric" dir="ltr" maxlength="20" autocomplete="tel" placeholder="01xxxxxxxxx">
+    <div class="gt-ch" id="gtCh"></div><p class="dlg-err bk-msg" id="gtM2" role="status"></p>
+    <div class="row dlg-row"><button class="btn gold" type="button" id="gtLog">استعِد تقدّمي</button></div></div></div>`;
+  const tab=t=>{$$('.gt-tabs button',d).forEach(b=>b.classList.toggle('on',b.dataset.t===t));$('#gtNew',d).hidden=t!=='new';$('#gtOld',d).hidden=t!=='old';setTimeout(()=>{try{$(t==='new'?'#gtN':'#gtP2',d).focus()}catch(e){}},30)};
+  $$('.gt-tabs button',d).forEach(b=>b.onclick=()=>tab(b.dataset.t));
+  const sel=$('#gtC',d),m=$('#gtM',d),m2=$('#gtM2',d),msg=(e,t,c='bad')=>{e.textContent=t;e.className='dlg-err bk-msg on '+c};
+  const fill=async()=>{const l=await this.classList();if(!l){sel.innerHTML='<option value="">تعذّر تحميل الفصول</option>';msg(m,Online.why.net);return}
+   sel.innerHTML='<option value="">اختر فصلك…</option>'+l.map(c=>`<option value="${esc(c)}">${esc(c)}</option>`).join('')};fill();
+  const done=(r,name,phone)=>{Prof.setName(r.name||name);Online.setAcct({aid:r.aid,phone:r.phone||phone,name:r.name||name,cls:r.cls});Online.lastSig='';d.hidden=true;d.innerHTML='';sfx('level');FX.confetti(30);say(`أهلًا يا ${r.name||name}! هيّا نبدأ الرحلة.`);
+   Online.sync({force:true,quiet:true});go(S.tab,S.step,true)};
+  /* restore: the saved snapshot of the account replaces this device's progress (unless this device already holds newer progress of the same account) */
+  const restore=r=>{const a=Online.acct(),local=store.snapshot();let ok=false;
+   if(r.snap){try{const s=JSON.parse(r.snap);const sameAcc=a&&a.aid===r.aid,newer=sameAcc&&(local.ts||0)>(r.ts||0);
+    if(!newer||!store.hasData(local.d)){store.load(s);Prof.rehydrate();ok=true}}catch(e){}}
+   Prof.setName(r.name);Online.setAcct({aid:r.aid,phone:r.phone,name:r.name,cls:r.cls,first:1});Online.lastSig='';d.hidden=true;d.innerHTML='';
+   Prof.paintName();go(ok?0:S.tab,0,true);sfx('level');FX.confetti(ok?40:20);toast(ok?'✓ استرجعتُ تقدّمك يا '+esc(r.name):'✓ أهلًا بعودتك يا '+esc(r.name));Online.sync({force:true,quiet:true})};
+  const login=async aid=>{const phone=this.dg($('#gtP2',d).value);msg(m2,'جارٍ البحث…','ok');const r=await Online.api('login',{phone,aid});
+   if(!r.ok){msg(m2,Online.err(r));return}
+   if(r.choose){msg(m2,'هذا الرقم مسجّل لأكثر من طالب. اختر اسمك:','ok');const ch=$('#gtCh',d);ch.innerHTML=r.choose.map(x=>`<button type="button" class="btn sky sm" data-a="${esc(x.aid)}">${esc(x.n)} · ${esc(x.c||'')}</button>`).join('');
+    $$('button',ch).forEach(b=>b.onclick=()=>login(b.dataset.a));return}
+   restore(r)};
+  $('#gtLog',d).onclick=()=>login();$('#gtP2',d).onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();login()}};
+  const go2=async()=>{const name=$('#gtN',d).value.trim(),cls=sel.value,phone=this.dg($('#gtP',d).value);
+   if(name.length<2){msg(m,Online.why.bad_name);$('#gtN',d).focus();return}
+   if(!cls){msg(m,Online.why.bad_class);sel.focus();return}
+   if(phone.length<8){msg(m,Online.why.bad_phone);$('#gtP',d).focus();return}
+   msg(m,'جارٍ التسجيل…','ok');$('#gtGo',d).disabled=true;const r=await Online.api('join',{name,cls,phone});$('#gtGo',d).disabled=false;
+   if(!r.ok){msg(m,Online.err(r));return}
+   if(r.exists){msg(m,`هذا الاسم مسجَّل بهذا الرقم من قبل (${r.cls}). سأستعيد تقدّمك…`,'ok');const l=await Online.api('login',{phone,aid:r.aid});if(l.ok&&!l.choose)restore(l);else msg(m,Online.err(l));return}
+   done(r,name,phone)};
+  $('#gtGo',d).onclick=go2;$('#gtP',d).onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go2()}};$('#gtN',d).onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();sel.focus()}};
+  setTimeout(()=>{try{$('#gtN',d).focus()}catch(e){}},60)},
+ /* the account window (after sign-in) */
+ account(){
+  const d=$('#dlg'),a=Online.acct(),close=()=>{d.hidden=true;d.innerHTML=''};let sure=false;d.hidden=false;
+  d.innerHTML=`<div class="dlg-card zoom-in gt" role="dialog" aria-modal="true" aria-labelledby="gtT"><img class="dlg-m" src="${IMG.boyA}" alt="">
+   <h2 id="gtT">حسابي</h2>
+   <p><b>${esc(a.name)}</b><br>${esc(a.cls||'')} · هاتف <bdi dir="ltr">${esc(Online.mask(a.phone))}</bdi></p>
+   <p class="sub" id="gtS" role="status">${Online.line()}</p>
+   <p class="gt-note">رقم هاتفك هو كود دخولك على أي جهاز آخر: «طالب جديد ← لدي حساب».</p>
+   <div class="row dlg-row"><button class="btn go sm" type="button" id="gtSn">${em('check_mark_button')} أرسل تقدّمي الآن</button><button class="btn ghost" type="button" id="gtX">إغلاق</button></div>
+   <div class="dlg-new"><button class="btn red sm" type="button" id="gtOut">تسجيل الخروج: طالب آخر على هذا الجهاز</button><p class="sub" id="gtOm">سيُحفَظ تقدّمك أولًا في حسابك، ثم يُمسح من هذا الجهاز فقط. تستعيده برقم هاتفك. اضغط مرة أخرى للتأكيد.</p></div></div>`;
+  $('#gtX',d).onclick=close;d.onkeydown=e=>{if(e.key==='Escape')close()};
+  $('#gtSn',d).onclick=async e=>{const b=e.currentTarget;b.disabled=true;$('#gtS',d).textContent='جارٍ الإرسال…';const r=await Online.sync({force:true});b.disabled=false;$('#gtS',d).textContent=r.ok?Online.line():Online.err(r)};
+  $('#gtOut',d).onclick=async e=>{const b=e.currentTarget;
+   if(!sure){sure=true;$('#gtOm',d).classList.add('on');b.textContent='نعم، سجّل الخروج';return}
+   b.disabled=true;const r=await Online.sync({force:true,quiet:true});
+   if(!r.ok&&r.error!=='busy'){$('#gtS',d).textContent='لم يُحفظ تقدّمك في الإنترنت ('+Online.err(r)+'). لن أمسح شيئًا حتى يُحفظ.';b.disabled=false;sure=false;b.textContent='تسجيل الخروج: طالب آخر على هذا الجهاز';return}
+   Online.setAcct(null);Online.lastSig='';Online.stat={ok:null,at:0};Prof.reset();this.open('first')};
+  setTimeout(()=>{try{$('#gtSn',d).focus()}catch(e){}},60)}};
 Online.init();
 
 ;boot();
