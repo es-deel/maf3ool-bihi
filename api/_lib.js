@@ -30,4 +30,14 @@ async function body(req) {
   try { return JSON.parse(s || '{}'); } catch (e) { return {}; }
 }
 const send = (res, code, obj) => { res.statusCode = code; res.setHeader('content-type', 'application/json; charset=utf-8'); res.end(JSON.stringify(obj)); };
-module.exports = { parseCode, nameKey, normCls, redis, dbConf, body, send };
+const crypto = require('crypto');
+const same = (a, b) => { const x = Buffer.from(String(a)), y = Buffer.from(String(b)); return x.length === y.length && crypto.timingSafeEqual(x, y); };
+/* teacher key check: returns null when allowed, otherwise sends the error and returns true */
+function deny(req, res) {
+  const want = process.env.TEACHER_KEY;
+  if (!want) { send(res, 503, { error: 'no_teacher_key' }); return true; }
+  if (!same(req.headers['x-key'] || '', want)) { send(res, 401, { error: 'bad_key' }); return true; }
+  return false;
+}
+const qs = (req, k) => (req.query && req.query[k]) || new URL(req.url, 'http://x').searchParams.get(k);
+module.exports = { parseCode, nameKey, normCls, redis, dbConf, body, send, deny, qs };

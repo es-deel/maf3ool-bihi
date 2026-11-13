@@ -3380,10 +3380,10 @@ function buildSheet(R){
 /* ---------- PDF: render each sheet page with html2canvas, then wrap the JPEGs in a small hand-written PDF ---------- */
 /* html2canvas travels INSIDE this file (see build.py), so making the PDF never needs the network.
    On a phone that runs out of memory the page is drawn again at a smaller scale before giving up. */
-async function capturePages(R,onProg){
+async function capturePages(R,onProg,build){
  const h2c=window.html2canvas;if(!h2c)throw new Error('h2c-missing');
  try{await Promise.all(['400 20px "Baloo Bhaijaan 2"','600 20px "Baloo Bhaijaan 2"','700 20px "Baloo Bhaijaan 2"','800 20px "Baloo Bhaijaan 2"','400 20px Lalezar'].map(f=>document.fonts.load(f,'أبجد هوز')));await document.fonts.ready}catch(e){}
- const pages=buildSheet(R);let last=null;
+ const pages=(build||buildSheet)(R);let last=null;
  for(const scale of [2,1.5,1]){
   try{const out=[];
    for(let i=0;i<pages.length;i++){
@@ -4493,6 +4493,312 @@ const Board={
 Eng.ih.push(()=>Mine.dot());
 
 /* --- online.js --- */
+/* TEACHER DASHBOARD (Vercel build only): class analysis + a detailed report for every student, on screen and as PDF.
+   Data: /api/board (every student's result code) and /api/report (the detailed snapshot a student's page sends along with the code). */
+const Dash={
+ S:{rows:[],cl:null,sort:'pos',asc:true,q:'',view:'class',cur:null,cache:{}},
+ DAY:864e5,
+ /* ---------- data ---------- */
+ mkRow(it){const x=Code.parse(it.code);if(!x)return null;
+  const tps=x.tp.map((t,i)=>({k:TP_ORDER[i],n:t[0],c:t[1],a:pc(t[1],t[0])}));
+  return Object.assign(x,{k:it.k,det:!!it.det,spct:pc(x.pts,x.max),acc:pc(x.c,x.n),rk:Rank.at(x.pts,x.max),tps,last:x.t*60000,
+   weak:tps.filter(t=>t.n>=MINN&&t.a<65).sort((a,b)=>a.a-b.a)})},
+ analyse(rows){
+  const N=rows.length,sum=f=>rows.reduce((s,r)=>s+f(r),0),avg=f=>N?Math.round(sum(f)/N):0,now=Date.now();
+  const by=rows.slice().sort((a,b)=>b.spct-a.spct||b.acc-a.acc||b.stars-a.stars||a.name.localeCompare(b.name,'ar'));by.forEach((r,i)=>r.pos=i+1);
+  const sp=by.map(r=>r.spct).sort((a,b)=>a-b),med=N?(N%2?sp[(N-1)/2]:Math.round((sp[N/2-1]+sp[N/2])/2)):0;
+  const bands=[['ممتاز','٩٠٪ فأكثر',r=>r.spct>=90,'#16a34a'],['جيد جدًا','٧٥–٨٩٪',r=>r.spct>=75&&r.spct<90,'#65a30d'],['جيد','٦٠–٧٤٪',r=>r.spct>=60&&r.spct<75,'#f59e0b'],['يحتاج إلى دعم','أقل من ٦٠٪',r=>r.spct<60,'#dc2626']]
+   .map(b=>({t:b[0],r:b[1],n:rows.filter(b[2]).length,c:b[3]}));
+  const topics=TP_ORDER.map((k,i)=>{let n=0,c=0,ev=0,weak=0;rows.forEach(r=>{const t=r.tps[i];n+=t.n;c+=t.c;if(t.n>=MINN){ev++;if(t.a<65)weak++}});const a=pc(c,n);return{k,i,name:TOPIC[k].n,tab:TOPIC[k].tab,n,c,a,ev,weak,st:stOf(n,a)}});
+  const ranked=topics.filter(t=>t.st!=='na').sort((a,b)=>a.a-b.a);
+  const ranks=RANKS.map((r,i)=>({n:r.n,ic:r.ic,k:rows.filter(x=>x.rk===i).length})).filter(x=>x.k);
+  const mins=avg(r=>r.mins),support=by.filter(r=>r.n>=8&&(r.acc<65||r.spct<35)),
+   enrich=by.filter(r=>r.n>=8&&r.acc>=85&&r.spct>=75),fresh=by.filter(r=>r.n<3),
+   idle=by.filter(r=>r.inc>0&&now-r.last>7*this.DAY&&r.n>=3),active=by.filter(r=>now-r.last<this.DAY),week=by.filter(r=>now-r.last<7*this.DAY),
+   fin=by.filter(r=>r.inc===0),effort=by.filter(r=>r.mins>=Math.max(20,mins)&&r.n>=8&&r.acc<65),bonus=by.filter(r=>r.bp>0).sort((a,b)=>b.bp-a.bp);
+  const A={N,by,avg:avg(r=>r.spct),med,acc:avg(r=>r.acc),mins,planets:avg(r=>r.done),total:N?rows[0].total:0,stars:avg(r=>r.stars),smax:N?rows[0].smax:0,bands,topics,ranked,ranks,
+   weakest:ranked[0]&&ranked[0].a<80?ranked[0]:null,strongest:ranked.length?ranked[ranked.length-1]:null,support,enrich,fresh,idle,active,week,fin,effort,bonus,won:rows.filter(r=>r.won).length,
+   spread:N?sp[N-1]-sp[0]:0};
+  A.insights=this.insights(A);return A},
+ /* the written analysis of the whole class (third person, for the teacher) */
+ insights(A){const L=[],nm=(a,k=6)=>a.slice(0,k).map(r=>r.name).join('، ')+(a.length>k?` و${AR(a.length-k)} آخرين`:'');
+  if(!A.N)return L;
+  const lv=A.avg>=75?'مرتفع':A.avg>=60?'جيد':'يحتاج إلى تعزيز';
+  L.push({k:A.avg>=75?'good':A.avg>=60?'info':'warn',s:`مستوى الفصل ${lv}: متوسط الدرجة ${AR(A.avg)}٪ (الوسيط ${AR(A.med)}٪) ومتوسط دقة الإجابات ${AR(A.acc)}٪، من ${NUM(A.N,N_ST)} أرسلوا نتائجهم.`});
+  if(A.strongest&&A.strongest.a>=80)L.push({k:'good',s:`أقوى موضوع في الفصل: «${A.strongest.name}» بدقة ${AR(A.strongest.a)}٪.`});
+  if(A.weakest){const w=A.weakest;L.push({k:'warn',s:`أضعف موضوع: «${w.name}» بدقة ${AR(w.a)}٪${w.weak?`، ويقع ${NUM(w.weak,N_ST)} دون ٦٥٪ فيه`:''}. يُنصح بإعادة شرحه في الحصة القادمة (كوكب «${tabTitle(w.tab)}»).`})}
+  const w2=A.ranked[1];if(w2&&w2!==A.weakest&&w2.a<75)L.push({k:'info',s:`موضوع «${w2.name}» يحتاج أيضًا إلى تثبيت (${AR(w2.a)}٪).`});
+  if(A.spread>=50&&A.N>=4)L.push({k:'info',s:`التفاوت بين الطلاب كبير (من ${AR(A.by[A.N-1].spct)}٪ إلى ${AR(A.by[0].spct)}٪)؛ يناسبه التدريس المتمايز بمجموعات: دعم وإثراء.`});
+  if(A.support.length)L.push({k:'warn',s:`${NUM(A.support.length,N_ST)} قد يحتاجون دعمًا مباشرًا: ${nm(A.support)}.`});
+  if(A.effort.length)L.push({k:'warn',s:`يبذلون وقتًا طويلًا لكن دقتهم منخفضة: ${nm(A.effort)}؛ يحتاجون شرحًا مباشرًا لا مجرد تكرار.`});
+  if(A.enrich.length)L.push({k:'good',s:`متميّزون يمكن إسناد مهام إثرائية لهم أو جعلهم مساعدين لزملائهم: ${nm(A.enrich)}.`});
+  L.push({k:A.fin.length?'good':'info',s:`${A.fin.length?NUM(A.fin.length,N_ST):'لم يُنهِ أحد'}${A.fin.length?' أنهوا':''} كل أجزاء الرحلة؛ ومتوسط الكواكب المنجزة ${AR(A.planets)} من ${AR(A.total)}.`});
+  if(A.idle.length)L.push({k:'warn',s:`توقف عن الدخول أكثر من أسبوع ولم يُنهوا الرحلة: ${nm(A.idle)}.`});
+  if(A.fresh.length)L.push({k:'warn',s:`لم يبدؤوا فعليًا (أقل من ٣ إجابات): ${nm(A.fresh)}.`});
+  if(A.bonus.length)L.push({k:'good',s:`أكثر المثابرين في البونص: ${A.bonus.slice(0,3).map(r=>`${r.name} (${AR(r.bp)})`).join('، ')}.`});
+  if(A.won)L.push({k:'good',s:`${NUM(A.won,N_ST)} هزموا الروبوت الأكبر في المعركة الأخيرة.`});
+  return L},
+ actions(A){const L=[];if(!A.N)return L;
+  if(A.weakest)L.push(`ابدأ الحصة القادمة بمراجعة «${A.weakest.name}» بأمثلة جديدة، ثم اختبر الفصل بأسئلة قصيرة من كوكب «${tabTitle(A.weakest.tab)}».`);
+  if(A.support.length)L.push(`اجمع مجموعة دعم صغيرة (${NUM(A.support.length,N_ST)}) لجلسة قصيرة تركّز على أضعف موضوع لدى كل منهم.`);
+  if(A.enrich.length)L.push('أسند إلى المتميّزين تحديات أصعب (الألعاب على المستوى المتقدّم) أو دور «المساعد» في المجموعات.');
+  if(A.idle.length||A.fresh.length)L.push('تواصل مع الطلاب المتوقفين أو الذين لم يبدؤوا (رسالة في المجموعة أو مع ولي الأمر)، وذكّرهم برابط الفصل.');
+  if(A.fin.length<A.N)L.push('حدّد موعدًا لإكمال الأجزاء الناقصة، وشجّع الفصل بنشر «ترتيب الفصل» (الخمسة الأوائل فقط).');
+  L.push('أعد تحميل اللوحة بعد أسبوع لتقارن تقدّم الفصل.');return L},
+ /* ---------- one student ---------- */
+ /* R: everything the student sheet needs, from the code and (when it exists) the detailed snapshot */
+ R(r,d){const pls=TABS.filter(t=>t.id!=='report'),g=(a,i)=>(a&&a[i])||[0,0];
+  const top=r.tps.map((t,i)=>({k:t.k,n:t.n,c:t.c,a:t.a,name:TOPIC[t.k].n,tab:TOPIC[t.k].tab,st:stOf(t.n,t.a)}));
+  const lvs=[1,2,3].map((l,i)=>{const[x,y]=d?g(d.lvs,i):[0,0],a=pc(y,x);return{l,n:x,c:y,a,name:LV_NAME[l],st:stOf(x,a)}});
+  const tys=d&&d.tys?d.tys.map(t=>{const a=pc(t[2],t[1]);return{k:t[0],n:t[1],c:t[2],a,name:TY_NAME[t[0]]||t[0],st:stOf(t[1],a)}}).filter(t=>t.n>0):[];
+  const R={name:r.name,n:r.n,c:r.c,acc:r.acc,pts:r.pts,max:r.max,stars:r.stars,smax:r.smax,spct:r.spct,done:r.done,total:r.total,bp:r.bp,bs:r.bs,bc:d?d.bc||0:0,br:d?d.br||0:0,
+   parts:d&&d.parts?['أسئلة الدروس','التدريبات','الألعاب'].map((n,i)=>[n,g(d.parts,i)[0],g(d.parts,i)[1]]):[],top,lvs,tys,
+   wrong:d&&d.wrong?d.wrong:[],best:d?d.best||0:0,fixed:d?d.fixed||0:0,mins:r.mins,qa:d?d.qa:null,qt:d?d.qt:null,rank:RANKS[r.rk].n,rk:r.rk,bd:d&&d.bd?d.bd:[],won:r.won,dc:r.dc,
+   planets:d&&d.pl?pls.map((t,i)=>({id:t.id,title:t.title,ok:!!d.pl[i]})):[],
+   inc:d&&d.inc?{count:d.incN?d.incN[0]:r.inc,nQ:d.incN?d.incN[1]:0,planets:d.inc}:{count:r.inc,nQ:0,planets:[]},hasDetail:!!d};
+  R.rate=R.n<8?RATE0:RATE.find(x=>R.spct>=x.min);return R},
+ notes(r,R,cl){const S=[],W=[],A=[],first=r.name.split(' ')[0],now=Date.now(),idleD=Math.floor((now-r.last)/this.DAY);
+  const ct=cl&&cl.topics||[];
+  R.top.forEach((t,i)=>{if(t.n<MINN)return;const c=ct[i]&&ct[i].n>=MINN?ct[i].a:null,vs=c==null?'':(t.a-c>=10?`، أعلى من متوسط الفصل (${AR(c)}٪)`:c-t.a>=10?`، أقل من متوسط الفصل (${AR(c)}٪)`:'');
+   if(t.st==='good')S.push(`«${t.name}»: ${AR(t.a)}٪ (${fa(t.c,t.n)})${vs}.`);
+   else if(t.st==='weak')W.push(`«${t.name}»: ${AR(t.a)}٪ فقط (${fa(t.c,t.n)})${vs}؛ يحتاج إلى مراجعة.`);
+   else W.push(`«${t.name}»: ${AR(t.a)}٪ مستوى جيد ويمكن رفعه بمزيد من التدريب${vs}.`)});
+  const L=R.lvs;if(L[0].n>=MINN&&L[0].a<75)W.push(`الأسئلة السهلة (الأساسيات) تحتاج إلى مراجعة: ${AR(L[0].a)}٪.`);
+  if(L[2].n>=MINN&&L[2].a>=70)S.push(`يتعامل بثقة مع الأسئلة المتقدّمة (${AR(L[2].a)}٪).`);
+  if(L[2].n>=MINN&&L[2].a<50)W.push(`الأسئلة المتقدّمة صعبة عليه الآن (${AR(L[2].a)}٪)؛ يثبّت الأساسيات أولًا.`);
+  R.tys.filter(t=>t.n>=MINN&&t.k!=='meteor'&&t.k!=='det').forEach(t=>{if(t.a>=85)S.push(`مهارة «${t.name}» ممتازة (${AR(t.a)}٪).`);else if(t.a<60)W.push(`مهارة «${t.name}» تحتاج إلى تدريب (${AR(t.a)}٪).`)});
+  const rep=R.wrong.filter(w=>w.k>=2);if(rep.length)W.push(`أخطأ أكثر من مرة في ${qn(rep.length)} (مذكورة في قسم الأسئلة الخاطئة).`);
+  if(R.best>=5)S.push(`أطول سلسلة إجابات صحيحة متتالية: ${AR(R.best)} إجابات.`);
+  if(R.fixed>0)S.push(`صحّح ${AR(R.fixed)} من أخطائه السابقة بعد المراجعة، وهذا دليل تعلّم.`);
+  if(R.bp>0)S.push(`جمع بونصًا (${NUM(R.bp,N_BPT)}) ما يدل على المثابرة وإعادة المحاولة.`);
+  if(R.won)S.push('هزم الروبوت الأكبر في المعركة الأخيرة.');
+  if(R.inc.count>0)W.unshift(`لم يكمل ${NUM(R.inc.count,N_PARTA)} من الرحلة${R.inc.nQ?` (${NUM(R.inc.nQ,N_Q)} بلا إجابة)`:''}، وتُحسب صفرًا في درجته.`);
+  if(idleD>=7&&R.inc.count>0)W.push(`لم يدخل الدرس منذ ${NUM(idleD,['يوم','يومين','أيام','يومًا'])}.`);
+  if(cl&&cl.N>=3){const d=r.spct-cl.avg;(d>=10?S:d<=-10?W:[]).push(`درجته ${AR(r.spct)}٪ ${d>=0?'أعلى':'أقل'} من متوسط الفصل (${AR(cl.avg)}٪) بـ ${AR(Math.abs(d))} نقطة مئوية.`)}
+  if(R.n<5){S.length=0;W.length=0;if(R.inc.count>0||R.n===0)W.push('لم يبدأ الحل فعليًا بعد.')}
+  if(R.n>=5&&!S.length)S.push(`ثابر وأجاب عن ${AR(R.n)} من الأسئلة.`);
+  if(R.n>=5&&!W.length)W.push('لا توجد نقاط ضعف واضحة حتى الآن.');
+  R.top.filter(t=>t.st==='weak').slice(0,3).forEach(t=>A.push(`جلسة دعم قصيرة مع ${first} في «${t.name}» ثم إعادة تدريبه على كوكب «${tabTitle(t.tab)}».`));
+  if(rep.length)A.push('مراجعة الأسئلة المتكررة الخطأ معه شفهيًا، والتأكد أنه يفهم سبب الإجابة الصحيحة.');
+  if(R.inc.count>0&&R.n>=3)A.push('تحفيزه على إكمال الأجزاء الناقصة (يمكنه من «لوحتي» الذهاب إلى أول جزء ناقص).');
+  if(R.n<3)A.push('مساعدته على البدء: فتح رابط الفصل وحل أول تدريب معه، وتحديد موعد لمتابعته.');
+  if(idleD>=7&&R.inc.count>0)A.push('التواصل معه أو مع ولي أمره لمعرفة سبب التوقف.');
+  if(R.n>=8&&R.acc>=85&&r.spct>=75)A.push('إسناد تحدٍّ إضافي (الألعاب بمستوى متقدّم) أو دور المساعد لزملائه.');
+  if(!A.length)A.push('متابعة عامة؛ مستواه مستقر. أعد قراءة التقرير بعد أسبوع.');
+  return{S,W,A}},
+ /* a short note for the parent / the student's WhatsApp */
+ summary(r,R,nt){return['تقرير الطالب: '+r.name,'مغامرة المفعول به · اللغة العربية · الصف الخامس الابتدائي',
+  `المستوى: ${R.rate.t} (${R.rate.g}) · الرتبة: ${R.rank}`,`الدرجة: ${AR(r.pts)} من ${AR(r.max)} (${AR(r.spct)}٪) · دقة الإجابات: ${R.n?AR(r.acc)+'٪':'—'} · الكواكب: ${fa(r.done,r.total)}`,
+  nt.S.length?'نقاط القوة: '+nt.S.slice(0,3).join(' '):'',nt.W.length?'يحتاج إلى: '+nt.W.slice(0,3).join(' '):'','مع تحيات الأستاذ إسلام قنديل'].filter(Boolean).join('\n')},
+ /* ---------- A4 sheets ---------- */
+ flow(blocks,o){const root=$('#pdfRoot');root.innerHTML='';const pages=[];
+  const mk=first=>{const p=document.createElement('div');p.className='pp-page';
+   p.innerHTML=first?`<div class="pp-head"><img class="pp-logo" src="${IMG.logo}" alt=""><div><h1>${o.title}</h1><p>${o.sub}</p></div></div><div class="pp-body"></div><div class="pp-foot"><span></span><span class="pp-pg"></span></div>`
+    :`<div class="pp-head mini"><h1>${o.mini}</h1></div><div class="pp-body"></div><div class="pp-foot"><span></span><span class="pp-pg"></span></div>`;
+   $('.pp-foot span',p).textContent=o.foot;root.appendChild(p);pages.push(p);return p};
+  let body=$('.pp-body',mk(true));
+  for(const h of blocks){const t=document.createElement('div');t.innerHTML=h;const el=t.firstElementChild;if(!el)continue;body.appendChild(el);
+   if(body.scrollHeight>body.clientHeight+1&&body.children.length>1){body.removeChild(el);body=$('.pp-body',mk(false));body.appendChild(el)}}
+  pages.forEach((p,i)=>$('.pp-pg',p).textContent=`صفحة ${AR(i+1)} من ${AR(pages.length)}`);return pages},
+ bar(label,pct,txt,col,mark){return`<div class="pp-row"><b>${esc(label)}</b><div class="pp-track" style="position:relative"><i style="width:${Math.max(pct,pct>0?3:0)}%;background:${col}"></i>${mark!=null?`<u class="ph-mk" style="right:${mark}%"></u>`:''}</div><div class="pp-v">${txt}</div></div>`},
+ hd(t,s){return`<div class="pp-first">${PH(t,s)}`},
+ list(title,sub,items,cls){const B=[];items.forEach((h,i)=>B.push(i?h:`<div class="pp-first">${PH(title,sub)}${h}</div>`));return B},
+ heat(a){const c=a>=80?'#bbf7d0':a>=65?'#fde68a':'#fecaca';return c},
+ studentBlocks(r,R,cl,nt){const B=[],pos=cl?`${AR(r.pos)} من ${AR(cl.N)}`:'—',today=dateAr();
+  B.push(`<div class="pp-id"><div class="pp-cell"><small>اسم الطالب</small><b>${esc(r.name)}</b></div><div class="pp-cell"><small>الفصل</small><b>${esc(this.S.cls||'')}</b></div><div class="pp-cell"><small>تاريخ التقرير</small><b>${today}</b></div></div>`);
+  B.push(`<div class="pp-rate" style="border-color:${R.rate.c}"><img class="pp-ic" src="${IMG[R.rate.ic]}" alt=""><div class="pp-rt"><h2>${R.rate.t}</h2><span class="pp-g" style="background:${R.rate.c}">${R.rate.g}</span><p>الرتبة الفضائية: ${esc(R.rank)} · ترتيبه في الفصل: ${pos}</p></div><div class="pp-pct" style="border-color:${R.n?(R.spct>=75?'#16a34a':R.spct>=50?'#f59e0b':'#dc2626'):'#cbd5e1'}"><b>${R.n?AR(R.spct)+'٪':'—'}</b><small>التقييم العام</small></div></div>`);
+  B.push(`<div class="pp-tiles"><div class="pp-tile"><b>${fa(R.pts,R.max)}</b><span>الدرجة</span></div><div class="pp-tile"><b>${fa(R.stars,R.smax)}</b><span>النجوم</span></div><div class="pp-tile"><b>${R.n?AR(R.acc)+'٪':'—'}</b><span>دقة الإجابات${R.n?` (${fa(R.c,R.n)})`:''}</span></div><div class="pp-tile"><b>${fa(R.done,R.total)}</b><span>الكواكب المنجزة</span></div></div>`);
+  B.push(`<div class="pp-pls">${R.parts.length?`<b>تفصيل الدرجة:</b> ${partsTxt(R)}<br>`:''}<b>آخر نشاط:</b> ${ago(r.last)} · <b>مدة التعلّم:</b> ${fmtTime(R.mins*60)}${R.qa!=null?` · <b>أسئلة الدروس المحلولة:</b> ${fa(R.qa,R.qt)}`:''}</div>`);
+  if(cl&&cl.N>=2)B.push(`<div class="pp-item"><span class="q">مقارنة بالفصل (${NUM(cl.N,N_ST)})</span><span class="e">درجته ${AR(r.spct)}٪ مقابل متوسط الفصل ${AR(cl.avg)}٪ (الوسيط ${AR(cl.med)}٪) · دقته ${AR(r.acc)}٪ مقابل ${AR(cl.acc)}٪ · الكواكب ${AR(r.done)} مقابل متوسط ${AR(cl.planets)}.</span></div>`);
+  if(R.bp>0)B.push(`<div class="pp-bonus"><div class="pp-bn-h"><b>التقييم الإضافي (بونص)</b><span>منفصل عن الدرجة والنجوم الأساسية</span></div><div class="pp-bn-v"><b>${NUM(R.bp,N_BPT)}</b>${R.bs?` · <b>${NUM(R.bs,N_BSTAR)}</b>`:''}</div>${R.hasDetail?`<small>من سلسلة الإجابات الصحيحة: ${AR(R.bc)} · من تكرار الحل: ${AR(R.br)}</small>`:''}</div>`);
+  if(R.bd.length)B.push(`<div class="pp-pls"><b>الأوسمة (${AR(R.bd.length)}):</b> ${R.bd.map(esc).join('، ')}</div>`);
+  B.push(`<div>${PH('الأداء حسب موضوعات الدرس','الخط الداكن = متوسط الفصل')}${R.top.map((t,i)=>{const c=cl&&cl.topics[i]&&cl.topics[i].n>=MINN?cl.topics[i].a:null;
+   return this.bar(t.name,t.n?t.a:0,t.n?`${AR(t.a)}٪${c!=null?` <span class="ph-c">الفصل ${AR(c)}٪</span>`:''}<span class="pp-chip" style="background:${ST_CH[t.st]}">${ST_TXT[t.st]}</span>`:'—',ST_PP[t.st],c)}).join('')}</div>`);
+  if(R.hasDetail&&(R.lvs.some(t=>t.n)||R.tys.length))B.push(`<div class="pp-two"><div>${PH('حسب مستوى الصعوبة')}${R.lvs.map(t=>ppRow(t.name,t.a,t.n,t.st,1)).join('')}</div><div>${PH('حسب نوع السؤال')}${R.tys.length?R.tys.map(t=>ppRow(t.name,t.a,t.n,t.st,1)).join(''):'<p style="font-size:13px;color:#6b6396">لا توجد بيانات.</p>'}</div></div>`);
+  if(R.planets.length)B.push(`<div class="pp-pls"><b>الكواكب:</b> ${R.planets.map(p=>`<span class="ph-pl${p.ok?' ok':''}">${p.ok?'✓':'○'} ${esc(p.title)}</span>`).join(' ')}</div>`);
+  this.list('أجزاء لم تكتمل','تُحسب صفرًا في الدرجة',R.inc.planets.map(p=>`<div class="pp-item topic"><span class="q">«${esc(p.t)}»</span><span class="e">${esc(p.i.slice(0,3).map(i=>i[0]).join('، '))}${p.i.length>3?` … و${AR(p.i.length-3)} أخرى`:''}</span></div>`)).forEach(h=>B.push(h));
+  this.list('نقاط القوة','',nt.S.map(s=>`<div class="pp-item good">${esc(s)}</div>`)).forEach(h=>B.push(h));
+  this.list('نقاط الضعف','',nt.W.map(s=>`<div class="pp-item weak">${esc(s)}</div>`)).forEach(h=>B.push(h));
+  if(R.wrong.length)this.list('أسئلة أخطأ فيها','للمراجعة معه'+(R.wrong.length>12?` (أهمّ ${AR(12)})`:''),R.wrong.slice(0,12).map(w=>`<div class="pp-item"><span class="q">${esc(w.q)}${w.k>1?`<span class="n">أخطأ ${AR(w.k)} مرات</span>`:''}</span><span class="a">الصواب: ${esc(w.a)}</span>${w.e?`<span class="e">${esc(w.e)}</span>`:''}</div>`)).forEach(h=>B.push(h));
+  else if(R.hasDetail&&R.n>0)B.push(`<div class="pp-item good">لا توجد أسئلة خاطئة مسجَّلة للمراجعة.</div>`);
+  if(!R.hasDetail)B.push(`<div class="pp-item">هذا التقرير مبنيّ على «رمز النتيجة» فقط؛ ستظهر تفاصيل المستويات وأنواع الأسئلة والأسئلة الخاطئة بعد أن يفتح الطالب الصفحة الجديدة وتُرسَل نتيجته من جديد.</div>`);
+  B.push(`<div>${PH('توصيات للمعلم')}<ol class="pp-plan">${nt.A.map((p,i)=>`<li><span>${AR(i+1)}</span>${esc(p)}</li>`).join('')}</ol></div>`);
+  B.push(`<div class="pp-note">${PH('ملاحظات المعلم')}<div class="pp-line"></div><div class="pp-line"></div><div class="pp-line"></div><div class="pp-sign"><span>توقيع المعلم: ....................</span><span>التاريخ: ....................</span></div></div>`);
+  return B},
+ studentPages(r,R,cl,nt){return this.flow(this.studentBlocks(r,R,cl,nt),{title:'تقرير أداء الطالب',sub:`مغامرة المفعول به · اللغة العربية · الصف الخامس الابتدائي · الفصل: ${esc(this.S.cls||'')} · الأستاذ إسلام قنديل`,mini:'تقرير أداء الطالب: '+esc(r.name),foot:'مغامرة المفعول به · '+r.name})},
+ classBlocks(A){const B=[],cls=this.S.cls||'';
+  B.push(`<div class="pp-id"><div class="pp-cell"><small>الفصل</small><b>${esc(cls)}</b></div><div class="pp-cell"><small>عدد الطلاب</small><b>${AR(A.N)}</b></div><div class="pp-cell"><small>تاريخ التقرير</small><b>${dateAr()}</b></div></div>`);
+  B.push(`<div class="pp-tiles"><div class="pp-tile"><b>${AR(A.avg)}٪</b><span>متوسط الدرجة (الوسيط ${AR(A.med)}٪)</span></div><div class="pp-tile"><b>${AR(A.acc)}٪</b><span>متوسط دقة الإجابات</span></div><div class="pp-tile"><b>${AR(A.fin.length)} / ${AR(A.N)}</b><span>أنهوا كل الأجزاء</span></div><div class="pp-tile"><b>${AR(A.week.length)} / ${AR(A.N)}</b><span>نشطون آخر ٧ أيام</span></div></div>`);
+  B.push(`<div>${PH('توزيع مستويات الطلاب','حسب الدرجة من المجموع الكلي')}${A.bands.map(b=>this.bar(b.t+' · '+b.r,A.N?pc(b.n,A.N):0,`${AR(b.n)} ${b.n===1?'طالب':'طلاب'}`,b.c)).join('')}</div>`);
+  B.push(`<div>${PH('الأداء حسب موضوعات الدرس','دقة الفصل كله وعدد من هم دون ٦٥٪')}${A.topics.map(t=>this.bar(t.name,t.n?t.a:0,t.n?`${AR(t.a)}٪${t.weak?` <span class="ph-c">${AR(t.weak)} دون ٦٥٪</span>`:''}<span class="pp-chip" style="background:${ST_CH[t.st]}">${ST_TXT[t.st]}</span>`:'—',ST_PP[t.st])).join('')}</div>`);
+  this.list('تحليل شامل لنتائج الفصل','',A.insights.map(x=>`<div class="pp-item ${x.k==='good'?'good':x.k==='warn'?'weak':''}">${esc(x.s)}</div>`)).forEach(h=>B.push(h));
+  B.push(`<div>${PH('توصيات للحصة القادمة')}<ol class="pp-plan">${this.actions(A).map((p,i)=>`<li><span>${AR(i+1)}</span>${esc(p)}</li>`).join('')}</ol></div>`);
+  const grp=(t,a,c)=>a.length?`<div class="pp-item ${c}"><span class="q">${t} (${AR(a.length)})</span><span class="e">${a.map(r=>esc(r.name)).join('، ')}</span></div>`:'';
+  const g=[grp('مجموعة الدعم',A.support,'weak'),grp('مجموعة الإثراء',A.enrich,'good'),grp('متوقفون عن الدخول',A.idle,'topic'),grp('لم يبدؤوا بعد',A.fresh,'topic')].filter(Boolean);
+  if(g.length)this.list('مجموعات مقترحة للمتابعة','',g).forEach(h=>B.push(h));
+  const th=`<tr><th>الموضوع</th>${A.topics.map((t,i)=>`<th>${AR(i+1)}</th>`).join('')}</tr>`;
+  B.push(`<div class="pp-first">${PH('مفتاح الموضوعات')}<div class="ph-key">${A.topics.map((t,i)=>`<span><b>${AR(i+1)}</b> ${esc(t.name)}</span>`).join('')}</div></div>`);
+  const cell=t=>`<td style="background:${t.n>=MINN?this.heat(t.a):'#f1f5f9'}">${t.n>=MINN?AR(t.a):'—'}</td>`;
+  for(let i=0;i<A.by.length;i+=13){const ch=A.by.slice(i,i+13);
+   B.push(`<div class="${i?'':'pp-first'}">${i?'':PH('جدول الطلاب وخريطة المواضيع','دقة كل موضوع ٪ (أخضر ٨٠+ · أصفر ٦٥+ · أحمر دون ذلك)')}<table class="ph-t"><tr><th>#</th><th>الطالب</th><th>الدرجة</th><th>٪</th><th>الدقة</th><th>كواكب</th>${A.topics.map((t,k)=>`<th>${AR(k+1)}</th>`).join('')}</tr>${ch.map(r=>`<tr><td>${AR(r.pos)}</td><td class="nm">${esc(r.name)}</td><td>${AR(r.pts)}</td><td>${AR(r.spct)}</td><td>${r.n?AR(r.acc)+'٪':'—'}</td><td>${AR(r.done)}/${AR(r.total)}</td>${r.tps.map(cell).join('')}</tr>`).join('')}</table></div>`)}
+  B.push(`<div class="pp-note">${PH('ملاحظات المعلم')}<div class="pp-line"></div><div class="pp-line"></div><div class="pp-sign"><span>توقيع المعلم: ....................</span><span>التاريخ: ....................</span></div></div>`);
+  return B},
+ classPages(A){return this.flow(this.classBlocks(A),{title:'تقرير تحليل نتائج الفصل',sub:`مغامرة المفعول به · اللغة العربية · الصف الخامس الابتدائي · الفصل: ${esc(this.S.cls||'')} · الأستاذ إسلام قنديل`,mini:'تحليل نتائج الفصل: '+esc(this.S.cls||''),foot:'مغامرة المفعول به · الفصل '+(this.S.cls||'')})},
+ /* ---------- PDF / print ---------- */
+ async pdf(build,title,file,btn,msg){const set=t=>{if(msg)msg.textContent=t};if(btn)btn.disabled=true;set('جارٍ تجهيز الملف… لحظات من فضلك.');
+  try{const imgs=await capturePages(null,(i,n)=>set(`جارٍ تجهيز الصفحة ${AR(i)} من ${AR(n)}…`),build),blob=pdfBlob(imgs,title),r=await saveFile(blob,file);
+   set(r==='declined'?'أُلغي الحفظ.':'تم تجهيز الملف ✓ ('+(r==='anchor'||r==='saved'?'حُفظ على جهازك':'')+')');if(r==='anchor'||r==='saved')toast('حُفظ ملف PDF ✓')}
+  catch(e){try{console.warn('dash pdf',e)}catch(_){}set('تعذّر تجهيز الملف على هذا الجهاز. جرّب مرة أخرى، أو استخدم «اطبع».')}
+  if(btn)btn.disabled=false},
+ async print(build,msg){try{try{await document.fonts.ready}catch(e){}build();document.body.classList.add('printing');
+  const end=()=>{document.body.classList.remove('printing');window.removeEventListener('afterprint',end)};window.addEventListener('afterprint',end);setTimeout(end,60000);setTimeout(()=>{try{window.print()}catch(e){end()}},150)}catch(e){if(msg)msg.textContent='تعذّرت الطباعة.'}},
+ fn(t){return t.replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,40)},
+ csv(A){const q=v=>'"'+String(v).replace(/"/g,'""')+'"',H=['#','الطالب','الدرجة','الدرجة العظمى','النسبة ٪','النجوم','الدقة ٪','الإجابات','الصحيحة','الكواكب المنجزة','الأجزاء الناقصة','بونص','دقائق التعلّم','الرتبة','آخر نشاط'];
+  TP_ORDER.forEach(k=>H.push(TOPIC[k].n+' (٪)'));
+  const L=[H.map(q).join(',')];A.by.forEach(r=>L.push([r.pos,r.name,r.pts,r.max,r.spct,r.stars,r.acc,r.n,r.c,r.done,r.inc,r.bp,r.mins,RANKS[r.rk].n,new Date(r.last).toISOString().slice(0,16).replace('T',' ')].concat(r.tps.map(t=>t.n>=MINN?t.a:'')).map(q).join(',')));
+  return new Blob(['﻿'+L.join('\r\n')],{type:'text/csv;charset=utf-8'})},
+ /* ---------- loading ---------- */
+ async load(){const S=this.S;
+  const r=await fetch('/api/board?cls='+encodeURIComponent(S.cls),{headers:{'x-key':S.key}}),j=await r.json().catch(()=>({}));
+  if(!r.ok||!j.ok)return{ok:false,error:j.error||'server'};
+  const items=j.items||(j.codes||[]).map(c=>({k:c,code:c,det:false}));
+  S.rows=items.map(it=>this.mkRow(it)).filter(Boolean);S.cl=this.analyse(S.rows);S.cache={};S.at=Date.now();
+  try{Board.ingest(S.rows.map(r=>r.code).join('\n'))}catch(e){}
+  return{ok:true}},
+ async detail(r){const S=this.S;if(!r.det)return null;if(S.cache[r.k]!==undefined)return S.cache[r.k];
+  try{const x=await fetch('/api/report?cls='+encodeURIComponent(S.cls)+'&k='+encodeURIComponent(r.k),{headers:{'x-key':S.key}}),j=await x.json().catch(()=>({}));S.cache[r.k]=x.ok&&j.ok?j.detail:null}catch(e){S.cache[r.k]=null}
+  return S.cache[r.k]},
+ /* ---------- screen ---------- */
+ inject(){if($('#dashCss'))return;const s=document.createElement('style');s.id='dashCss';s.textContent=this.CSS;document.head.appendChild(s)},
+ root(){let d=$('#dash');if(!d){d=document.createElement('div');d.id='dash';d.setAttribute('role','dialog');d.setAttribute('aria-modal','true');d.setAttribute('aria-label','لوحة المعلم');document.body.appendChild(d);
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!d.hidden){if(this.S.view==='student')this.show('class');else this.close()}})}return d},
+ close(){const d=$('#dash');if(d){d.hidden=true;d.innerHTML=''}document.body.classList.remove('dash-on')},
+ async open(cls,key,pre){this.inject();const S=this.S;S.cls=cls;S.key=key;const d=this.root();d.hidden=false;document.body.classList.add('dash-on');S.q='';S.sort='pos';S.asc=true;
+  let r={ok:true};if(!pre){d.innerHTML=`<div class="dh-wait">${em('rocket','xl')}<p>جارٍ تحميل نتائج الفصل…</p></div>`;r=await this.load()}
+  if(!r.ok){d.innerHTML=`<div class="dh-wait"><p>${esc(Online.why[r.error]||Online.why.server)}</p><button class="btn ghost" type="button" id="dhX">إغلاق</button></div>`;$('#dhX',d).onclick=()=>this.close();return r}
+  this.show('class');return r},
+ show(v,k){const S=this.S;S.view=v;if(v==='student'&&k!=null)S.cur=k;const d=this.root();d.scrollTop=0;if(v==='class')this.classView(d);else this.studentView(d)},
+ sorted(){const S=this.S,A=S.cl,q=Board.key(S.q||'');let a=A.by.filter(r=>!q||Board.key(r.name).includes(q));
+  const f={pos:r=>r.pos,name:r=>r.name,pts:r=>-r.pts,acc:r=>-(r.n?r.acc:-1),done:r=>-r.done,last:r=>-r.last,inc:r=>r.inc}[S.sort]||(r=>r.pos);
+  a=a.slice().sort((x,y)=>{const p=f(x),q2=f(y);const c=typeof p==='string'?p.localeCompare(q2,'ar'):p-q2;return(S.asc?c:-c)||x.pos-y.pos});return a},
+ classView(d){const S=this.S,A=S.cl,self=this;
+  if(!A.N){d.innerHTML=`<div class="dh-top"><b>لوحة المعلم · الفصل «${esc(S.cls)}»</b><span><button class="btn ghost sm" id="dhR" type="button">تحديث</button><button class="btn ghost sm" id="dhX" type="button">إغلاق</button></span></div><div class="dh-wait"><p>لا توجد نتائج مرسلة لهذا الفصل بعد. أرسل «رابط الفصل» لطلابك.</p></div>`;
+   $('#dhX',d).onclick=()=>this.close();$('#dhR',d).onclick=()=>this.open(S.cls,S.key);return}
+  const tile=(v,l,c)=>`<div class="dh-tile"${c?` style="--tc:${c}"`:''}><b>${v}</b><small>${l}</small></div>`;
+  const bar=(l,pct,txt,col)=>`<div class="dh-bar"><span>${l}</span><i><u style="width:${Math.max(pct,pct>0?3:0)}%;background:${col}"></u></i><em>${txt}</em></div>`;
+  const rows=this.sorted(),th=(k,t)=>`<th><button type="button" data-s="${k}" class="${S.sort===k?'on':''}">${t}${S.sort===k?(S.asc?' ▲':' ▼'):''}</button></th>`;
+  const chips=(a,c)=>a.map(r=>`<button type="button" class="dh-chip ${c}" data-o="${esc(r.k)}">${esc(r.name)}</button>`).join('');
+  d.innerHTML=`<div class="dh-top"><b>${em('man_teacher')} لوحة المعلم · الفصل «${esc(S.cls)}»</b><span><button class="btn ghost sm" id="dhR" type="button">تحديث</button><button class="btn ghost sm" id="dhX" type="button">إغلاق</button></span></div>
+  <div class="dh-wrap">
+   <p class="dh-sub">آخر تحديث ${ago(S.at)} · ${NUM(A.N,N_ST)} في الفصل. اضغط اسم أي طالب لترى تقريره المفصّل وتحمّله PDF.</p>
+   <div class="dh-act"><button class="btn gold sm" id="dhP" type="button">${em('closed_book')} تحميل تقرير الفصل PDF</button><button class="btn sky sm" id="dhPr" type="button">${em('pencil')} اطبع تقرير الفصل</button><button class="btn ghost sm" id="dhC" type="button">جدول Excel (CSV)</button><button class="btn ghost sm" id="dhT" type="button">انسخ ترتيب الفصل</button><button class="btn ghost sm" id="dhB" type="button">${em('crown')} لوحة الشرف</button></div>
+   <p class="dh-msg" id="dhM" role="status"></p>
+   <div class="dh-tiles">${tile(AR(A.avg)+'٪','متوسط الدرجة · الوسيط '+AR(A.med)+'٪','#a78bfa')}${tile(AR(A.acc)+'٪','متوسط دقة الإجابات','#38bdf8')}${tile(AR(A.fin.length)+'/'+AR(A.N),'أنهوا كل الأجزاء','#4ade80')}${tile(AR(A.week.length)+'/'+AR(A.N),'نشطون آخر ٧ أيام','#fbbf24')}${tile(AR(A.planets)+'/'+AR(A.total),'متوسط الكواكب المنجزة','#f472b6')}${tile(fmtTime(A.mins*60),'متوسط وقت التعلّم','#fb923c')}</div>
+   <section class="dh-card"><h3>${em('light_bulb')} تحليل شامل لنتائج الفصل</h3><ul class="dh-ins">${A.insights.map(x=>`<li class="${x.k}">${esc(x.s)}</li>`).join('')}</ul>
+    <h4>توصيات للحصة القادمة</h4><ol class="dh-rec">${this.actions(A).map(s=>`<li>${esc(s)}</li>`).join('')}</ol></section>
+   <div class="dh-two"><section class="dh-card"><h3>توزيع المستويات</h3>${A.bands.map(b=>bar(`${b.t} <small>${b.r}</small>`,pc(b.n,A.N),AR(b.n),b.c)).join('')}
+     <h4>الرتب الفضائية</h4><div class="dh-rk">${A.ranks.map(r=>`<span>${em(r.ic)} ${r.n} <b>${AR(r.k)}</b></span>`).join('')}</div></section>
+    <section class="dh-card"><h3>الأداء حسب الموضوعات</h3>${A.topics.map(t=>bar(esc(t.name),t.n?t.a:0,t.n?`${AR(t.a)}٪${t.weak?` <small>· ${AR(t.weak)} دون ٦٥٪</small>`:''}`:'—',ST_UI[t.st])).join('')}</section></div>
+   <section class="dh-card"><h3>خريطة الموضوعات لكل طالب</h3><p class="dh-sub">كل خانة = دقة الطالب في الموضوع (أخضر ٨٠٪+، أصفر ٦٥٪+، أحمر أقل). الرقم يشير إلى الموضوع.</p>
+    <div class="dh-key">${A.topics.map((t,i)=>`<span><b>${AR(i+1)}</b> ${esc(t.name)}</span>`).join('')}</div>
+    <div class="dh-sc"><table class="dh-heat"><tr><th>الطالب</th>${A.topics.map((t,i)=>`<th>${AR(i+1)}</th>`).join('')}</tr>${A.by.map(r=>`<tr><td><button type="button" data-o="${esc(r.k)}">${esc(r.name)}</button></td>${r.tps.map(t=>`<td style="--h:${t.n>=MINN?this.heat(t.a):'#475569'}" class="${t.n>=MINN?'h':'x'}">${t.n>=MINN?AR(t.a):'—'}</td>`).join('')}</tr>`).join('')}</table></div></section>
+   <div class="dh-two">${A.support.length?`<section class="dh-card"><h3>${em('bullseye')} قد يحتاجون دعمًا</h3><div class="dh-chips">${chips(A.support,'w')}</div></section>`:''}
+    ${A.enrich.length?`<section class="dh-card"><h3>${em('trophy')} متميّزون للإثراء</h3><div class="dh-chips">${chips(A.enrich,'g')}</div></section>`:''}
+    ${A.idle.length||A.fresh.length?`<section class="dh-card"><h3>${em('thinking_face')} للمتابعة</h3><div class="dh-chips">${chips(A.idle,'o')}${chips(A.fresh,'o')}</div></section>`:''}</div>
+   <section class="dh-card"><h3>الطلاب</h3><label class="sr" for="dhQ">بحث باسم الطالب</label><input id="dhQ" class="bk-ta dh-q" placeholder="ابحث باسم الطالب" value="${esc(S.q)}" autocomplete="off">
+    <div class="dh-sc"><table class="dh-tab"><tr>${th('pos','#')}${th('name','الطالب')}${th('pts','الدرجة')}${th('acc','الدقة')}${th('done','الكواكب')}${th('inc','ناقص')}${th('last','آخر نشاط')}<th></th></tr>
+    ${rows.map(r=>`<tr><td>${AR(r.pos)}</td><td><button type="button" class="nm" data-o="${esc(r.k)}">${esc(r.name)}</button><small>${em(RANKS[r.rk].ic)} ${RANKS[r.rk].n}${r.det?'':' · بلا تفاصيل'}</small></td>
+     <td><b>${AR(r.pts)}</b> <small>(${AR(r.spct)}٪)</small><i class="dh-mini"><u style="width:${Math.max(3,r.spct)}%"></u></i></td><td>${r.n?AR(r.acc)+'٪':'—'}</td><td>${AR(r.done)}/${AR(r.total)}</td><td>${r.inc?AR(r.inc):'✓'}</td><td>${ago(r.last)}</td>
+     <td><button type="button" class="btn sky sm" data-o="${esc(r.k)}">التقرير ←</button></td></tr>`).join('')||'<tr><td colspan="8">لا نتائج مطابقة.</td></tr>'}</table></div></section>
+   <p class="dh-sub">النتائج تأتي من «رمز النتيجة» الذي يولّده الدرس نفسه، وتُرسَل تلقائيًا من أجهزة الطلاب. الغرض المتابعة والتشجيع لا الاختبارات الرسمية.</p>
+  </div>`;
+  const msg=$('#dhM',d);
+  $('#dhX',d).onclick=()=>this.close();$('#dhR',d).onclick=async()=>{msg.textContent='جارٍ التحديث…';const r=await this.load();if(!r.ok){msg.textContent=Online.why[r.error]||Online.why.server;return}this.classView(d)};
+  $('#dhP',d).onclick=e=>this.pdf(()=>this.classPages(A),'تحليل نتائج الفصل '+S.cls,'تحليل_الفصل_'+this.fn(S.cls)+'.pdf',e.currentTarget,msg);
+  $('#dhPr',d).onclick=()=>this.print(()=>this.classPages(A),msg);
+  $('#dhC',d).onclick=async()=>{const r=await saveFile(this.csv(A),'نتائج_الفصل_'+this.fn(S.cls)+'.csv');msg.textContent=r==='declined'?'أُلغي الحفظ.':'حُفظ جدول النتائج ✓'};
+  $('#dhT',d).onclick=async()=>{const ok=await copyTxt(Board.text({rows:A.by,N:A.N,avg:A.avg,weakest:A.weakest&&{name:A.weakest.name,a:A.weakest.a}}));toast(ok?'نُسخ ترتيب الفصل ✓ (الخمسة الأوائل فقط)':'تعذّر النسخ تلقائيًا')};
+  $('#dhB',d).onclick=()=>{this.close();Board.open()};
+  d.onclick=e=>{const b=e.target.closest('[data-o]');if(b){this.show('student',b.dataset.o);return}const s=e.target.closest('[data-s]');if(s){const k=s.dataset.s;S.asc=S.sort===k?!S.asc:true;S.sort=k;const y=d.scrollTop;this.classView(d);d.scrollTop=y}};
+  $('#dhQ',d).oninput=e=>{S.q=e.target.value;const y=d.scrollTop,p=e.target.selectionStart;this.classView(d);d.scrollTop=y;const q=$('#dhQ',d);q.focus();try{q.setSelectionRange(p,p)}catch(x){}}},
+ async studentView(d){const S=this.S,A=S.cl,r=A.by.find(x=>x.k===S.cur);if(!r){this.show('class');return}
+  const list=this.sorted(),i=list.findIndex(x=>x.k===r.k),prev=list[i-1],next=list[i+1];
+  d.innerHTML=`<div class="dh-top"><b>${em('student')} ${esc(r.name)}</b><span><button class="btn ghost sm" id="dhBk" type="button">← كل الفصل</button><button class="btn ghost sm" id="dhX" type="button">إغلاق</button></span></div>
+   <div class="dh-wrap"><div class="dh-act"><button class="btn gold sm" id="dhP" type="button">${em('closed_book')} تحميل التقرير PDF</button><button class="btn sky sm" id="dhPr" type="button">${em('pencil')} اطبع</button><button class="btn ghost sm" id="dhS" type="button">انسخ ملخصًا (لولي الأمر)</button>
+    <button class="btn ghost sm" id="dhPv" type="button"${prev?'':' disabled'}>→ السابق</button><button class="btn ghost sm" id="dhNx" type="button"${next?'':' disabled'}>التالي ←</button></div>
+   <p class="dh-msg" id="dhM" role="status"></p><div id="dhPg" class="dh-pages"><div class="dh-wait"><p>جارٍ تجهيز التقرير…</p></div></div></div>`;
+  $('#dhX',d).onclick=()=>this.close();$('#dhBk',d).onclick=()=>this.show('class');
+  const go=x=>()=>this.show('student',x.k);if(prev)$('#dhPv',d).onclick=go(prev);if(next)$('#dhNx',d).onclick=go(next);
+  const det=await this.detail(r);if(S.view!=='student'||S.cur!==r.k)return;
+  const R=this.R(r,det),nt=this.notes(r,R,A),msg=$('#dhM',d);
+  if(r.det&&!det)msg.textContent='تعذّر تحميل التفاصيل؛ التقرير مبنيّ على رمز النتيجة فقط.';
+  const build=()=>this.studentPages(r,R,A,nt),pages=build(),box=$('#dhPg',d);box.innerHTML='';
+  const fit=()=>{const w=Math.min(794,box.clientWidth||794),k=w/794;box.querySelectorAll('.dh-pgbox').forEach(b=>{b.style.width=Math.round(794*k)+'px';b.style.height=Math.round(1123*k)+'px';b.firstChild.style.transform=`scale(${k})`})};
+  pages.forEach(p=>{const b=document.createElement('div');b.className='dh-pgbox';const c=p.cloneNode(true);c.style.position='absolute';c.style.top='0';c.style.right='0';c.style.transformOrigin='top right';b.appendChild(c);box.appendChild(b)});fit();
+  if(!this.rz){this.rz=1;window.addEventListener('resize',()=>{const b=$('#dhPg');if(b&&!$('#dash').hidden)Dash.fitPages()})}
+  const fl=this.fn(r.name);
+  $('#dhP',d).onclick=e=>this.pdf(build,'تقرير '+r.name,'تقرير_'+fl+'_مغامرة_المفعول_به.pdf',e.currentTarget,msg);
+  $('#dhPr',d).onclick=()=>this.print(build,msg);
+  $('#dhS',d).onclick=async()=>{const ok=await copyTxt(this.summary(r,R,nt));toast(ok?'نُسخ الملخص ✓ الصقه في واتساب':'تعذّر النسخ تلقائيًا')}},
+ fitPages(){const box=$('#dhPg');if(!box)return;const w=Math.min(794,box.clientWidth||794),k=w/794;box.querySelectorAll('.dh-pgbox').forEach(b=>{b.style.width=Math.round(794*k)+'px';b.style.height=Math.round(1123*k)+'px';b.firstChild.style.transform=`scale(${k})`})},
+ CSS:`
+#dash{position:fixed;inset:0;z-index:120;overflow:auto;background:var(--bg);color:var(--ink);font-family:var(--f-body);direction:rtl;-webkit-overflow-scrolling:touch}
+#dash[hidden]{display:none}
+body.dash-on{overflow:hidden}
+.dh-top{position:sticky;top:0;z-index:3;display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:10px max(14px,env(safe-area-inset-right)) 10px max(14px,env(safe-area-inset-left));background:#1b0f50ee;border-bottom:1.5px solid var(--line);backdrop-filter:blur(6px)}
+.dh-top>b{font:400 1.25rem/1.4 var(--f-display);display:flex;align-items:center;gap:8px}
+.dh-top>span{display:flex;gap:8px;flex-wrap:wrap}
+.dh-wrap{max-width:1100px;margin:0 auto;padding:14px max(14px,env(safe-area-inset-right)) 60px max(14px,env(safe-area-inset-left));display:grid;gap:14px}
+.dh-wait{display:grid;place-items:center;gap:12px;min-height:50vh;text-align:center;padding:20px}
+.dh-sub{margin:0;color:var(--muted);font-size:.92rem;line-height:1.7}
+.dh-msg{margin:0;min-height:1.4em;color:var(--good);font-size:.95rem}
+.dh-act{display:flex;gap:8px;flex-wrap:wrap}
+.dh-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.dh-tile{padding:12px 10px;border-radius:16px;background:#ffffff12;border:1.5px solid var(--line);border-top:4px solid var(--tc,var(--ac));text-align:center}
+.dh-tile b{display:block;font:400 1.7rem/1.25 var(--f-display)}
+.dh-tile small{color:var(--muted);font-size:.85rem;line-height:1.4}
+.dh-card{padding:14px 16px;border-radius:18px;background:#ffffff0f;border:1.5px solid var(--line);min-width:0}
+.dh-card h3{margin:0 0 8px;font:400 1.2rem/1.4 var(--f-display);display:flex;align-items:center;gap:8px}
+.dh-card h4{margin:14px 0 6px;font-size:1rem;color:var(--gold)}
+.dh-two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px}
+.dh-ins,.dh-rec{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.dh-ins li{padding:9px 12px;border-radius:12px;background:#ffffff0d;border-right:5px solid var(--ac);line-height:1.7}
+.dh-ins li.good{border-right-color:var(--good)}.dh-ins li.warn{border-right-color:var(--bad)}.dh-ins li.info{border-right-color:#38bdf8}
+.dh-rec{counter-reset:r}.dh-rec li{counter-increment:r;position:relative;padding:2px 34px 2px 0;line-height:1.7}
+.dh-rec li::before{content:counter(r,arabic-indic);position:absolute;right:0;top:3px;width:24px;height:24px;border-radius:12px;background:var(--gold2);color:#2a1a00;font-weight:800;text-align:center;line-height:24px;font-size:.85rem}
+.dh-bar{display:grid;grid-template-columns:minmax(110px,1.1fr) 2fr minmax(70px,.7fr);gap:8px;align-items:center;margin:7px 0;font-size:.92rem}
+.dh-bar i{display:block;height:12px;border-radius:8px;background:#ffffff1c;overflow:hidden}.dh-bar u{display:block;height:100%;border-radius:8px}
+.dh-bar em{font-style:normal;font-weight:700;text-align:left}.dh-bar small{color:var(--muted);font-weight:400}
+.dh-rk{display:flex;flex-wrap:wrap;gap:8px}.dh-rk span{display:inline-flex;gap:6px;align-items:center;padding:3px 10px;border-radius:12px;background:#ffffff12;font-size:.9rem}
+.dh-key{display:flex;flex-wrap:wrap;gap:6px 14px;margin:6px 0;font-size:.88rem;color:var(--muted)}.dh-key b{color:var(--gold)}
+.dh-sc{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.dh-heat,.dh-tab{width:100%;border-collapse:separate;border-spacing:0 4px;font-size:.92rem}
+.dh-heat th,.dh-tab th{color:var(--muted);font-weight:600;padding:4px 8px;text-align:center;white-space:nowrap}
+.dh-heat td{text-align:center;padding:5px 8px;border-radius:8px;min-width:46px;font-weight:700}
+.dh-heat td.h{background:var(--h);color:#1f1647}.dh-heat td.x{background:#ffffff10;color:var(--muted)}
+.dh-heat td:first-child{text-align:right;background:none;min-width:130px}
+.dh-heat button,.dh-tab .nm{all:unset;cursor:pointer;color:var(--ink);font-weight:700;text-decoration:underline dotted;text-underline-offset:4px}
+.dh-tab td{padding:7px 8px;background:#ffffff0d;text-align:center;vertical-align:middle}
+.dh-tab td:first-child{border-radius:0 10px 10px 0}.dh-tab td:last-child{border-radius:10px 0 0 10px}
+.dh-tab td:nth-child(2){text-align:right;min-width:150px}.dh-tab td small{display:block;color:var(--muted);font-size:.78rem}
+.dh-tab th button{all:unset;cursor:pointer;padding:2px 4px}.dh-tab th button.on{color:var(--gold)}
+.dh-mini{display:block;height:6px;border-radius:4px;background:#ffffff1c;margin-top:4px;overflow:hidden}.dh-mini u{display:block;height:100%;background:linear-gradient(90deg,#a78bfa,#4ade80);border-radius:4px}
+.dh-q{margin-bottom:8px;width:100%}
+.dh-chips{display:flex;flex-wrap:wrap;gap:8px}
+.dh-chip{all:unset;cursor:pointer;padding:4px 12px;border-radius:14px;font-weight:700;font-size:.92rem;background:#ffffff14;border:1.5px solid var(--line)}
+.dh-chip.w{border-color:var(--bad)}.dh-chip.g{border-color:var(--good)}.dh-chip.o{border-color:var(--warn)}
+.dh-pages{display:grid;gap:16px;justify-items:center}
+.dh-pgbox{position:relative;max-width:100%;background:#fff;border-radius:6px;box-shadow:0 8px 28px #0008;overflow:hidden}
+#pdfRoot .ph-mk,.dh-pgbox .ph-mk{position:absolute;top:-2px;bottom:-2px;width:3px;background:#1f1647;border-radius:2px}
+.ph-c{font-weight:400;font-size:11px;color:#6b6396}
+.ph-pl{display:inline-block;margin:2px 4px 2px 0;padding:0 8px;border-radius:9px;background:#f1f5f9;color:#475569;font-size:12px}.ph-pl.ok{background:#dcfce7;color:#166534}
+.ph-t{width:100%;border-collapse:collapse;font-size:12px}.ph-t th{background:#ece8fb;color:#3b1fa8;padding:4px 3px;text-align:center;font-weight:700}
+.ph-t td{padding:3px;border-bottom:1px solid #ece8fb;text-align:center}.ph-t td.nm{text-align:right;font-weight:700;white-space:nowrap}
+.ph-key{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:#3d3566}.ph-key b{color:#3b1fa8}
+@media(max-width:560px){.dh-bar{grid-template-columns:1fr 1fr}.dh-bar i{grid-column:1/-1;order:3}}
+@media print{body.printing #dash{display:none!important}}
+`};
+
 /* ONLINE layer (Vercel build only): the student links to a class code and the result code is sent to /api/submit;
    the teacher loads the whole class from /api/board with a private key. Nothing here runs in the offline / artifact builds. */
 const Online={
@@ -4506,13 +4812,19 @@ const Online={
   const c=this.cfg();if(!c.cls)return{ok:false,error:'bad_class'};if(!NAME())return{ok:false,error:'bad_code'};
   const sg=this.sig();if(!manual&&sg===c.sig)return{ok:true,status:'same'};
   if(this.busy)return{ok:true,status:'busy'};this.busy=1;
-  try{const r=await fetch('/api/submit',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({cls:c.cls,code:Code.make()}),keepalive:true});
+  try{const r=await fetch('/api/submit',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({cls:c.cls,code:Code.make(),detail:this.detail()}),keepalive:true});
    const j=await r.json().catch(()=>({}));
    if(r.ok&&j.ok){c.sig=sg;c.at=Date.now();let fin=false;try{fin=Incomplete.list().count===0}catch(e){}
     const first=!c.first,newFin=fin&&!c.fin;c.first=1;if(fin)c.fin=1;this.save(c);
     if(!manual){if(newFin)toast(em('trophy')+' أكملتَ الرحلة، ووصلت نتيجتك النهائية إلى معلمك ✓');else if(first)toast(em('check_mark_button')+' وصلت نتيجتك إلى معلمك، وتصل تلقائيًا كلما تقدّمت')}}
    return j.ok?j:{ok:false,error:j.error||'server'}}
   catch(e){return{ok:false,error:'server'}}finally{this.busy=0}},
+ /* the detailed snapshot the teacher's page turns into a full report (the result code alone carries only the summary) */
+ detail(){try{const R=REP(),A=Ach.get(),cut=(x,n)=>String(x==null?'':x).slice(0,n);
+  return{v:1,at:Date.now(),parts:R.parts.map(p=>[p[1],p[2]]),top:R.top.map(t=>[t.n,t.c]),lvs:R.lvs.map(t=>[t.n,t.c]),tys:R.tys.map(t=>[t.k,t.n,t.c]),
+   wrong:R.wrong.slice(0,25).map(w=>({q:cut(w.q,160),a:cut(w.a,100),e:cut(w.e,160),k:w.k|0,tp:cut(w.tp,2),lv:w.lv|0})),
+   pl:R.planets.map(p=>p.ok?1:0),inc:R.inc.planets.map(p=>({id:p.id,t:cut(p.title,40),i:p.items.slice(0,8).map(i=>[cut(i.t,80),cut(i.note,60)])})),incN:[R.inc.count,R.inc.nQ],
+   bc:R.bc,br:R.br,best:R.best,fixed:R.fixed,sec:Math.round(ST.sec),qa:R.qa,qt:R.qt,rank:A.rank,bd:A.badges.map(b=>cut(b.n,30)),pg:[A.pages,A.pagesT],won:A.won?1:0,dc:A.dc}}catch(e){return null}},
  /* send a few seconds after the student's progress is saved (answers, games, finishing) */
  soon(){if(!this.cfg().cls)return;clearTimeout(this.tm);this.tm=setTimeout(()=>this.send(false),4000)},
  /* the teacher's class link: opening it links the student to the class with no typing */
@@ -4537,16 +4849,16 @@ const Online={
    const o=this.cfg();o.cls=cls;o.sig='';this.save(o);inp.value=cls;st.textContent='جارٍ الإرسال…';b.disabled=true;
    const r=await this.send(true);b.disabled=false;st.textContent=r.ok?'وصلت نتيجتك إلى معلمك ✓':(this.why[r.error]||this.why.server);if(r.ok)sfx('level')};
   b.onclick=go;inp.onkeydown=e=>{if(e.key==='Enter')go()};
-  const row=$('.row',tr);if(row&&!$('[data-ol=t]',tr)){row.insertAdjacentHTML('beforeend',`<button class="btn ghost sm" type="button" data-ol="t">${em('crown')} لوحة الفصل من الإنترنت</button>`);$('[data-ol=t]',tr).onclick=()=>this.teacher()}},
+  const row=$('.row',tr);if(row&&!$('[data-ol=t]',tr)){row.insertAdjacentHTML('beforeend',`<button class="btn ghost sm" type="button" data-ol="t">${em('crown')} لوحة المعلم (تحليل وتقارير)</button>`);$('[data-ol=t]',tr).onclick=()=>this.teacher()}},
  /* the teacher's window: class code + private key → ingest into the existing board */
  teacher(){
   const d=$('#dlg'),close=()=>{d.hidden=true;d.innerHTML=''},c=this.cfg();let key='';try{key=sessionStorage.getItem('mf_tk')||''}catch(e){}
-  d.hidden=false;d.innerHTML=`<div class="dlg-card zoom-in" role="dialog" aria-modal="true" aria-labelledby="olT"><h2 id="olT">لوحة الفصل من الإنترنت</h2>
-   <p class="sub">اكتب رمز الفصل ومفتاح المعلم لتُحمَّل نتائج كل الطلاب الذين أرسلوا نتائجهم.</p>
+  d.hidden=false;d.innerHTML=`<div class="dlg-card zoom-in" role="dialog" aria-modal="true" aria-labelledby="olT"><h2 id="olT">لوحة المعلم: تحليل الفصل وتقارير الطلاب</h2>
+   <p class="sub">اكتب رمز الفصل ومفتاح المعلم لتُحمَّل نتائج الطلاب الذين أرسلوا نتائجهم، فتظهر لك تقارير مفصّلة وتحليل شامل للفصل.</p>
    <label class="sr" for="olTC">رمز الفصل</label><input id="olTC" class="bk-ta ol-in" maxlength="30" value="${esc(c.tcls||c.cls||'')}" placeholder="رمز الفصل">
    <label class="sr" for="olTK">مفتاح المعلم</label><input id="olTK" class="bk-ta ol-in" type="password" dir="ltr" value="${esc(key)}" placeholder="مفتاح المعلم" autocomplete="off">
    <p class="dlg-err bk-msg" id="olTM" role="status"></p>
-   <div class="row dlg-row"><button class="btn go" type="button" id="olTG">حمّل اللوحة</button><button class="btn sky" type="button" id="olTL">${em('link')} انسخ رابط الفصل</button><button class="btn ghost" type="button" id="olTX">إغلاق</button></div>
+   <div class="row dlg-row"><button class="btn go" type="button" id="olTG">افتح اللوحة</button><button class="btn sky" type="button" id="olTL">${em('link')} انسخ رابط الفصل</button><button class="btn ghost" type="button" id="olTX">إغلاق</button></div>
    <p class="sub">أرسل «رابط الفصل» لطلابك على واتساب؛ يربطهم بفصلك تلقائيًا بلا كتابة، وتصلك نتائجهم عند كل تقدّم وعند إنهاء الرحلة.</p></div>`;
   const msg=(t,k='')=>{const m=$('#olTM',d);m.textContent=t;m.className='dlg-err bk-msg on '+k};
   $('#olTX',d).onclick=close;
@@ -4555,11 +4867,10 @@ const Online={
    msg(ok?'نُسخ رابط الفصل ✓ الصقه في مجموعة الطلاب:\n'+u:'انسخ هذا الرابط وأرسله للطلاب:\n'+u,ok?'ok':'warn')};
   $('#olTG',d).onclick=async()=>{const cls=this.norm($('#olTC',d).value),k=$('#olTK',d).value;if(!cls||!k){msg('اكتب رمز الفصل ومفتاح المعلم.','bad');return}
    msg('جارٍ التحميل…');
-   try{const r=await fetch('/api/board?cls='+encodeURIComponent(cls),{headers:{'x-key':k}}),j=await r.json().catch(()=>({}));
-    if(!r.ok||!j.ok){msg(this.why[j.error]||this.why.server,'bad');return}
-    const o=this.cfg();o.tcls=cls;this.save(o);try{sessionStorage.setItem('mf_tk',k)}catch(e){}
-    if(!j.codes.length){msg('لا توجد نتائج مرسلة لهذا الفصل بعد.','warn');return}
-    Board.ingest(j.codes.join('\n'));close();Board.open()}
+   try{Dash.S.cls=cls;Dash.S.key=k;const r=await Dash.load();
+    if(!r.ok){msg(this.why[r.error]||this.why.server,'bad');return}
+    const c2=this.cfg();c2.tcls=cls;this.save(c2);try{sessionStorage.setItem('mf_tk',k)}catch(e){}
+    close();Dash.open(cls,k,true)}
    catch(e){msg(this.why.server,'bad')}};
   setTimeout(()=>{try{$('#olTC',d).focus({preventScroll:true})}catch(e){}},60)},
  init(){
