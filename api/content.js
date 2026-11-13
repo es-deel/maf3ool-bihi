@@ -6,7 +6,7 @@ const { redis, send, deny, body, cfg, saveCfg } = require('./_lib');
    POST (teacher): one operation at a time — q (edit a question), qhide, qadd, qdel, qreset, tx (a text replacement), gm, ch, reset. */
 const MAX = 300000, TP = /^[a-z]{1,2}$/;
 const S = (x, n) => String(x == null ? '' : x).replace(/\s+/g, ' ').trim().slice(0, n);
-const EMPTY = () => ({ v: 0, nid: 1000, qo: {}, qh: [], qn: [], tx: {}, gm: {}, ch: {} });
+const EMPTY = () => ({ v: 0, nid: 1000, qo: {}, qh: [], qn: [], tx: {}, gm: {}, ch: {}, nm: {}, gd: {} });
 async function load() { let o = null; try { const r = await redis(['GET', 'mf:content']); if (r) o = JSON.parse(r); } catch (e) { if (e.code === 'no_db') throw e; } return Object.assign(EMPTY(), o || {}); }
 async function save(c) {
   c.v = Date.now(); const s = JSON.stringify(c); if (s.length > MAX) return null;
@@ -36,10 +36,14 @@ module.exports = async (req, res) => {
     else if (op === 'qhide') { if (!id) return send(res, 400, { error: 'bad' }); c.qh = c.qh.filter(x => x !== id); if (b.on) c.qh.push(id); }
     else if (op === 'qreset') { delete c.qo[id]; }
     else if (op === 'qadd') {
-      const p = cleanQ(b.q || {}), o = p.o || [];
-      if (!p.q || o.length < 2 || !('a' in p) || p.a >= o.length) return send(res, 400, { error: 'bad_q' });
+      const t = ['mcq', 'tap', 'order'].includes(b.t) ? b.t : 'mcq', p = cleanQ(b.q || {}), o = p.o || [];
+      if (!p.q) return send(res, 400, { error: 'bad_q' });
       if (c.qn.length >= 150) return send(res, 400, { error: 'too_many' });
-      c.nid = (c.nid || 1000) + 1; c.qn.push({ id: c.nid, t: 'mcq', tp: p.tp || 's', lv: p.lv || 1, q: p.q, o, a: p.a, e: p.e || '', h: p.h || '' });
+      let nq;
+      if (t === 'mcq') { if (o.length < 2 || !('a' in p) || p.a >= o.length) return send(res, 400, { error: 'bad_q' }); nq = { t, o, a: p.a, h: p.h || '' }; }
+      else if (t === 'tap') { const w = p.w || []; if (w.length < 2 || !('a' in p) || p.a >= w.length) return send(res, 400, { error: 'bad_q' }); nq = { t, w, a: p.a, roles: null, roleKey: S(b.roleKey, 2) || null }; }
+      else { const w = p.w || [], r = (p.r || []).slice(0, w.length); if (w.length < 2 || r.length !== w.length) return send(res, 400, { error: 'bad_q' }); nq = { t, w, r }; }
+      c.nid = (c.nid || 1000) + 1; c.qn.push(Object.assign({ id: c.nid, tp: p.tp || 's', lv: p.lv || 1, q: p.q, e: p.e || '' }, nq));
     }
     else if (op === 'qdel') { c.qn = c.qn.filter(x => x.id !== id); }
     else if (op === 'tx') {
@@ -48,7 +52,20 @@ module.exports = async (req, res) => {
     }
     else if (op === 'gm') { const g = {}; ['hop', 'boss', 'final'].forEach(k => { const v = String((b.gm || {})[k] || 'auto'); g[k] = ['auto', '1', '2', '3'].includes(v) ? v : 'auto'; }); c.gm = g; }
     else if (op === 'ch') { const h = b.ch || {}; c.ch = { dailyBonus: Math.max(0, Math.min(30, Math.floor(+h.dailyBonus) || 0)), dailyPerfect: Math.max(0, Math.min(30, Math.floor(+h.dailyPerfect) || 0)) }; if (h.dailyBonus === undefined) delete c.ch.dailyBonus; if (h.dailyPerfect === undefined) delete c.ch.dailyPerfect; }
-    else if (op === 'reset') { const w = String(b.what || ''); const e = EMPTY(); if (w === 'all') { c.qo = e.qo; c.qh = e.qh; c.qn = e.qn; c.tx = e.tx; c.gm = e.gm; c.ch = e.ch; } else if (['qo', 'qh', 'qn', 'tx', 'gm', 'ch'].includes(w)) c[w] = e[w]; }
+    else if (op === 'nm') {   // a name / title replacement: key like tab.sentence.title
+      const k = S(b.k, 60), v = S(b.v, 200); if (!/^[a-z]+\.[A-Za-z0-9_]+\.[a-z]+$/.test(k)) return send(res, 400, { error: 'bad' });
+      if (!v) delete c.nm[k]; else c.nm[k] = v;
+    }
+    else if (op === 'gd') {   // data of a game: det = detective cases, mw = meteor rounds' words (null/[] puts the original back)
+      const w = String(b.game || '');
+      if (w === 'det') {
+        if (!Array.isArray(b.data) || !b.data.length) delete c.gd.det; else c.gd.det = b.data.slice(0, 8).map(x => ({ t: S(x.t, 40) || 'قضية', lv: Math.max(1, Math.min(3, Math.floor(+x.lv) || 1)), sec: Math.max(20, Math.min(180, Math.floor(+x.sec) || 60)), w: arr(x.w, 40, y => [S(y[0], 30), ['v', 's', 'o', 'j', 'm'].includes(y[1]) ? y[1] : 'j', ['.', '،', ''].includes(y[2]) ? y[2] : '']).filter(y => y[0]) })).filter(x => x.w.filter(y => y[1] === 'o').length >= 1 && x.w.length >= 3);
+        if (c.gd.det && !c.gd.det.length) delete c.gd.det;
+      } else if (w === 'mw') {
+        if (!Array.isArray(b.data) || !b.data.length) delete c.gd.mw; else c.gd.mw = b.data.slice(0, 4).map(x => arr(x, 40, y => [S(y[0], 30), ['verb', 'mufrad', 'muthanna', 'jms', 'jfs', 'taksir'].includes(y[1]) ? y[1] : 'mufrad', ['r', 'a'].includes(y[2]) ? y[2] : '']).filter(y => y[0]));
+      } else return send(res, 400, { error: 'bad' });
+    }
+    else if (op === 'reset') { const w = String(b.what || ''); const e = EMPTY(); if (w === 'all') { c.qo = e.qo; c.qh = e.qh; c.qn = e.qn; c.tx = e.tx; c.gm = e.gm; c.ch = e.ch; c.nm = e.nm; c.gd = e.gd; } else if (['qo', 'qh', 'qn', 'tx', 'gm', 'ch', 'nm', 'gd'].includes(w)) c[w] = e[w]; }
     else return send(res, 400, { error: 'bad_op' });
     if (!(await save(c))) return send(res, 400, { error: 'too_big' });
     return send(res, 200, { ok: true, content: c });
