@@ -2082,7 +2082,7 @@ const TABS=[];
 const S={tab:0,step:0,cleanup:null,seen:store.get('seen',{}),done:store.get('done',{}),sd:store.get('sd',{}),stars:0,pts:0,qj:null};
 const stage=()=>$('#stage');
 function say(t){const b=$('#bubble');b.classList.remove('say');void b.offsetWidth;b.textContent=t;b.classList.add('say')}
-function progress(){const n=TABS.filter(t=>S.done[t.id]).length;$('#pbar').style.width=(n/TABS.length*100)+'%';$('#pcount').textContent=`${AR(n)} من ${AR(TABS.length)} كوكبًا`;
+function progress(){const V=typeof Hid!=='undefined'?Hid.tabs():TABS,n=V.filter(t=>S.done[t.id]).length,N=V.length||1;$('#pbar').style.width=(n/N*100)+'%';$('#pcount').textContent=`${AR(n)} من ${AR(V.length)} كوكبًا`;
  $$('.tabbtn').forEach((b,i)=>b.classList.toggle('done',!!S.done[TABS[i].id]));if(typeof Resume!=='undefined')Resume.refresh()}
 function markDone(id,quiet){if(S.done[id])return;S.done[id]=1;store.set('done',S.done);progress();if(!quiet){const t=TABS.find(x=>x.id===id);toast(`${em('star')} أنجزتَ «${t.title}»`);FX.confetti(26)}Nav.paint();if(typeof Eng!=='undefined')Eng.onDone(id,!!quiet)}
 
@@ -2251,6 +2251,8 @@ const LESSON_TP={kalam:'k',nom:'m',numbers:'n',rafa:'r',sentence:'s',subject:'f'
 const GAME_LES={det:['object'],flee:['object'],fix:['object'],build:['object'],kind:['kalam'],mub:['nom'],gate:['rafa'],zar:['zarf','ajl']};      // game -> lessons it cannot be played without (the other games draw from every visible question)
 const Hid={
  lesson(id){return typeof Ctl!=='undefined'&&!!Ctl.hidden&&Ctl.hidden(id)},
+ any(l){return Array.isArray(l)?l.some(i=>this.lesson(i)):this.lesson(l)},      // a map / board / game built on one lesson or on several (hidden as soon as one of them is)
+ tabs(){return TABS.filter(t=>!this.lesson(t.id))},
  tp(tp){const ids=Object.keys(LESSON_TP).filter(k=>LESSON_TP[k]===tp);return ids.length>0&&ids.every(i=>this.lesson(i))},
  game(id){return(GAME_LES[id]||[]).some(l=>this.lesson(l))},
  drills(){return typeof DRILLS==='undefined'?[]:DRILLS.filter(d=>!this.lesson(d.id))},
@@ -2506,22 +2508,22 @@ const GROUPS=[
  {id:'g3',t:'الجملة الفعلية والفاعل',d:'أركان الجملة الفعلية، وإعراب الفاعل وعلامات رفعه',c:'#a78bfa',tabs:['sentence','subject']},
  {id:'g4',t:'المفعول به وأخواته',d:'المفعول به وعلامات نصبه ومقارنته بالفاعل، ثم المفعول لأجله وظرفا الزمان والمكان',c:'#2dd4bf',tabs:['object','signs','compare','parse','ajl','zarf','maps']},
  {id:'gz',t:'التدريب والختام',d:'تدريبات وألعاب وشهادة وتقرير',c:'#ffd43b',tabs:['practice','games','certificate','report'],end:true}];
-const groupOf=id=>GROUPS.find(g=>g.tabs.includes(id))||GROUPS[GROUPS.length-1],groupNo=g=>g.end?'':AR(GROUPS.indexOf(g)+1);
+const groupOf=id=>GROUPS.find(g=>g.tabs.includes(id))||GROUPS[GROUPS.length-1],gShown=g=>!g.tabs.length||g.tabs.some(id=>!Hid.lesson(id)),groupNo=g=>g.end?'':AR(GROUPS.filter(gShown).indexOf(g)+1);   // a group whose planets are all hidden disappears, and the numbers close up
 const PLHUE={kalam:200,nom:300,rafa:60,ajl:30,zarf:170,maps:140,practice:110,report:220,games:80}; /* the same picture on two planets gets another tint */
 function orrery(host){
  const SUN=TABS.findIndex(t=>t.id==='start'),timers=[],ghosts=new Set(),lit=store.get('lit',{});
  const ZL=[60,75,90,100,115,130,150,175],pf=Object.assign({z:100,hide:false},store.get('orr',{}));if(!ZL.includes(pf.z))pf.z=100;
- const done=t=>!!S.done[t.id],PL=TABS.map((t,i)=>({t,i})).filter(x=>x.i!==SUN),SB={t:TABS[SUN],i:SUN,sun:true},ALL=[SB,...PL],byI=i=>ALL.find(x=>x.i===i);
+ const done=t=>!!S.done[t.id],PL=TABS.map((t,i)=>({t,i})).filter(x=>x.i!==SUN&&!Hid.lesson(x.t.id)),SB={t:TABS[SUN],i:SUN,sun:true},ALL=[SB,...PL],byI=i=>ALL.find(x=>x.i===i);
  const allDone=PL.every(p=>done(p.t)),NX=PL.find(p=>!done(p.t)),PER=[30,46,64,86];
  PL.forEach(p=>{p.dk=!allDone&&done(p.t)&&!!lit[p.t.id]});                       // finished and already celebrated before: it waits on the shelf
  const ico=t=>IMG[t.id==='start'?'sun':t.pl],tone=t=>`--c:${t.color};--h:${PLHUE[t.id]||0}deg;--gc:${groupOf(t.id).c}`,orbit=()=>PL.filter(p=>!p.dk);
- const P0=store.get('pos'),PT=P0&&TABS.find(t=>t.id===P0.t),cont=PT&&PT.id!=='start'&&!done(PT)?{T:PT,s:Math.max(0,Math.min(+P0.s||0,PT.steps.length-1))}:null;
+ const P0=store.get('pos'),PT=P0&&TABS.find(t=>t.id===P0.t),cont=PT&&PT.id!=='start'&&!Hid.lesson(PT.id)&&!done(PT)?{T:PT,s:Math.max(0,Math.min(+P0.s||0,PT.steps.length-1))}:null;
  host.innerHTML=`<div class="orr">
   ${cont?`<div class="orr-cont rise">${em('rocket','lg')}<span class="oc-t">تابع من حيث توقفتَ<b>${esc(cont.T.title)}</b><small>${esc(cont.T.steps[cont.s].t)}</small></span><button class="btn go sm" type="button" data-act="ocn">تابع ←</button></div>`:''}
   <div class="orr-bar"><div class="orr-cnt" id="ocnt" aria-live="polite"></div>
    <div class="orr-ctl"><span class="orr-sz" role="group" aria-label="حجم الكواكب"><span class="orr-szl" aria-hidden="true">حجم الكواكب</span><button type="button" id="ozm" data-act="oz" data-d="-1" aria-label="تصغير الكواكب">−</button><output id="ozl"></output><button type="button" id="ozp" data-act="oz" data-d="1" aria-label="تكبير الكواكب">+</button></span>
     <button class="orr-tg" id="otg" type="button" data-act="oh" aria-pressed="false"></button></div></div>
-  <div class="orr-grps" id="ogrp" role="group" aria-label="مجموعات الدرس">${GROUPS.map(g=>`<button type="button" class="og${g.tabs.length?'':' soon'}" data-act="ogp" data-g="${g.id}" style="--gc:${g.c}" aria-pressed="false" title="${esc(g.d)}" aria-label="${g.end?'':'المجموعة '+groupNo(g)+': '}${esc(g.t)}. ${esc(g.d)}"><span class="og-h">${g.end?'<b>★</b>':`<b>${groupNo(g)}</b>`}<span class="og-t">${esc(g.t)}</span></span><i class="og-bar"><u></u></i><em class="og-n"></em></button>`).join('')}</div>
+  <div class="orr-grps" id="ogrp" role="group" aria-label="مجموعات الدرس">${GROUPS.filter(gShown).map(g=>`<button type="button" class="og${g.tabs.length?'':' soon'}" data-act="ogp" data-g="${g.id}" style="--gc:${g.c}" aria-pressed="false" title="${esc(g.d)}" aria-label="${g.end?'':'المجموعة '+groupNo(g)+': '}${esc(g.t)}. ${esc(g.d)}"><span class="og-h">${g.end?'<b>★</b>':`<b>${groupNo(g)}</b>`}<span class="og-t">${esc(g.t)}</span></span><i class="og-bar"><u></u></i><em class="og-n"></em></button>`).join('')}</div>
   <div class="orr-stage" id="ostage" data-act="oc">
    <div class="orr-cam" id="ocam">
     ${PER.map((_,r)=>`<i class="orr-ring" data-r="${r}"></i>`).join('')}
@@ -2966,30 +2968,38 @@ BOARDS.push(
  {n:'المفعول به والمفعول لأجله',h:['وجه المقارنة','المفعول به','المفعول لأجله'],hc:['#c4b5fd','#fde047','#fdba74'],r:[['التعريف','ما وقع عليه الفعل','مصدر يبيّن سبب الفعل'],['السؤال','ماذا؟ / مَن؟','لماذا؟'],['الحكم','منصوب','منصوب'],['مثال','شكرتُ <b>المعلمَ</b>','شكرتُ المعلمَ <b>تقديرًا</b> لجهدِه']]},
  {n:'ظرفا الزمان والمكان',h:['وجه المقارنة','ظرف الزمان','ظرف المكان'],hc:['#c4b5fd','#67e8f9','#86efac'],r:[['السؤال','متى؟','أين؟'],['أمثلة','صباحًا • مساءً • ليلًا','فوقَ • تحتَ • أمامَ • خلفَ'],['الحكم','منصوب وعلامة نصبه الفتحة','منصوب وعلامة نصبه الفتحة'],['ليس ظرفًا','في الصباحِ (جار ومجرور)','في الغرفةِ (جار ومجرور)']]});
 {const re=(a,o)=>{const m=o.map(i=>a[i]);a.length=0;a.push(...m)};re(MAPS,[0,5,6,2,7,1,3,4,8,9]);re(BOARDS,[4,5,2,6,1,0,3,7,8])}
+/* the lesson(s) each map and board is built on: the teacher hiding one of them removes it from the student's view */
+{const ML={'الجملة الفعلية':'sentence','المفرد والجمع':'numbers','الفاعل':'subject','المفعول به':'object','أقسام الكلام':'kalam','الجملة الاسمية':'nom','علامات رفع المبتدأ والخبر':'rafa','المفعول لأجله':'ajl','ظرفا الزمان والمكان':'zarf'},
+ BL={'علامات الرفع والنصب':'signs','أركان الجملة الفعلية':'sentence','المفرد والمثنى والجمع':'numbers','الفاعل والمفعول به':['subject','object'],'أقسام الكلام وعلامات الاسم':'kalam','المبتدأ والخبر':'nom','علامات رفع المبتدأ والخبر':'rafa','المفعول به والمفعول لأجله':['object','ajl'],'ظرفا الزمان والمكان':'zarf'};
+ MAPS.forEach(m=>{m.l=ML[m.n]||null});BOARDS.forEach(b=>{b.l=BL[b.n]||null})}
 /* every branch of every map / every row of every board, in the order the one button shows them */
 const MU=[];MAPS.forEach((m,mi)=>m.b.forEach((_,k)=>MU.push([mi,k])));const MUI=(m,k)=>MU.findIndex(u=>u[0]===m&&u[1]===k);
 const BU=[];BOARDS.forEach((b,bi)=>b.r.forEach((_,r)=>BU.push([bi,r])));const BUI=(b,r)=>BU.findIndex(u=>u[0]===b&&u[1]===r);
 TABS.push({id:'maps',title:'خرائط ولوحات',pl:'p3',color:'#38bdf8',mentor:'kidH',steps:[
  {t:'الخرائط الذهنية',tip:'الخريطة الذهنية تجمع الدرس في صورة واحدة. اضغط على أي فرع لترى مثاله، أو اضغط الزرّ لتفتح الفروع واحدًا بعد الآخر.',
-  render(sc){let mi=-1,sq;sc.innerHTML=`<div class="chips rise">${MAPS.map((m,i)=>`<button class="chip ${i?'':'on'}" data-act="mp" data-i="${i}">${m.n}</button>`).join('')}</div><div class="mm rise" style="--d:1" id="mm"></div><p class="hintline">اضغط على أي فرع لتفتح مثاله.</p>`;
-   const draw=()=>{const m=MAPS[mi],sl=MM_SLOT.slice(0,m.b.length);$$('.chip',sc).forEach((c,k)=>c.classList.toggle('on',k===mi));
+  render(sc){const VM=MAPS.filter(m=>!Hid.any(m.l)),VU=[];VM.forEach((m,mi)=>m.b.forEach((_,k)=>VU.push([mi,k])));const VUI=(m,k)=>VU.findIndex(u=>u[0]===m&&u[1]===k);
+   if(!VM.length){sc.innerHTML='<p class="lead rise">لا توجد خرائط متاحة الآن.</p>';Nav.finish();return()=>{}}
+   let mi=-1,sq;sc.innerHTML=`<div class="chips rise">${VM.map((m,i)=>`<button class="chip ${i?'':'on'}" data-act="mp" data-i="${i}">${m.n}</button>`).join('')}</div><div class="mm rise" style="--d:1" id="mm"></div><p class="hintline">اضغط على أي فرع لتفتح مثاله.</p>`;
+   const draw=()=>{const m=VM[mi],sl=MM_SLOT.slice(0,m.b.length);$$('.chip',sc).forEach((c,k)=>c.classList.toggle('on',k===mi));
     $('#mm').innerHTML=`<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${sl.map((s,k)=>`<path class="ln" pathLength="1" style="--d:${k+1};stroke:${MM_COL[k]}" d="M50 50L${s[0]} ${s[1]}"/>`).join('')}</svg>
      <div class="node center" style="left:50%;top:50%">${m.c}</div>${m.b.map((b,k)=>`<button class="node br" style="--d:${k+1};--nc:${MM_COL[k]};left:${sl[k][0]}%;top:${sl[k][1]}%" data-act="nd"><b>${b[0]}</b><small>${b[1]}</small><em class="ex">${b[2]}</em></button>`).join('')}`;};
    const openBr=k=>$$('#mm .node.br',sc).forEach((x,j)=>x.classList.toggle('open',j===k));            // one example open at a time (the map stays clear on a phone)
-   sq=Seq.run(sc,MU.length,j=>{const[m,k]=MU[j];if(m!==mi){mi=m;draw();sfx('whoosh')}openBr(k);sfx('pop')},{noun:'الفرع',all:'الفروع',chips:'.chip',after:'.chips',
-    ticked:(c,seen)=>MAPS[c].b.every((_,k)=>seen[MUI(c,k)]),
-    cap:j=>`الخريطة <b>${AR(MU[j][0]+1)}</b> من ${AR(MAPS.length)} · الفرع <b>${AR(MU[j][1]+1)}</b> من ${AR(MAPS[MU[j][0]].b.length)}`,
-    lab:j=>{const[m,k]=MU[j];return k===0&&m!==mi?`الخريطة ${ORDF[m]}: «${MAPS[m].n}» ←`:`افتح فرع «${MAPS[m].b[k][0]}» ←`}});
-   act(sc,{mp:b=>sq.go(MUI(+b.dataset.i,0)),nd:b=>{const k=$$('#mm .node.br',sc).indexOf(b);if(b.classList.contains('open')){b.classList.remove('open');sfx('pop')}else sq.go(MUI(mi,k))}});return()=>sq.stop()}},
+   sq=Seq.run(sc,VU.length,j=>{const[m,k]=VU[j];if(m!==mi){mi=m;draw();sfx('whoosh')}openBr(k);sfx('pop')},{noun:'الفرع',all:'الفروع',chips:'.chip',after:'.chips',
+    ticked:(c,seen)=>VM[c].b.every((_,k)=>seen[VUI(c,k)]),
+    cap:j=>`الخريطة <b>${AR(VU[j][0]+1)}</b> من ${AR(VM.length)} · الفرع <b>${AR(VU[j][1]+1)}</b> من ${AR(VM[VU[j][0]].b.length)}`,
+    lab:j=>{const[m,k]=VU[j];return k===0&&m!==mi?`الخريطة ${ORDF[m]}: «${VM[m].n}» ←`:`افتح فرع «${VM[m].b[k][0]}» ←`}});
+   act(sc,{mp:b=>sq.go(VUI(+b.dataset.i,0)),nd:b=>{const k=$$('#mm .node.br',sc).indexOf(b);if(b.classList.contains('open')){b.classList.remove('open');sfx('pop')}else sq.go(VUI(mi,k))}});return()=>sq.stop()}},
  {t:'اللوحات التعليمية',tip:'اللوحة تنظّم المعلومات في جدول. اكشف الصفوف واحدًا واحدًا وحاول أن تتذكّر قبل أن ترى. الزرّ يكشف الصف التالي، ثم اللوحة التالية.',
-  render(sc){let cur=null,bi=-1,sq;sc.innerHTML=`<div class="chips rise">${BOARDS.map((m,i)=>`<button class="chip ${i?'':'on'}" data-act="bd" data-i="${i}">${m.n}</button>`).join('')}</div><div id="bd" class="rise" style="--d:1"></div>`;
-   const draw=i=>{const b=BOARDS[i],sn=sq?sq.seen():[];bi=i;$$('.chip',sc).forEach((c,k)=>c.classList.toggle('on',k===i));$('#bd').innerHTML='';cur=revealTable($('#bd'),b.h,b.r,b.hc,'اكشف الصف الأول',true);
-    b.r.forEach((_,r)=>{if(sn[BUI(i,r)])cur.show(true)})};                                              // rows already seen on this board stay open
-   sq=Seq.run(sc,BU.length,j=>{const[b,r]=BU[j];if(b!==bi){draw(b);sfx('whoosh')}while(cur.count()<=r)cur.show()},{noun:'الصف',all:'الصفوف',chips:'.chip',after:'.chips',
-    ticked:(c,seen)=>BOARDS[c].r.every((_,r)=>seen[BUI(c,r)]),
-    cap:j=>`اللوحة <b>${AR(BU[j][0]+1)}</b> من ${AR(BOARDS.length)} · الصف <b>${AR(BU[j][1]+1)}</b> من ${AR(BOARDS[BU[j][0]].r.length)}`,
-    lab:j=>{const[b,r]=BU[j];return r===0&&b!==bi?`اللوحة ${ORDF[b]}: «${BOARDS[b].n}» ←`:`اكشف صف «${BOARDS[b].r[r][0]}» ←`}});
-   act(sc,{bd:b=>sq.go(BUI(+b.dataset.i,0)),rv:()=>{if(cur.count()<BOARDS[bi].r.length){cur.show();sq.note(BUI(bi,cur.count()-1))}},all:()=>{cur.all();BOARDS[bi].r.forEach((_,r)=>sq.note(BUI(bi,r)))}});return()=>sq.stop()}},
+  render(sc){const VB=BOARDS.filter(b=>!Hid.any(b.l)),VBU=[];VB.forEach((b,bi)=>b.r.forEach((_,r)=>VBU.push([bi,r])));const VBUI=(b,r)=>VBU.findIndex(u=>u[0]===b&&u[1]===r);
+   if(!VB.length){sc.innerHTML='<p class="lead rise">لا توجد لوحات متاحة الآن.</p>';Nav.finish();return()=>{}}
+   let cur=null,bi=-1,sq;sc.innerHTML=`<div class="chips rise">${VB.map((m,i)=>`<button class="chip ${i?'':'on'}" data-act="bd" data-i="${i}">${m.n}</button>`).join('')}</div><div id="bd" class="rise" style="--d:1"></div>`;
+   const draw=i=>{const b=VB[i],sn=sq?sq.seen():[];bi=i;$$('.chip',sc).forEach((c,k)=>c.classList.toggle('on',k===i));$('#bd').innerHTML='';cur=revealTable($('#bd'),b.h,b.r,b.hc,'اكشف الصف الأول',true);
+    b.r.forEach((_,r)=>{if(sn[VBUI(i,r)])cur.show(true)})};                                              // rows already seen on this board stay open
+   sq=Seq.run(sc,VBU.length,j=>{const[b,r]=VBU[j];if(b!==bi){draw(b);sfx('whoosh')}while(cur.count()<=r)cur.show()},{noun:'الصف',all:'الصفوف',chips:'.chip',after:'.chips',
+    ticked:(c,seen)=>VB[c].r.every((_,r)=>seen[VBUI(c,r)]),
+    cap:j=>`اللوحة <b>${AR(VBU[j][0]+1)}</b> من ${AR(VB.length)} · الصف <b>${AR(VBU[j][1]+1)}</b> من ${AR(VB[VBU[j][0]].r.length)}`,
+    lab:j=>{const[b,r]=VBU[j];return r===0&&b!==bi?`اللوحة ${ORDF[b]}: «${VB[b].n}» ←`:`اكشف صف «${VB[b].r[r][0]}» ←`}});
+   act(sc,{bd:b=>sq.go(VBUI(+b.dataset.i,0)),rv:()=>{if(cur.count()<VB[bi].r.length){cur.show();sq.note(VBUI(bi,cur.count()-1))}},all:()=>{cur.all();VB[bi].r.forEach((_,r)=>sq.note(VBUI(bi,r)))}});return()=>sq.stop()}},
 ]});
 
 /* --- tab_e.js --- */
@@ -3033,10 +3043,10 @@ TABS.push({id:'certificate',title:'الملخص والشهادة',pl:'p2',color:
    sq=Seq.run(sc,SUMM.length,i=>{const f=$$('.flip',sc)[i];if(f&&!f.classList.contains('on')){f.classList.add('on');sfx('pop')}},{start:-1,noun:'البطاقة',fem:true,all:'البطاقات',verb:'اقلب',after:'.flips'});
    act(sc,{fl:(b,e)=>{if(e.target.closest('[data-act=gt]'))return;if(b.classList.contains('on')){b.classList.remove('on');sfx('pop')}else sq.go(+b.dataset.i)},gt:b=>{go(TABS.findIndex(t=>t.id===b.dataset.t),0)}});return()=>sq.stop()}},
  {t:'شهادة بطل النحو والإعراب',tip:'اكتب اسمك لتحصل على شهادتك، ثم احفظها صورة لتشاركها مع أسرتك!',
-  render(sc){const nm=store.get('name','');const n=TABS.filter(t=>S.done[t.id]).length,cf=Cert.cfg(),ck=Cert.check();
+  render(sc){const nm=store.get('name','');const n=Hid.tabs().filter(t=>S.done[t.id]).length,cf=Cert.cfg(),ck=Cert.check();
    if(!cf.on){sc.innerHTML=`<div class="cert-form rise"><p class="sub">الشهادات غير متاحة الآن. سيُخبرك معلمك حين تُفتح.</p></div>`;return}
-   if(!ck.ok){sc.innerHTML=`<div class="cert-form rise"><h3 class="cert-h">${em('locked')} شروط الحصول على الشهادة</h3><ul class="cert-req">${ck.items.map(i=>`<li class="${i.ok?'ok':''}"><b aria-hidden="true">${i.ok?'✓':'○'}</b><span>${i.t}</span><small>${i.v}</small></li>`).join('')}</ul><p class="sub">أكمل الشروط الناقصة ثم عُد إلى هنا لتحصل على شهادتك. أنجزتَ ${AR(n)} من ${AR(TABS.length)} كوكبًا، ودرجتك ${AR(S.pts)} من ${AR(Score.max())}، ونجومك ${AR(S.stars)} من ${AR(Score.starsMax())}.</p></div>`;return}
-   sc.innerHTML=`<div class="cert-form rise"><label for="nm">اكتب اسمك الكريم</label><input id="nm" class="inp" maxlength="40" autocomplete="off" value="${esc(nm)}" placeholder="اسم الطالب"><button class="btn gold" data-act="mk">أنشئ شهادتي ${em('sparkles')}</button><p class="sub">أنجزتَ ${AR(n)} من ${AR(TABS.length)} كوكبًا، ودرجتك ${AR(S.pts)} من ${AR(Score.max())}، ونجومك ${AR(S.stars)} من ${AR(Score.starsMax())}.</p></div><div id="cert"></div>`;
+   if(!ck.ok){sc.innerHTML=`<div class="cert-form rise"><h3 class="cert-h">${em('locked')} شروط الحصول على الشهادة</h3><ul class="cert-req">${ck.items.map(i=>`<li class="${i.ok?'ok':''}"><b aria-hidden="true">${i.ok?'✓':'○'}</b><span>${i.t}</span><small>${i.v}</small></li>`).join('')}</ul><p class="sub">أكمل الشروط الناقصة ثم عُد إلى هنا لتحصل على شهادتك. أنجزتَ ${AR(n)} من ${AR(Hid.tabs().length)} كوكبًا، ودرجتك ${AR(S.pts)} من ${AR(Score.max())}، ونجومك ${AR(S.stars)} من ${AR(Score.starsMax())}.</p></div>`;return}
+   sc.innerHTML=`<div class="cert-form rise"><label for="nm">اكتب اسمك الكريم</label><input id="nm" class="inp" maxlength="40" autocomplete="off" value="${esc(nm)}" placeholder="اسم الطالب"><button class="btn gold" data-act="mk">أنشئ شهادتي ${em('sparkles')}</button><p class="sub">أنجزتَ ${AR(n)} من ${AR(Hid.tabs().length)} كوكبًا، ودرجتك ${AR(S.pts)} من ${AR(Score.max())}، ونجومك ${AR(S.stars)} من ${AR(Score.starsMax())}.</p></div><div id="cert"></div>`;
    let cv=null,cur='';
    const mk=async()=>{const v=($('#nm').value||'').trim()||'البطل الصغير';Prof.setName(v);cur=v;const box=$('#cert');box.innerHTML='<p class="sub" style="text-align:center">جارٍ تجهيز شهادتك…</p>';
     cv=await Cert.draw(v);if(!box.isConnected)return;cv.className='cert-cv zoom-in';cv.setAttribute('role','img');cv.setAttribute('aria-label',`${Cert.cfg().d.title} للطالب ${v}`);
@@ -3922,7 +3932,7 @@ const qn=k=>k===1?'سؤال واحد':k===2?'سؤالين':k<=10?AR(k)+' أسئ�
 const Incomplete={
  list(){
   const planets=[];let count=0,nQ=0;
-  TABS.forEach((t,ti)=>{if(t.id==='report')return;const items=[];
+  TABS.forEach((t,ti)=>{if(t.id==='report'||Hid.lesson(t.id))return;const items=[];
    if(t.id==='practice'){STAGES.forEach((s,i)=>{if((PB[i]||0)<3){count++;items.push({t:`${s.n}: ${s.d}`,note:(PB[i]||0)?'لم تُجتَز بعد (تحتاج ٣ إجابات صحيحة)':'لم تُلعَب بعد',s:0,h:'stage',i})}})}
    else if(t.id==='games'){GAMES.forEach((g,i)=>{if(!Hid.game(g.id)&&!(GB[g.id]>0)){count++;items.push({t:g.t,note:'لم تفز بها بعد',s:0,h:'game',i})}})}
    else t.steps.forEach((st,si)=>{
@@ -3934,21 +3944,21 @@ const Incomplete={
    if(items.length)planets.push({id:t.id,title:t.title,pl:t.pl,ti,items})});
   return{planets,count,nQ,sig:planets.map(p=>p.id+':'+p.items.map(i=>(i.h?i.h+i.i:i.s)+(i.q?'q'+i.q.join(''):'')).join(',')).join('|')}},
  /* lesson items answered / all lesson items */
- answered(){return LQ.filter(x=>Ledger.has(x.key)).length}};
+ answered(){return LQ.filter(x=>!Hid.lesson(x.tab)&&Ledger.has(x.key)).length}};
 
 /* everything the report says comes from this one snapshot */
 function REP(){
  const n=ST.n,c=ST.c,acc=pc(c,n),g=(o,k)=>o[k]||[0,0];
- const top=TP_ORDER.map(k=>{const[x,y]=g(ST.tp,k),a=pc(y,x);return{k,n:x,c:y,a,name:TOPIC[k].n,tab:TOPIC[k].tab,st:stOf(x,a)}});
+ const top=TP_ORDER.filter(k=>!Hid.tp(k)).map(k=>{const[x,y]=g(ST.tp,k),a=pc(y,x);return{k,n:x,c:y,a,name:TOPIC[k].n,tab:TOPIC[k].tab,st:stOf(x,a)}});
  const lvs=[1,2,3].map(l=>{const[x,y]=g(ST.lv,l),a=pc(y,x);return{l,n:x,c:y,a,name:LV_NAME[l],st:stOf(x,a)}});
  const tys=Object.keys(TY_NAME).map(k=>{const[x,y]=g(ST.ty,k),a=pc(y,x);return{k,n:x,c:y,a,name:TY_NAME[k],st:stOf(x,a)}}).filter(t=>t.n>0);
- const pls=TABS.filter(t=>t.id!=='report');
+ const pls=Hid.tabs().filter(t=>t.id!=='report');
  /* the rating is the share of the grand total of questions, practice and games: what was not answered counts zero. The stars come from the same total. The bonus is a separate account and never enters it */
  const pts=Score.total(),max=Score.max(),stars=Score.stars(),smax=Score.starsMax(),spct=max?Math.round(pts/max*100):0,tpct=smax?Math.round(stars/smax*100):0,pct=spct;
- const R={name:NAME()||'الطالب',date:dateAr(),n,c,acc,pts,max,stars,smax,spct,tpct,pct,bp:Bonus.pts(),bs:Bonus.stars(),bc:BON.c||0,br:BON.r||0,parts:[['أسئلة الدروس',Score.lesson(),Score.lessonMax()],['التدريبات',Score.practice(),Score.practiceMax],['الألعاب',Score.games(),Score.gamesMax()]],qa:Incomplete.answered(),qt:LQ.length,inc:Incomplete.list(),best:ST.best,fixed:ST.fixed,time:fmtTime(ST.sec),top,lvs,tys,
+ const R={name:NAME()||'الطالب',date:dateAr(),n,c,acc,pts,max,stars,smax,spct,tpct,pct,bp:Bonus.pts(),bs:Bonus.stars(),bc:BON.c||0,br:BON.r||0,parts:[['أسئلة الدروس',Score.lesson(),Score.lessonMax()],['التدريبات',Score.practice(),Score.practiceMax],['الألعاب',Score.games(),Score.gamesMax()]],qa:Incomplete.answered(),qt:LQ.filter(x=>!Hid.lesson(x.tab)).length,inc:Incomplete.list(),best:ST.best,fixed:ST.fixed,time:fmtTime(ST.sec),top,lvs,tys,
   rate:n<8?RATE0:RATE.find(r=>pct>=r.min),
   planets:pls.map(t=>({id:t.id,title:t.title,pl:t.pl,ok:!!S.done[t.id]})),
-  wrong:[...ST.w].sort((a,b)=>b.k-a.k||b.t-a.t)};
+  wrong:[...ST.w].filter(w=>!Hid.tp(w.tp)).sort((a,b)=>b.k-a.k||b.t-a.t)};
  R.done=R.planets.filter(p=>p.ok).length;R.total=pls.length;
  return Object.assign(R,analyse(R))}
 
@@ -4270,7 +4280,7 @@ function toastAct(msg,label,fn,ms=7000){const t=$('#toast');t.innerHTML=`<span>$
 
 const Resume={
  sess:{nudged:{},welcomed:false,bkAsked:false},tm:0,saved:0,
- pos(){const p=store.get('pos',null);if(!p||!p.t)return null;const ti=TABS.findIndex(t=>t.id===p.t);if(ti<0)return null;
+ pos(){const p=store.get('pos',null);if(!p||!p.t)return null;const ti=TABS.findIndex(t=>t.id===p.t);if(ti<0||Hid.lesson(p.t))return null;
   const T=TABS[ti],s=Math.max(0,Math.min(+p.s||0,T.steps.length-1));return{t:T.id,ti,T,s,step:T.steps[s],at:+p.at||0}},
  hasProgress(){return!!(ST.n>0||Object.keys(S.done).length||Object.keys(LED).length||store.get('pos',null))},
  /* "planet · step n of m · question k of j" for the saved place */
@@ -4354,7 +4364,7 @@ const Resume={
 /* --- eng_b.js --- */
 /* ===== space ranks, celebration banner, the "Book of Grammar" (pages + gift boxes), badges and the cabinet ===== */
 const GIFT=(w=64,cls='',at='')=>`<svg class="gift-svg ${cls}" ${at} viewBox="0 0 64 64"${w?` width="${w}" height="${w}"`:''} aria-hidden="true"><rect x="8" y="27" width="48" height="31" rx="4" fill="#ec4899"/><rect x="28" y="27" width="8" height="31" fill="#ffd43b"/><g class="gl"><rect x="5" y="16" width="54" height="14" rx="4" fill="#f472b6"/><rect x="28" y="16" width="8" height="14" fill="#fbbf24"/><path d="M32 16c-5-12-19-9-14-1 3 5 11 3 14 1zM32 16c5-12 19-9 14-1-3 5-11 3-14 1z" fill="#fbbf24"/></g></svg>`;
-const doneN=()=>TABS.filter(t=>S.done[t.id]).length;
+const doneN=()=>Hid.tabs().filter(t=>S.done[t.id]).length;
 /* «صندوق مفاجأة جديد» · «صندوقا مفاجأة جديدان» · «٣ صناديق مفاجأة جديدة» · «١١ صندوقًا جديدًا» */
 const giftTxt=n=>n===1?'صندوق مفاجأة جديد':n===2?'صندوقا مفاجأة جديدان':n<=10?`${AR(n)} صناديق مفاجأة جديدة`:`${AR(n)} صندوقًا جديدًا`;
 
@@ -4401,7 +4411,7 @@ const PAGES=[
  {id:'report',ic:'envelope',t:'ساعي البريد',f:'من الجذر «ق ر ر» جاءت: تقرير، وقرار، واستقرار.'}];
 const PG_BATTLE=['certificate','report'];                  // the pages of these two planets come after the last battle
 const Pg={
- list(){return PAGES.filter(p=>TABS.some(t=>t.id===p.id))},
+ list(){return PAGES.filter(p=>TABS.some(t=>t.id===p.id)&&!Hid.lesson(p.id))},
  got(id){return!!S.done[id]},
  opened(id){return!!(store.get('gift',{})||{})[id]},
  recovered(){return this.list().filter(p=>this.got(p.id)).length},
@@ -5036,7 +5046,7 @@ const Mine={
   if(!NAME()){Prof.ask('edit');return}
   const d=$('#dlg'),close=()=>{d.hidden=true;d.innerHTML='';Resume.refresh()};d.hidden=false;
   const c=Rank.cur(),p=Resume.pos(),L=Incomplete.list(),f=Resume.first(L),A=Ach.get(),s=Daily.summary(),r=Daily.run(),R=REP(),code=Code.make(R),gf=Pg.unopened().length,sv=store.persistent,cls=typeof Cls!=='undefined'&&Cls.on;
-  const map=TABS.filter(t=>t.id!=='report').map(t=>{const pl=L.planets.find(x=>x.id===t.id),ok=!!S.done[t.id],n=pl?pl.items.length:0;
+  const map=Hid.tabs().filter(t=>t.id!=='report').map(t=>{const pl=L.planets.find(x=>x.id===t.id),ok=!!S.done[t.id],n=pl?pl.items.length:0;
    return`<button type="button" class="mn-p${ok?' ok':n?' left':''}" data-act="pl" data-id="${t.id}" title="${ok?'أنجزتَ هذا الكوكب':n?`بقي فيه ${NUM(n,N_PART)}؛ اضغط لتذهب إلى الجزء الناقص`:'اضغط لتبدأ'}"><img src="${IMG[t.pl]}" alt=""><span>${esc(t.title)}</span><small>${ok?'✓':n?AR(n):''}</small></button>`}).join('');
   const sub=sv?`✓ يُحفَظ تقدّمك تلقائيًا في هذا المتصفح بعد كل إجابة.${Resume.saved||PREV_TS?` آخر حفظ ${ago(Resume.saved||PREV_TS)}.`:''}`:'⚠ هذا المتصفح لا يحفظ التقدّم تلقائيًا؛ احفظ «رمز التقدّم» وأبقِه معك.';
   d.innerHTML=`<div class="dlg-card zoom-in mine" role="dialog" aria-modal="true" aria-labelledby="mnT">
@@ -5819,6 +5829,8 @@ const Dash={
  /* ---------- game controls: saved in the database, applied to every student's page within about 30 seconds ---------- */
  ctl(scope){const S=this.S,c=S.cfg||{};scope=scope||'all';const cl=scope!=='all',o=cl?(c.byCls||{})[scope]:null,has=!!o,
   val=(k,def)=>cl&&o&&k in o?o[k]:(k in c?c[k]:def),lock=new Set(val('lock',[])),hide=new Set(val('hide',[])),goff=new Set(val('gamesOff',[])),tabs=TABS.filter(t=>t.id!=='start'),now=this.now(),st=id=>hide.has(id)?'hide':lock.has(id)?'lock':'open',w=c.win||{on:false,from:'08:00',to:'14:00'};
+  const lessons=tabs.filter(t=>t.id in LESSON_TP),gl=typeof GAMES!=='undefined'?GAMES.concat(typeof EXTRA!=='undefined'?EXTRA:[]):[],
+   info=id=>{if(!(id in LESSON_TP))return'';const pts=LQ.filter(x=>x.tab===id).reduce((a,x)=>a+x.pts,0)+(DRILLS.some(d=>d.id===id)?300:0),gm=Object.keys(GAME_LES).filter(g=>GAME_LES[g].includes(id)).map(g=>(gl.find(x=>x.id===g)||{}).t).filter(Boolean);return esc((pts?AR(pts)+' نقطة (دروس وتدريب)':'')+(gm.length?(pts?' · ':'')+'ألعاب: '+gm.join('، '):''))};
   const live=S.rows.filter(r=>r.seen&&now-r.seen<90000),got=live.filter(r=>r.cv>=(c.v||0)).length;
   this.modal(`<h3>${em('bullseye')} التحكم باللعبة</h3><p class="dh-sub">تُحفَظ في قاعدة البيانات وتصل إلى أجهزة الطلاب المفتوحة خلال نحو نصف دقيقة.</p>
    <div class="dh-set"><b>تطبيق الإعدادات على</b><label class="sr" for="dhSco">النطاق</label><select id="dhSco" class="inp dh-sel"><option value="all"${cl?'':' selected'}>كل الفصول</option>${S.classes.map(x=>`<option value="${esc(x)}"${x===scope?' selected':''}>${esc(x)} فقط</option>`).join('')}</select>
@@ -5826,10 +5838,12 @@ const Dash={
     <small id="dhRc">${live.length?`استلم الإعدادات الحالية ${AR(got)} من ${AR(live.length)} طالبًا متصلًا الآن.`:'لا طلاب متصلون الآن؛ ستصل الإعدادات عند فتحهم الصفحة.'} <button class="dh-x" id="dhRf" type="button">تحديث</button></small></div>
    <div class="dh-set"><b>رسالة للطلاب (شريط أعلى الصفحة)</b><label class="sr" for="dhNt">نص الرسالة</label><input id="dhNt" class="inp" maxlength="200" placeholder="مثال: افتحوا كوكب «المفعول به» الآن" value="${esc(val('notice',''))}"><small>اتركها فارغة لإخفاء الشريط.</small></div>
    <div class="dh-set"><b>إيقاف الحل مؤقتًا</b><label class="dh-sw"><input type="checkbox" id="dhPs"${val('pause',false)?' checked':''}> أوقِف الطلاب (تظهر لهم شاشة انتظار)</label><label class="sr" for="dhPm">رسالة الإيقاف</label><input id="dhPm" class="inp" maxlength="120" placeholder="مثال: انتبهوا إلى الشرح" value="${esc(val('pauseMsg',''))}"></div>
-   <div class="dh-set"><b>الكواكب (التبويبات)</b><small>«مغلق» يظهر للطالب بقفل ولا يفتحه؛ «مخفي» يختفي من الشريط تمامًا، وتُستبعد معه درجاتُ الدرس وتدريباتُه وألعابُه وأسئلتُه من التقييم ومن الأسئلة العشوائية حتى تُظهره. افتح الكوكب عند وصولك إليه في الشرح.</small>
-    <div class="dh-tbl">${tabs.map((t,k)=>`${k===0||groupOf(tabs[k-1].id)!==groupOf(t.id)?`<div class="dh-grp" style="--gc:${groupOf(t.id).c}">${groupOf(t.id).end?'':'المجموعة '+groupNo(groupOf(t.id))+': '}${esc(groupOf(t.id).t)}</div>`:''}<div class="dh-tr"><span>${esc(t.title)}</span><select class="inp dh-sel" data-tb="${t.id}" aria-label="حالة ${esc(t.title)}"><option value="open"${st(t.id)==='open'?' selected':''}>مفتوح</option><option value="lock"${st(t.id)==='lock'?' selected':''}>مغلق</option><option value="hide"${st(t.id)==='hide'?' selected':''}>مخفي</option></select></div>`).join('')}</div>
-    <div class="row"><button class="btn ghost sm" id="dhLa" type="button">أغلِق الكل</button><button class="btn ghost sm" id="dhLn" type="button">افتح الكل</button></div></div>
-   <div class="dh-set"><b>الألعاب داخل كوكب «الألعاب»</b><small>أزل العلامة لإغلاق لعبة بعينها.</small><div class="dh-lk">${(typeof GAMES!=='undefined'?GAMES:[]).map(g=>`<label class="dh-sw"><input type="checkbox" data-gm="${g.id}"${goff.has(g.id)?'':' checked'}> ${esc(g.t)}</label>`).join('')}</div></div>
+   <div class="dh-set"><b>الكواكب (الدروس)</b><small>«مغلق»: يظهر للطالب بقفل ولا يفتحه. «مخفي»: يختفي من الشريط والخريطة والتقرير والخرائط واللوحات، وتُستبعد معه درجاته وتدريباته وألعابه وأسئلته من التقييم ومن الأسئلة العشوائية حتى تُظهره. لا يُحذف شيء: نتائج الطالب تعود إلى درجته فور الإظهار.</small>
+    <div class="dh-sum" id="dhSum" role="status"></div>
+    <div class="dh-up"><b>التقدّم التدريجي</b><span>افتح الدروس حتى</span><select id="dhUp" class="inp dh-sel" aria-label="افتح الدروس حتى">${lessons.map(t=>`<option value="${t.id}">${esc(t.title)}</option>`).join('')}</select><span>وما بعده</span><select id="dhRest" class="inp dh-sel" aria-label="حالة الدروس التالية"><option value="lock">مغلق</option><option value="hide">مخفي</option></select><button class="btn gold sm" id="dhUpB" type="button">طبّق</button></div>
+    <div class="dh-tbl">${tabs.map((t,k)=>`${k===0||groupOf(tabs[k-1].id)!==groupOf(t.id)?`<div class="dh-grp" style="--gc:${groupOf(t.id).c}"><span>${groupOf(t.id).end?'':'المجموعة '+groupNo(groupOf(t.id))+': '}${esc(groupOf(t.id).t)}</span><span class="dh-gb" role="group" aria-label="كل كواكب المجموعة"><button type="button" data-gs="${groupOf(t.id).id}:open">افتح</button><button type="button" data-gs="${groupOf(t.id).id}:lock">أغلق</button><button type="button" data-gs="${groupOf(t.id).id}:hide">أخفِ</button></span></div>`:''}<div class="dh-tr dh-s-${st(t.id)}" data-row="${t.id}"><span class="dh-tn"><span>${esc(t.title)}</span>${info(t.id)?`<small class="dh-ti">${info(t.id)}</small>`:''}</span><select class="inp dh-sel" data-tb="${t.id}" aria-label="حالة ${esc(t.title)}"><option value="open"${st(t.id)==='open'?' selected':''}>مفتوح</option><option value="lock"${st(t.id)==='lock'?' selected':''}>مغلق</option><option value="hide"${st(t.id)==='hide'?' selected':''}>مخفي</option></select></div>`).join('')}</div>
+    <div class="row"><button class="btn ghost sm" id="dhLn" type="button">افتح الكل</button><button class="btn ghost sm" id="dhLa" type="button">أغلِق الكل</button><button class="btn ghost sm" id="dhLh" type="button">أخفِ الدروس كلها</button></div></div>
+   <div class="dh-set"><b>الألعاب</b><small>أزل العلامة لإغلاق لعبة بعينها. اللعبة المبنية على درس مخفي تختفي وحدها (تظهر بعلامة «مخفية»).</small><div class="dh-lk">${(typeof GAMES!=='undefined'?GAMES:[]).concat(typeof EXTRA!=='undefined'?EXTRA:[]).map(g=>`<label class="dh-sw"><input type="checkbox" data-gm="${g.id}"${goff.has(g.id)?'':' checked'}> ${esc(g.t)}<span class="dh-an" hidden>مخفية بإخفاء درسها</span></label>`).join('')}</div></div>
    <div class="dh-set"><b>رسالة تشجيع لحظية</b><div class="dh-cr"><input id="dhCh" class="inp" maxlength="100" placeholder="مثال: أحسنتم يا أبطال!"><button class="btn gold sm" id="dhCs2" type="button">أرسل${cl?' للفصل':' للجميع'}</button></div></div>
    ${cl?'<p class="dh-sub">الخيارات التالية تخص كل الفصول؛ اخترها من «كل الفصول».</p>':`<div class="dh-set"><b>لوحة ترتيب الفصل للطلاب</b><label class="sr" for="dhBd">عرض لوحة الترتيب</label><select id="dhBd" class="inp dh-sel"><option value="off">مغلقة (لا يراها الطلاب)</option><option value="top5">أفضل ٥ في الفصل</option><option value="top10">أفضل ١٠ في الفصل</option><option value="all">كل طلاب الفصل</option></select>
     <label class="sr" for="dhBn">الأسماء</label><select id="dhBn" class="inp dh-sel"><option value="first">الاسم الأول فقط</option><option value="full">الاسم الكامل</option></select><small>يرى الطالب ترتيب فصله فقط، ويظهر ترتيبه هو دائمًا.</small></div>
@@ -5839,7 +5853,15 @@ const Dash={
    <div class="row"><button class="btn go sm" id="dhGs" type="button">حفظ التغييرات</button>${cl&&has?'<button class="btn ghost sm" id="dhGr" type="button">إلغاء إعدادات هذا الفصل</button>':''}<button class="btn ghost sm" id="dhGx" type="button">إغلاق</button></div>`,m=>{
    if(!cl){$('#dhBd',m).value=c.board||'off';$('#dhBn',m).value=c.boardNames||'first'}
    const msg=t=>{$('#dhGm',m).textContent=t},sels=()=>$$('[data-tb]',m);
-   $('#dhGx',m).onclick=()=>this.modal();$('#dhLa',m).onclick=()=>sels().forEach(b=>b.value='lock');$('#dhLn',m).onclick=()=>sels().forEach(b=>b.value='open');
+   $('#dhGx',m).onclick=()=>this.modal();
+   const paintLs=()=>{const cnt={open:0,lock:0,hide:0},hid=new Set();sels().forEach(b=>{cnt[b.value]++;if(b.value==='hide')hid.add(b.dataset.tb);const r=b.closest('.dh-tr');if(r)r.className='dh-tr dh-s-'+b.value});
+    $('#dhSum',m).innerHTML=`<span class="dh-s-open">${AR(cnt.open)} مفتوح</span><span class="dh-s-lock">${AR(cnt.lock)} مغلق</span><span class="dh-s-hide">${AR(cnt.hide)} مخفي</span>`;
+    $$('[data-gm]',m).forEach(b=>{const lb=b.closest('label'),auto=(GAME_LES[b.dataset.gm]||[]).some(l=>hid.has(l));lb.classList.toggle('dh-auto',auto);const an=$('.dh-an',lb);if(an)an.hidden=!auto})};
+   const setAll=(v,f)=>{sels().forEach(b=>{if(!f||f(b.dataset.tb))b.value=v});paintLs()};
+   $('#dhLa',m).onclick=()=>setAll('lock');$('#dhLn',m).onclick=()=>setAll('open');$('#dhLh',m).onclick=()=>setAll('hide',id=>id in LESSON_TP);
+   $$('[data-gs]',m).forEach(b=>b.onclick=()=>{const[g,v]=b.dataset.gs.split(':'),G=GROUPS.find(x=>x.id===g);setAll(v,id=>!!G&&G.tabs.includes(id))});
+   $('#dhUpB',m).onclick=()=>{const ids=lessons.map(t=>t.id),at=ids.indexOf($('#dhUp',m).value),rest=$('#dhRest',m).value;if(at<0)return;ids.forEach((id,i)=>{const b=$(`[data-tb=${id}]`,m);if(b)b.value=i<=at?'open':rest});paintLs();msg('طُبِّق التقدّم على الدروس؛ اضغط «حفظ التغييرات» ليصل إلى الطلاب.')};
+   m.addEventListener('change',e=>{if(e.target.matches&&e.target.matches('[data-tb]'))paintLs()});paintLs();
    $('#dhSco',m).onchange=e=>this.ctl(e.target.value);
    $('#dhRf',m).onclick=async()=>{await this.load();this.ctl(scope)};
    const post=async cfg=>{msg('جارٍ الحفظ…');const r=await Online.api('config',{cfg},S.key);if(!r.ok){msg(this.err(r));if(r.error==='login'){this.close();Online.teacherForget();Online.teacherAsk(Online.why.login)}return false}S.cfg=r.cfg;return true};
@@ -6250,6 +6272,14 @@ body.dash-on{overflow:hidden}
 .dh-tab tr.dh-grp td{background:#ffffff14;padding:8px 10px;font-size:1rem}
 .dh-pod{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-items:end;margin:8px 0}.dh-pd{display:grid;gap:2px;justify-items:center;padding:12px 6px;border-radius:16px;background:#ffffff10;border:1.5px solid var(--line);color:inherit;font:inherit;cursor:pointer}.dh-pd .m{font-size:2rem}.dh-pd em{font-style:normal;font:400 1.4rem var(--f-display)}.dh-pd.p1{padding-block:20px;background:#fbbf2426;border-color:#fbbf24}.dh-pd b{text-align:center}
 .dh-hn2{margin-top:6px}
+.dh-md .dh-tbl{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr))}.dh-tr .dh-sel{min-width:92px;max-width:112px;flex:0 0 auto}.dh-tr>.dh-tn{flex:1 1 auto}
+.dh-tbl .dh-grp{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center;justify-content:space-between}.dh-gb{display:flex;gap:4px}.dh-gb button{border:1px solid var(--line);background:#ffffff0d;color:inherit;border-radius:9px;padding:2px 9px;font:inherit;font-size:.78rem;cursor:pointer}.dh-gb button:hover{background:#ffffff22}
+.dh-sum{display:flex;flex-wrap:wrap;gap:8px;margin:.4rem 0}.dh-sum span{padding:3px 12px;border-radius:12px;font-weight:700;font-size:.85rem;background:#ffffff12}
+.dh-s-open.dh-sum,.dh-sum .dh-s-open{background:#16a34a33;color:#86efac}.dh-sum .dh-s-lock{background:#f59e0b33;color:#fcd34d}.dh-sum .dh-s-hide{background:#e11d4833;color:#fda4af}
+.dh-tr.dh-s-open{border-inline-start:4px solid #22c55e}.dh-tr.dh-s-lock{border-inline-start:4px solid #f59e0b}.dh-tr.dh-s-hide{border-inline-start:4px solid #fb7185;opacity:.78}
+.dh-tn{display:grid;gap:1px;min-width:0}.dh-ti{color:var(--muted);font-size:.74rem;line-height:1.4}
+.dh-up{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 10px;margin:.4rem 0;border-radius:12px;background:#ffffff0c;border:1px dashed var(--line)}.dh-up>b{flex:1 1 100%}
+.dh-an{margin-inline-start:6px;padding:1px 8px;border-radius:9px;background:#e11d4833;color:#fda4af;font-size:.72rem}.dh-sw.dh-auto{opacity:.6}
 .dh-tbl{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px}.dh-tr{display:flex;gap:8px;align-items:center;justify-content:space-between;padding:4px 8px;border-radius:10px;background:#ffffff0a}
 .dh-sw-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}.dh-col{display:flex;gap:5px;align-items:center;cursor:pointer;padding:4px 8px;border-radius:12px;border:1.5px solid var(--line)}.dh-col i{width:20px;height:20px;border-radius:50%;display:inline-block;border:1px solid #fff4}.dh-col input{accent-color:var(--gold2)}
 .dh-prev{position:relative;overflow:hidden;border-radius:12px;background:#fff;min-height:120px}#dhLg{max-height:56px;max-width:140px;background:#fff;border-radius:8px;padding:3px}
@@ -6583,7 +6613,8 @@ const Ctl={
   setInterval(()=>Ctl.paint(),20000);
   const qr=Q.render;Q.render=function(h,q,o){if(Ctl.cfg&&Ctl.cfg.hints===false)o=Object.assign({},o||{},{noHint:true});return qr.call(this,h,q,o)};
   setTimeout(()=>this.paint(),50)},
- apply(c){if(!c||typeof c!=='object')return;const old=this.cfg;this.cfg=c;try{Content.check(c.ct)}catch(e){}try{localStorage.setItem('mf_cfg',JSON.stringify(c))}catch(e){}RepCfg.rep=c.rep||{};this.logo(c);this.paint(old);if(old&&(JSON.stringify(old.sc||{})!==JSON.stringify(c.sc||{})||JSON.stringify(old.hide||[])!==JSON.stringify(c.hide||[]))){try{paintScore();progress()}catch(e){}}
+ apply(c){if(!c||typeof c!=='object')return;const old=this.cfg;this.cfg=c;try{Content.check(c.ct)}catch(e){}try{localStorage.setItem('mf_cfg',JSON.stringify(c))}catch(e){}RepCfg.rep=c.rep||{};this.logo(c);this.paint(old);if(old&&(JSON.stringify(old.sc||{})!==JSON.stringify(c.sc||{})||JSON.stringify(old.hide||[])!==JSON.stringify(c.hide||[]))){try{paintScore();progress()}catch(e){}
+  if(JSON.stringify(old.hide||[])!==JSON.stringify(c.hide||[])){try{const T=TABS[S.tab];if(T&&T.id==='start'&&S.step===0)go(S.tab,0,true)}catch(e){}}}
   /* tell the server this device now holds the new settings (the teacher's dashboard counts how many students received them) */
   if((!old||old.v!==c.v)&&Online.acct()){clearTimeout(this.ak);this.ak=setTimeout(()=>{const a=Online.acct();if(a)Online.api('sync',{aid:a.aid,sk:a.sk,cv:c.v,w:Online.where()})},400)}},
  /* the report logo is stored apart (it is large): fetched once per version and kept on the device */
