@@ -49,13 +49,38 @@ async function body(req) {
 }
 const send = (res, code, obj) => { res.statusCode = code; res.setHeader('content-type', 'application/json; charset=utf-8'); res.end(JSON.stringify(obj)); };
 const crypto = require('crypto');
+/* ---------- teacher accounts: user name + password stored (hashed) in the database; a login gives a token valid for 7 days ---------- */
+const hashPw = (pw, salt) => { salt = salt || crypto.randomBytes(16).toString('hex'); return salt + ':' + crypto.scryptSync(String(pw), salt, 32).toString('hex'); };
+const checkPw = (pw, stored) => { const [salt, h] = String(stored || '').split(':'); if (!salt || !h) return false; const x = Buffer.from(h, 'hex'), y = crypto.scryptSync(String(pw), salt, 32); return x.length === y.length && crypto.timingSafeEqual(x, y); };
+const userKey = u => String(u || '').normalize('NFKC').trim().toLowerCase().replace(/\s+/g, '').slice(0, 30);
 const same = (a, b) => { const x = Buffer.from(String(a)), y = Buffer.from(String(b)); return x.length === y.length && crypto.timingSafeEqual(x, y); };
-/* teacher key check: returns null when allowed, otherwise sends the error and returns true */
-function deny(req, res) {
-  const want = process.env.TEACHER_KEY;
-  if (!want) { send(res, 503, { error: 'no_teacher_key' }); return true; }
-  if (!same(req.headers['x-key'] || '', want)) { send(res, 401, { error: 'bad_key' }); return true; }
-  return false;
+const TOKEN_TTL = 7 * 24 * 3600;
+async function newToken(user) { const t = crypto.randomBytes(24).toString('hex'); await redis(['SET', 'mf:tok:' + t, user, 'EX', String(TOKEN_TTL)]); return t; }
+/* returns null when allowed (req.teacher = user name), otherwise sends the error and returns true */
+async function deny(req, res) {
+  const t = String(req.headers['x-tok'] || '').replace(/[^0-9a-f]/g, '').slice(0, 64);
+  if (t.length < 32) { send(res, 401, { error: 'login' }); return true; }
+  try { const u = await redis(['GET', 'mf:tok:' + t]); if (!u) { send(res, 401, { error: 'login' }); return true; } req.teacher = u; return false; }
+  catch (e) { send(res, e.code === 'no_db' ? 503 : 500, { error: e.code === 'no_db' ? 'no_db' : 'server' }); return true; }
 }
+/* ---------- game settings the teacher controls (applied to every student's page within ~40 s) ---------- */
+const CFG0 = { v: 0, notice: '', lock: [], pause: false, pauseMsg: '', reg: true, hints: true, cheer: '', cheerAt: 0 };
+let cfgCache = { at: 0, v: CFG0 };
+async function cfg(fresh) {
+  if (!fresh && Date.now() - cfgCache.at < 8000) return cfgCache.v;
+  let o = {}; try { const r = await redis(['GET', 'mf:cfg']); if (r) o = JSON.parse(r); } catch (e) { if (e.code === 'no_db') throw e; }
+  cfgCache = { at: Date.now(), v: Object.assign({}, CFG0, o) }; return cfgCache.v;
+}
+function cleanCfg(b, old) {
+  const t = (x, n) => String(x == null ? '' : x).replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, n), c = Object.assign({}, old);
+  if ('notice' in b) c.notice = t(b.notice, 200);
+  if ('pauseMsg' in b) c.pauseMsg = t(b.pauseMsg, 120);
+  if ('lock' in b) c.lock = (Array.isArray(b.lock) ? b.lock : []).map(x => t(x, 20)).filter(x => /^[a-z]{2,20}$/.test(x)).slice(0, 20);
+  ['pause', 'reg', 'hints'].forEach(k => { if (k in b) c[k] = !!b[k]; });
+  if (b.cheer) { c.cheer = t(b.cheer, 100); c.cheerAt = Date.now(); }
+  c.v = Date.now(); return c;
+}
+async function saveCfg(c) { await redis(['SET', 'mf:cfg', JSON.stringify(c)]); cfgCache = { at: Date.now(), v: c }; return c; }
 const qs = (req, k) => (req.query && req.query[k]) || new URL(req.url, 'http://x').searchParams.get(k);
-module.exports = { parseCode, nameKey, normCls, redis, pipeline, h2o, normPhone, normName, classes, aidOf, DEFAULT_CLASSES, dbConf, body, send, deny, qs };
+const ip = req => String(req.headers['x-forwarded-for'] || '').split(',')[0].trim().slice(0, 45) || 'x';
+module.exports = { parseCode, nameKey, normCls, redis, pipeline, h2o, normPhone, normName, classes, aidOf, DEFAULT_CLASSES, dbConf, body, send, deny, qs, hashPw, checkPw, userKey, same, newToken, cfg, cleanCfg, saveCfg, ip, TOKEN_TTL };

@@ -1,5 +1,5 @@
 'use strict';
-const { redis, pipeline, send, body, parseCode, nameKey } = require('./_lib');
+const { redis, pipeline, send, body, parseCode, nameKey, cfg } = require('./_lib');
 const MAX_SNAP = 250000, MAX_DETAIL = 40000;
 /* the student's page calls this: a heartbeat (who is writing now), and the progress snapshot + result code + detailed report when something changed */
 module.exports = async (req, res) => {
@@ -27,6 +27,6 @@ module.exports = async (req, res) => {
     }
     if (set.length) cmds.push(['HSET', 'mf:acc:' + aid].concat(set));
     await pipeline(cmds);
-    return send(res, 200, { ok: true, status });
+    return send(res, 200, { ok: true, status, cfg: await cfg() });
   } catch (e) { return send(res, e.code === 'no_db' ? 503 : 500, { error: e.code === 'no_db' ? 'no_db' : 'server' }); }
 };

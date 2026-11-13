@@ -2,7 +2,7 @@
 const { redis, send, deny, qs } = require('./_lib');
 /* one student's detailed report (teacher only); served only while it belongs to his newest result code */
 module.exports = async (req, res) => {
-  if (deny(req, res)) return;
+  if (await deny(req, res)) return;
   const aid = String(qs(req, 'aid') || '').slice(0, 200);
   if (!aid) return send(res, 400, { error: 'bad_account' });
   try {

@@ -1,5 +1,5 @@
 'use strict';
-const { redis, pipeline, send, body, normPhone, normName, classes, aidOf } = require('./_lib');
+const { redis, pipeline, send, body, normPhone, normName, classes, aidOf, cfg } = require('./_lib');
 const MAX_CLASS = 250;
 /* a new student: name + class + phone number (the phone number is the login code on any device) */
 module.exports = async (req, res) => {
@@ -11,6 +11,7 @@ module.exports = async (req, res) => {
     if (!(await classes()).includes(cls)) return send(res, 400, { error: 'bad_class' });
     const aid = aidOf(phone, name), have = await redis(['HGET', 'mf:acc:' + aid, 'cls']);
     if (have) return send(res, 200, { ok: true, exists: true, aid, name, cls: have, phone });
+    if (!(await cfg()).reg) return send(res, 403, { error: 'reg_closed' });
     if ((await redis(['HLEN', 'mf:cls:' + cls])) >= MAX_CLASS) return send(res, 429, { error: 'class_full' });
     const now = Date.now();
     await pipeline([
