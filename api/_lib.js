@@ -35,16 +35,22 @@ const h2o = a => { const o = {}; for (let i = 0; a && i + 1 < a.length; i += 2) 
 /* a phone number: Arabic or Persian digits are accepted, +20 / 0020 become the local form, 8-15 digits */
 function normPhone(s) {
   let t = String(s || '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[^0-9]/g, '');
-  t = t.replace(/^00/, ''); if (/^20(1[0-9]{9})$/.test(t)) t = '0' + t.slice(2);
+  t = t.replace(/^00/, '');
+  if (/^20(1[0-9]{9})$/.test(t)) t = '0' + t.slice(2);          // +20 1x… (Egypt)  -> 01x…
+  else if (/^966(5[0-9]{8})$/.test(t)) t = '0' + t.slice(3);    // +966 5x… (Saudi) -> 05x…
+  else if (/^1[0125][0-9]{8}$/.test(t)) t = '0' + t;            // 1x… without the leading 0 (Egypt)
+  else if (/^5[0-9]{8}$/.test(t)) t = '0' + t;                  // 5x… without the leading 0 (Saudi)
   return t.length >= 8 && t.length <= 15 ? t : '';
 }
+/* the number with its country code, ready for WhatsApp: 01x… -> Egypt (20), 05x… -> Saudi Arabia (966) */
+function intlPhone(p) { p = String(p || '').replace(/\D/g, ''); if (/^01[0125][0-9]{8}$/.test(p)) return '20' + p.slice(1); if (/^05[0-9]{8}$/.test(p)) return '966' + p.slice(1); return p.replace(/^0+/, ''); }
 const normName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40);
 const DEFAULT_CLASSES = ['الخامس أ', 'الخامس ب', 'الخامس ج', 'الخامس د'];
 async function classes() { try { const v = await redis(['GET', 'mf:classes']); const a = v ? JSON.parse(v) : null; if (Array.isArray(a) && a.length) return a.map(String); } catch (e) { if (e.code === 'no_db') throw e; } return DEFAULT_CLASSES; }
 const aidOf = (phone, name) => phone + '~' + nameKey(name);
 async function body(req) {
   if (req.body && typeof req.body === 'object') return req.body;
-  let s = ''; for await (const ch of req) { s += ch; if (s.length > 5000) break; }
+  let s = ''; for await (const ch of req) { s += ch; if (s.length > 400000) break; }
   try { return JSON.parse(s || '{}'); } catch (e) { return {}; }
 }
 const send = (res, code, obj) => { res.statusCode = code; res.setHeader('content-type', 'application/json; charset=utf-8'); res.end(JSON.stringify(obj)); };
@@ -66,8 +72,8 @@ async function deny(req, res) {
 /* ---------- game settings the teacher controls (applied to every student's page within ~30 s) ----------
    global keys: reg, hints, board ('off' | 'top5' | 'top10' | 'all'), boardNames ('full' | 'first')
    scoped keys (global, or overridden for one class in byCls[class]): notice, pause, pauseMsg, lock[], cheer + cheerAt */
-const SCOPED = ['notice', 'pause', 'pauseMsg', 'lock', 'cheer', 'cheerAt'];
-const CFG0 = { v: 0, notice: '', lock: [], pause: false, pauseMsg: '', reg: true, hints: true, cheer: '', cheerAt: 0, board: 'off', boardNames: 'first', byCls: {} };
+const SCOPED = ['notice', 'pause', 'pauseMsg', 'lock', 'hide', 'gamesOff', 'cheer', 'cheerAt'];
+const CFG0 = { v: 0, notice: '', lock: [], pause: false, pauseMsg: '', hide: [], gamesOff: [], reg: true, hints: true, sound: true, fx: true, win: { on: false, from: '08:00', to: '14:00' }, rep: {}, cheer: '', cheerAt: 0, board: 'off', boardNames: 'first', byCls: {} };
 let cfgCache = { at: 0, v: CFG0 };
 async function cfg(fresh) {
   if (!fresh && Date.now() - cfgCache.at < 8000) return cfgCache.v;
@@ -78,7 +84,10 @@ const tx = (x, n) => String(x == null ? '' : x).replace(/[\u0000-\u001f\u007f<>]
 function cleanScoped(b, c) {
   if ('notice' in b) c.notice = tx(b.notice, 200);
   if ('pauseMsg' in b) c.pauseMsg = tx(b.pauseMsg, 120);
-  if ('lock' in b) c.lock = (Array.isArray(b.lock) ? b.lock : []).map(x => tx(x, 20)).filter(x => /^[a-z]{2,20}$/.test(x)).slice(0, 20);
+  const ids = v => (Array.isArray(v) ? v : []).map(x => tx(x, 20)).filter(x => /^[a-z0-9]{2,20}$/.test(x)).slice(0, 24);
+  if ('lock' in b) c.lock = ids(b.lock);
+  if ('hide' in b) c.hide = ids(b.hide);
+  if ('gamesOff' in b) c.gamesOff = ids(b.gamesOff);
   if ('pause' in b) c.pause = !!b.pause;
   if (b.cheer) { c.cheer = tx(b.cheer, 100); c.cheerAt = Date.now(); }
   return c;
@@ -91,14 +100,26 @@ function cleanCfg(b, old) {
     if (b.reset) delete c.byCls[scope];
     else { if (Object.keys(c.byCls).length >= 20 && !c.byCls[scope]) return c; c.byCls[scope] = cleanScoped(b, Object.assign({}, c.byCls[scope])); }
   } else cleanScoped(b, c);
-  ['reg', 'hints'].forEach(k => { if (k in b) c[k] = !!b[k]; });
+  ['reg', 'hints', 'sound', 'fx'].forEach(k => { if (k in b) c[k] = !!b[k]; });
+  if (b.win && typeof b.win === 'object') { const hm = x => /^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(String(x)) ? String(x) : null; c.win = { on: !!b.win.on, from: hm(b.win.from) || '08:00', to: hm(b.win.to) || '14:00' }; }
+  if (b.rep && typeof b.rep === 'object') c.rep = cleanRep(b.rep, c.rep);
   if (['off', 'top5', 'top10', 'all'].includes(b.board)) c.board = b.board;
   if (['full', 'first'].includes(b.boardNames)) c.boardNames = b.boardNames;
   c.v = Date.now(); return c;
 }
+const REP_SEC = ['compare', 'topics', 'heat', 'wrong', 'plan', 'notes', 'recs', 'students', 'insights'];
+/* the look of the reports (teacher + student): school line, titles, footer, parent note, colour, which sections are printed */
+function cleanRep(b, old) {
+  const r = Object.assign({}, old);
+  [['school', 60], ['teacher', 40], ['tStu', 60], ['tCls', 60], ['course', 90], ['foot', 80], ['note', 300]].forEach(([k, n]) => { if (k in b) r[k] = tx(b[k], n); });
+  if ('color' in b) r.color = /^(violet|emerald|blue|amber|rose|slate)$/.test(b.color) || /^#[0-9a-fA-F]{6}$/.test(b.color) ? b.color : 'violet';
+  if (b.sec && typeof b.sec === 'object') { r.sec = Object.assign({}, r.sec); REP_SEC.forEach(k => { if (k in b.sec) r.sec[k] = !!b.sec[k]; }); }
+  if ('logoV' in b) r.logoV = Math.floor(+b.logoV || 0);
+  return r;
+}
 /* what one student's page receives: the global values with his class's overrides on top */
 function eff(c, cls) {
-  const o = c.byCls && cls ? c.byCls[cls] || {} : {}, r = { v: c.v, reg: c.reg !== false, hints: c.hints !== false, board: c.board || 'off', boardNames: c.boardNames || 'first' };
+  const o = c.byCls && cls ? c.byCls[cls] || {} : {}, r = { v: c.v, reg: c.reg !== false, hints: c.hints !== false, board: c.board || 'off', boardNames: c.boardNames || 'first', sound: c.sound !== false, fx: c.fx !== false, win: c.win || CFG0.win, rep: c.rep || {} };
   SCOPED.forEach(k => { r[k] = k in o ? o[k] : c[k]; });
   if ((o.cheerAt || 0) < (c.cheerAt || 0)) { r.cheer = c.cheer; r.cheerAt = c.cheerAt; }
   return r;
@@ -108,4 +129,4 @@ async function saveCfg(c) { await redis(['SET', 'mf:cfg', JSON.stringify(c)]); c
 async function limited(key, max) { const n = await redis(['INCR', key]); await redis(['EXPIRE', key, '600']); return n > max; }
 const qs = (req, k) => (req.query && req.query[k]) || new URL(req.url, 'http://x').searchParams.get(k);
 const ip = req => String(req.headers['x-forwarded-for'] || '').split(',')[0].trim().slice(0, 45) || 'x';
-module.exports = { parseCode, nameKey, normCls, redis, pipeline, h2o, normPhone, normName, classes, aidOf, DEFAULT_CLASSES, dbConf, body, send, deny, qs, hashPw, checkPw, userKey, same, newToken, cfg, cleanCfg, saveCfg, eff, limited, ip, TOKEN_TTL };
+module.exports = { parseCode, nameKey, normCls, redis, pipeline, h2o, normPhone, intlPhone, normName, classes, aidOf, DEFAULT_CLASSES, dbConf, body, send, deny, qs, hashPw, checkPw, userKey, same, newToken, cfg, cleanCfg, saveCfg, eff, limited, ip, TOKEN_TTL };
