@@ -24,6 +24,24 @@ async function redis(cmd) {
   const r = await fetch(c.url, { method: 'POST', headers: { Authorization: 'Bearer ' + c.token, 'content-type': 'application/json' }, body: JSON.stringify(cmd) });
   const j = await r.json(); if (!r.ok || j.error) throw new Error(j.error || 'redis ' + r.status); return j.result;
 }
+/* several commands in one round trip */
+async function pipeline(cmds) {
+  const c = dbConf(); if (!c) { const e = new Error('no_db'); e.code = 'no_db'; throw e; }
+  const r = await fetch(c.url.replace(/\/$/, '') + '/pipeline', { method: 'POST', headers: { Authorization: 'Bearer ' + c.token, 'content-type': 'application/json' }, body: JSON.stringify(cmds) });
+  const j = await r.json(); if (!r.ok || !Array.isArray(j)) throw new Error('pipeline ' + r.status);
+  return j.map(x => { if (x.error) throw new Error(x.error); return x.result; });
+}
+const h2o = a => { const o = {}; for (let i = 0; a && i + 1 < a.length; i += 2) o[a[i]] = a[i + 1]; return o; };
+/* a phone number: Arabic or Persian digits are accepted, +20 / 0020 become the local form, 8-15 digits */
+function normPhone(s) {
+  let t = String(s || '').replace(/[٠-٩]/g, d => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, d => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[^0-9]/g, '');
+  t = t.replace(/^00/, ''); if (/^20(1[0-9]{9})$/.test(t)) t = '0' + t.slice(2);
+  return t.length >= 8 && t.length <= 15 ? t : '';
+}
+const normName = n => String(n || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40);
+const DEFAULT_CLASSES = ['الخامس أ', 'الخامس ب', 'الخامس ج', 'الخامس د'];
+async function classes() { try { const v = await redis(['GET', 'mf:classes']); const a = v ? JSON.parse(v) : null; if (Array.isArray(a) && a.length) return a.map(String); } catch (e) { if (e.code === 'no_db') throw e; } return DEFAULT_CLASSES; }
+const aidOf = (phone, name) => phone + '~' + nameKey(name);
 async function body(req) {
   if (req.body && typeof req.body === 'object') return req.body;
   let s = ''; for await (const ch of req) { s += ch; if (s.length > 5000) break; }
@@ -40,4 +58,4 @@ function deny(req, res) {
   return false;
 }
 const qs = (req, k) => (req.query && req.query[k]) || new URL(req.url, 'http://x').searchParams.get(k);
-module.exports = { parseCode, nameKey, normCls, redis, dbConf, body, send, deny, qs };
+module.exports = { parseCode, nameKey, normCls, redis, pipeline, h2o, normPhone, normName, classes, aidOf, DEFAULT_CLASSES, dbConf, body, send, deny, qs };
