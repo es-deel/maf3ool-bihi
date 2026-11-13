@@ -102,7 +102,7 @@ module.exports = async (req, res) => {
       return send(res, 200, { ok: true, n: k });
     }
     if (op === 'reset') {   // the teacher resets some parts of one or several students' progress: {aids|aid, scopes:[score|progress|bonus|daily|badges|stats]}
-      const RS = { score: ['led', 'pb', 'ps', 'gb', 'fb'], progress: ['done', 'seen', 'sd', 'pos', 'lit', 'pu'], bonus: ['bn', 'cmb'], daily: ['dc', 'wk', 'wkh'], badges: ['bdg', 'gift', 'rk'], stats: ['st'] };
+      const RS = { score: ['led', 'pb', 'dq', 'ps', 'gb', 'fb'], progress: ['done', 'seen', 'sd', 'pos', 'lit', 'pu'], bonus: ['bn', 'cmb'], daily: ['dc', 'wk', 'wkh'], badges: ['bdg', 'gift', 'rk'], stats: ['st'] };
       const scopes = (Array.isArray(b.scopes) ? b.scopes : []).filter(x => RS[x]).filter((x, i, a) => a.indexOf(x) === i);
       if (!scopes.length) return send(res, 400, { error: 'bad' });
       const list = (Array.isArray(b.aids) ? b.aids : [aid]).map(x => String(x || '').slice(0, 200)).filter(Boolean).slice(0, 250), keys = [].concat(...scopes.map(x => RS[x]));
