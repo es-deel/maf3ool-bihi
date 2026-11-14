@@ -1,8 +1,21 @@
 'use strict';
-const { redis, send, deny, qs } = require('./_lib');
+const { redis, pipeline, send, deny, qs, classes, h2o } = require('./_lib');
 /* one student's detailed report (teacher only); served only while it belongs to his newest result code */
 module.exports = async (req, res) => {
   if (await deny(req, res)) return;
+  const cls = String(qs(req, 'cls') || '').trim();
+  if (cls && qs(req, 'dets')) {   // the class file: the compact detailed report of every student of one class (only those that match his newest result code)
+    try {
+      if (!(await classes()).includes(cls)) return send(res, 404, { error: 'bad_class' });
+      const ids = Object.keys(h2o((await redis(['HGETALL', 'mf:cls:' + cls])) || [])), dets = {};
+      for (let i = 0; i < ids.length; i += 40) {
+        const part = ids.slice(i, i + 40), got = await pipeline(part.map(a => ['HMGET', 'mf:acc:' + a, 'det', 'code', 'aw', 'ce']));
+        part.forEach((a, k) => { const [det, code, aw, ce] = got[k] || []; let o = null; try { o = det ? JSON.parse(det) : null; } catch (e) { o = null; } let w = []; try { w = aw ? JSON.parse(aw) : []; } catch (e) { w = []; }
+          dets[a] = { d: o && o.c === code ? o.d : null, aw: w.length, ce: ce === '1' ? 1 : 0 }; });
+      }
+      return send(res, 200, { ok: true, dets });
+    } catch (e) { return send(res, e.code === 'no_db' ? 503 : 500, { error: e.code === 'no_db' ? 'no_db' : 'server' }); }
+  }
   const aid = String(qs(req, 'aid') || '').slice(0, 200);
   if (!aid) return send(res, 400, { error: 'bad_account' });
   try {

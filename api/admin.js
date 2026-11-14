@@ -75,6 +75,22 @@ module.exports = async (req, res) => {
     }
     if (op === 'edit') { const r = await editOne(aid, b, await classes()); return send(res, r.code || 200, r.code ? { error: r.error } : r); }
     if (op === 'del') return (await delOne(aid)) ? send(res, 200, { ok: true }) : send(res, 404, { error: 'no_account' });
+    if (op === 'addstu') {   // the teacher adds students to a class himself: {cls, pass (default password), rows:[{name, phone, pass?}]} (up to 60 at once)
+      const to = String(b.cls || '').trim(), list = (await classes()), rows = Array.isArray(b.rows) ? b.rows.slice(0, 60) : [];
+      if (!list.includes(to)) return send(res, 400, { error: 'bad_class' }); if (!rows.length) return send(res, 400, { error: 'bad_name' });
+      if (((await redis(['HLEN', 'mf:cls:' + to])) || 0) + rows.length > 250) return send(res, 429, { error: 'class_full' });
+      const out = [];
+      for (const r of rows) {
+        const name = normName(r.name), phone = normPhone(r.phone), pass = String(r.pass || b.pass || '');
+        if (name.length < 2) { out.push({ name: String(r.name || ''), err: 'bad_name' }); continue; } if (!phone) { out.push({ name, err: 'bad_phone' }); continue; } if (pass.length < 4 || pass.length > 40) { out.push({ name, err: 'bad_pass' }); continue; }
+        const aid2 = aidOf(phone, name); if (await redis(['HGET', 'mf:acc:' + aid2, 'name'])) { out.push({ name, err: 'exists' }); continue; }
+        const sk = crypto.randomBytes(16).toString('hex'), now = Date.now();
+        await pipeline([['HSET', 'mf:acc:' + aid2, 'name', name, 'phone', phone, 'cls', to, 'pw', hashPw(pass), 'sk', sk, 'created', String(now)], ['HSET', 'mf:ph:' + phone, aid2, JSON.stringify({ n: name, c: to })],
+          ['HSET', 'mf:cls:' + to, aid2, JSON.stringify({ n: name, p: phone, c: '', d: 0 })], ['HSET', 'mf:seen:' + to, aid2, JSON.stringify({ t: now })]]);
+        out.push({ name, ok: 1 });
+      }
+      return send(res, 200, { ok: true, added: out.filter(x => x.ok).length, out });
+    }
     if (op === 'move') { const to = String(b.to || '').trim(); if (!(await classes()).includes(to)) return send(res, 400, { error: 'bad_class' }); return (await moveOne(aid, to)) ? send(res, 200, { ok: true }) : send(res, 404, { error: 'no_account' }); }
     if (op === 'setpw') {   // forgotten password: the teacher sets a new one (old devices must sign in again)
       const pass = String(b.pass || ''); if (pass.length < 4 || pass.length > 40) return send(res, 400, { error: 'bad_pass' });
