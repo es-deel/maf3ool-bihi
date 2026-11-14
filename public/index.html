@@ -1786,6 +1786,52 @@ body.cls .opt{min-height:4.6rem}
 .hn-cm small{font-size:.74rem;color:#fde68a}
 .hn-cs{font-size:.88rem;color:#fef3c7;line-height:1.5}
 .hn-cs b{color:#fde047;font-size:1.05rem}
+
+/* ===== the score window (stars / points) ===== */
+.sb-chip{cursor:pointer;transition:transform .15s,background .15s}
+.sb-chip:hover,.sb-chip:focus-visible{background:#ffffff26;transform:translateY(-1px)}
+.dlg-card.sb{max-width:40rem;width:min(100%,40rem);max-height:calc(100vh - 1.2rem);max-height:calc(100dvh - 1.2rem);overflow-y:auto;text-align:start}
+.sb h2{display:flex;gap:.45rem;align-items:center;margin:0 0 .5rem}
+.sb h2 .em{width:1.4em;height:1.4em}
+.sb-tg{display:inline-flex;padding:.2rem;gap:.2rem;border-radius:99px;background:#0005;border:1.5px solid var(--line);margin-bottom:.5rem}
+.sb-tg button{border:0;border-radius:99px;padding:.4rem .95rem;background:transparent;color:var(--muted);font:700 .92rem/1.2 var(--f-text);cursor:pointer;display:inline-flex;gap:.35rem;align-items:center}
+.sb-tg button .em{width:1.15em;height:1.15em}
+.sb-tg button[aria-pressed=true]{background:linear-gradient(180deg,#ffd43b,#f59e0b);color:#2a1a00}
+.sb-nx{margin:.3rem 0}
+.sb-why{font-size:.86rem;line-height:1.75;padding:.5rem .7rem;border-radius:12px;background:#0004;border:1px dashed var(--line)}
+.sb-gap{margin:.6rem 0;padding:.6rem .75rem;border-radius:16px;background:linear-gradient(135deg,#78350f55,#4c1d9555);border:1.5px solid #ffd43b55}
+.sb-gap h3{margin:0 0 .35rem;font-size:1.05rem;display:flex;gap:.4rem;align-items:center}
+.sb-gap h3 .em{width:1.3em;height:1.3em}
+.sb-gap ol{list-style:none;margin:0;padding:0;display:grid;gap:.35rem}
+.sb-gap li{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:.5rem;align-items:center}
+.sb-gap li small{color:var(--muted)}
+.sb-gap li b{color:var(--gold)}
+.sb-done{padding:.6rem;border-radius:14px;background:#14532d66;text-align:center;display:flex;gap:.4rem;justify-content:center;align-items:center}
+.sb-sec{margin:.45rem 0;border-radius:16px;background:#ffffff0d;border:1.5px solid var(--line)}
+.sb-sec[open]{background:#ffffff14}
+.sb-sec summary{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"h v" "b b";gap:.35rem .6rem;align-items:center;padding:.6rem .75rem;cursor:pointer;list-style:none}
+.sb-sec summary::-webkit-details-marker{display:none}
+.sb-sec summary::after{content:"▾";position:absolute;opacity:0}
+.sb-sh{grid-area:h;display:flex;gap:.4rem;align-items:center;font-weight:700}
+.sb-sh .em{width:1.3em;height:1.3em}
+.sb-sv{grid-area:v;text-align:end;display:grid;line-height:1.3}
+.sb-sv small,.sb-r small{color:var(--muted);font-size:.74rem;font-weight:400}
+.sb-sec summary .sb-bar{grid-area:b}
+.sb-bar{display:block;height:.42rem;border-radius:99px;background:#0006;overflow:hidden}
+.sb-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#38bdf8,#a78bfa)}
+.sb-sn{margin:0;padding:0 .8rem .4rem;font-size:.84rem;line-height:1.7}
+.sb-l{list-style:none;margin:0;padding:0 .6rem .6rem;display:grid;gap:.4rem}
+.sb-r{display:grid;grid-template-columns:minmax(0,1fr) auto auto;grid-template-areas:"n st v" "bar bar act";gap:.25rem .6rem;align-items:center;padding:.45rem .55rem;border-radius:12px;background:#0003}
+.sb-r.full{background:#14532d44}
+.sb-n{grid-area:n;display:grid;font-weight:700;min-width:0}
+.sb-st{grid-area:st;display:inline-flex;gap:.1rem;white-space:nowrap}
+.sb-st .em{width:1.05rem;height:1.05rem}
+.sb-v{grid-area:v;text-align:end;display:grid;line-height:1.3;white-space:nowrap}
+.sb-r .sb-bar{grid-area:bar}
+.sb-r .btn,.sb-ok{grid-area:act;justify-self:end}
+.sb-ok{color:#86efac;font-size:.85rem;font-weight:700}
+.sb-p .sb-sv b{color:#7dd3fc}.sb-s .sb-sv b{color:var(--gold)}
+@media (max-width:440px){.sb-r{grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"n v" "st st" "bar act"}.sb-r{align-items:center}.sb-r .sb-bar{align-self:center}}
 </style></head><body><div class="sky" aria-hidden="true"><div class="stars"></div><div class="stars b"></div><img class="float-pl a" data-em="p2" alt=""><img class="float-pl b" data-em="p3" alt=""><i class="comet"></i></div>
 <header class="top"><div class="top-in">
  <div class="brand"><img data-em="logo" alt=""><div><h1>مغامرة النحو والإعراب</h1><small>رحلة بين الكواكب مع الأستاذ إسلام قنديل</small></div></div>
@@ -2540,7 +2586,7 @@ const Prof={
   $('#zoomOut').onclick=()=>{this.setZ(this.z-.1);sfx('pop')};
   $('#zoomIn').onclick=()=>{this.setZ(this.z+.1);sfx('pop')};
   $('#nameBtn').onclick=()=>{if(typeof Mine!=='undefined'&&NAME())Mine.open();else this.ask('edit')};
-  const bn=$('#bonusN');if(bn)bn.onclick=()=>Bonus.open();
+  const bn=$('#bonusN');if(bn)bn.onclick=()=>Bonus.open();if(typeof StarBox!=='undefined')StarBox.init();
   this.paintName();
  },
  setZ(v){const z=Math.round(Math.min(this.ZMAX,Math.max(this.ZMIN,v))*100)/100;this.z=z;
@@ -4070,6 +4116,62 @@ const Drill={
    onPick:ok=>{if(ok){score++;$('#rk').classList.add('boost');sfx('whoosh');setTimeout(()=>{const r=$('#rk');r&&r.classList.remove('boost')},900)}else{wrong.push(q);FX.shake($('#rk'))}},onDone:()=>{k++;load()}})};
   act(sc,{dgo:b=>this.run(sc,b.dataset.id,+b.dataset.lv,o),dhome:()=>this.hub(sc,o)});load()}};
 
+/* --- scorebox.js --- */
+/* ---- the score window: opens from the stars chip or the points chip in the header.
+   It splits the points and the journey stars by where they come from (lesson questions, challenge stages, lesson drills, games, extras, last battle),
+   shows what is still missing in each place with a button to go there, and explains how stars and points are earned. ---- */
+const StarBox={
+ view:'s',rows:[],
+ init(){[['.stars-n','s'],['.pts-n','p']].forEach(([q,v])=>{const e=$(q);if(!e)return;e.setAttribute('role','button');e.tabIndex=0;e.classList.add('sb-chip');
+  e.onclick=()=>this.open(v);e.onkeydown=ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();this.open(v)}}})},
+ fx:n=>AR(String(Math.round(n*10)/10).replace('.','٫')),
+ /* every place that gives points, with what the student has and what is the most he can get there */
+ build(){const R=[],SEC=[],M=Score.max()||1,sh=v=>v*STARS_MAX/M;
+  const add=(k,n,ic,rows,note)=>{const v=rows.reduce((s,r)=>s+r.v,0),max=rows.reduce((s,r)=>s+r.max,0);rows.forEach(r=>{r.k=k;r.i=R.length;R.push(r)});SEC.push({k,n,ic,rows,v,max,note})};
+  /* 1 · the questions inside the lesson planets */
+  {const by={};LQ.forEach(it=>{if(Hid.lesson(it.tab))return;(by[it.tab]=by[it.tab]||[]).push(it)});
+   add('lesson','أسئلة الدروس (داخل الكواكب)','books',TABS.filter(t=>by[t.id]).map(t=>{const L=by[t.id],v=L.reduce((s,it)=>s+(LED[it.key]||0),0),max=L.reduce((s,it)=>s+it.pts,0),miss=L.filter(it=>(LED[it.key]||0)<it.pts),first=miss.length?Math.min(...miss.map(it=>it.step)):0;
+    return{n:t.title,v,max,det:`${AR(L.length-miss.length)} من ${AR(L.length)} سؤالًا كاملة`,go:{tab:t.id,step:first}}}),'كل سؤال تُجيب عنه صحيحًا لأول مرة يمنحك ١٠ نقاط × مستواه (سهل ١، متوسط ٢، صعب ٣).')}
+  /* 2 · the challenge stages */
+  {const ps=store.get('ps',[0,0,0]);
+   add('stages','مراحل التحدّي','bullseye',STAGES.map((s,i)=>({n:s.n,v:(PB[i]||0)*10*s.lv,max:50*s.lv,stars:[ps[i]||Drill.stars(PB[i]||0),3],det:`أفضل نتيجة ${AR(PB[i]||0)} من ${AR(5)}`,go:{tab:'practice',step:0}})),'خمسة أسئلة في كل مرحلة، وكل إجابة صحيحة تمنحك ١٠ نقاط × مستوى المرحلة (١ ثم ٢ ثم ٣). ٣ صحيحة نجمة، و٤ نجمتان، و٥ ثلاث نجوم.')}
+  /* 3 · the lesson drills (a part of the score unless the teacher turned the extras off) */
+  if(Score.xon()&&typeof DRILLS!=='undefined'){
+   add('drills','تدريبات الدروس','pencil',Hid.drills().map(d=>{const T=TABS.find(t=>t.id===d.id),b=[1,2,3].map(lv=>Drill.best(d.id,lv));
+    return{n:T.title,v:b.reduce((s,c,i)=>s+c*10*(i+1),0),max:300,stars:[b.reduce((s,c)=>s+Drill.stars(c),0),9],det:`المستويات: ${b.map(c=>AR(c)+'/'+AR(5)).join(' · ')}`,go:{tab:'practice',drill:1}}}),'لكل درس ثلاثة مستويات، في كل مستوى خمسة أسئلة: كل إجابة صحيحة ١٠ نقاط × رقم المستوى. ٣ صحيحة نجمة، و٤ نجمتان، و٥ ثلاث نجوم.')}
+  /* 4 · the games */
+  add('games','الألعاب','joystick',Hid.games().map(g=>({n:g.t,v:10*(GB[g.id]||0),max:30,stars:[GB[g.id]||0,3],det:'',go:{game:g.id}})),'كل نجمة تنالها في لعبة (حتى ٣) تمنحك ١٠ نقاط. إن أعدتَ لعبة لتحسّن نجومها حصلتَ على الفرق فقط.');
+  /* 5 · the extra games and the last battle */
+  if(Score.xon()){
+   const X=Hid.extra().map(g=>({n:g.t,v:10*(GB[g.id]||0),max:30,stars:[GB[g.id]||0,3],det:'',go:{game:g.id}}));X.push({n:'المعركة الأخيرة',v:Score.boss(),max:30,stars:[Score.boss()?3:0,3],det:Score.boss()?'فُزتَ بها':'لم تفز بها بعد',go:{game:'final'}});
+   add('extra','الألعاب الإضافية والمعركة الأخيرة','trophy',X,'تعمل مثل الألعاب: ١٠ نقاط لكل نجمة، والفوز بالمعركة الأخيرة يمنح ٣٠ نقطة.')}
+  SEC.forEach(s=>{s.stars=sh(s.v)});this.rows=R;return SEC},
+ goTo(g){const T=g.tab&&TABS.findIndex(t=>t.id===g.tab);
+  if(g.game){const i=TABS.findIndex(t=>t.id==='games');go(i,0);setTimeout(()=>{try{S.play(g.game)}catch(e){}},450);return}
+  if(T<0||T===undefined)return;go(T,g.step||0);
+  if(g.drill)setTimeout(()=>{const b=document.querySelector('[data-act=mode][data-m=d]');if(b)b.click()},500)},
+ open(v){this.view=v||this.view;const d=$('#dlg'),close=()=>{d.hidden=true;d.innerHTML=''};
+  const SEC=this.build(),tot=Score.total(),M=Score.max(),st=Score.stars(),per=M/STARS_MAX,nx=st>=STARS_MAX?0:Math.max(1,Math.ceil((st+1)*per-1e-9)-tot),P=this.view==='p';
+  const sumS=SEC.reduce((s,x)=>s+x.stars,0);
+  /* the biggest points still to win */
+  const gaps=this.rows.filter(r=>r.max-r.v>0).sort((a,b)=>(b.max-b.v)-(a.max-a.v)).slice(0,5);
+  const bar=(v,m)=>`<span class="sb-bar" aria-hidden="true"><i style="width:${m?Math.round(v/m*100):0}%"></i></span>`;
+  const starsRow2=(a)=>a?`<span class="sb-st" title="النجوم في هذا النشاط">${a[1]<=3?[0,1,2].map(i=>`<img class="em" src="${IMG[i<a[0]?'star':'star_grey']}" alt="">`).join(''):`${AR(a[0])}/${AR(a[1])} ${em('star','sm')}`}</span>`:'';
+  const row=r=>{const miss=r.max-r.v;return`<li class="sb-r${miss?'':' full'}"><span class="sb-n">${esc(r.n)}${r.det?`<small>${esc(r.det)}</small>`:''}</span>${starsRow2(r.stars)}<span class="sb-v"><span class="sb-vv"><b>${AR(r.v)}</b> / ${AR(r.max)}</span><small>≈ ${this.fx(r.v*STARS_MAX/M)} نجمة</small></span>${bar(r.v,r.max)}${miss?`<button class="btn sky sm" type="button" data-act="sbg" data-i="${r.i}">اذهب ←</button>`:`<span class="sb-ok">✓ كاملة</span>`}</li>`};
+  d.hidden=false;
+  d.innerHTML=`<div class="dlg-card zoom-in sb ${P?'sb-p':'sb-s'}" role="dialog" aria-modal="true" aria-labelledby="sbT"><h2 id="sbT">${em(P?'hundred_points':'star')} ${P?'نقاطك':'نجومك'} وتفاصيلها</h2>
+   <div class="sb-tg" role="group" aria-label="العرض"><button type="button" data-act="sbv" data-v="s" aria-pressed="${!P}">${em('star')} النجوم</button><button type="button" data-act="sbv" data-v="p" aria-pressed="${P}">${em('hundred_points')} النقاط</button></div>
+   <div class="mn-tiles sb-tiles"><div class="mn-t">${em('star')}<b>${AR(st)}</b><small>نجمة من ${AR(STARS_MAX)}</small></div><div class="mn-t">${em('hundred_points')}<b>${AR(tot)}</b><small>نقطة من ${AR(M)}</small></div></div>
+   <div class="rk-bar" role="img" aria-label="التقدّم إلى النجمة التالية"><i style="width:${st>=STARS_MAX?100:Math.round(((tot%per)/per)*100)}%"></i></div>
+   <p class="sub sb-nx">${st>=STARS_MAX?'أحرزتَ كل النجوم. ما أعظمك!':`بقي <b>${AR(nx)}</b> نقطة لتنال النجمة ${AR(st+1)}.`}</p>
+   <p class="sub sb-why">نجوم الرحلة = ⌊(نقاطك ÷ الدرجة الكلية) × ${AR(STARS_MAX)}⌋، أي نجمة لكل ${AR(Math.round(per))} نقطة تقريبًا. نجوم الألعاب والتدريبات التي تراها داخلها (٣ لكل نشاط) هي تقييم ذلك النشاط، وكل نجمة منها تساوي ${AR(10)} نقاط تدخل في المجموع. الجدول التالي يجمع كل شيء: ${SEC.map(s=>`${s.n} ${this.fx(s.stars)}`).join(' + ')} = <b>${this.fx(sumS)}</b> ← ${AR(st)} نجمة كاملة.</p>
+   ${gaps.length?`<section class="sb-gap"><h3>${em('bullseye')} أقرب فرصك لكسب المزيد</h3><ol>${gaps.map(r=>`<li><span>${esc(r.n)} <small>(${esc(SEC.find(s=>s.k===r.k).n)})</small></span><b>+${AR(r.max-r.v)}</b><button class="btn gold sm" type="button" data-act="sbg" data-i="${r.i}">اذهب ←</button></li>`).join('')}</ol></section>`:`<p class="sb-done">${em('trophy')} حصلتَ على كل النقاط المتاحة!</p>`}
+   ${SEC.map(s=>`<details class="sb-sec"${s.max-s.v>0&&s.k==='lesson'?'':''}><summary><span class="sb-sh">${em(s.ic)} ${s.n}</span><span class="sb-sv"><span class="sb-vv">${P?`<b>${AR(s.v)}</b> / ${AR(s.max)} نقطة`:`<b>${this.fx(s.stars)}</b> نجمة`}</span><small>${P?`≈ ${this.fx(s.stars)} نجمة`:`${AR(s.v)} / ${AR(s.max)} نقطة`}</small></span>${bar(s.v,s.max)}</summary><p class="sub sb-sn">${s.note}</p><ul class="sb-l">${s.rows.map(row).join('')||'<li class="sub">لا يوجد شيء هنا الآن.</li>'}</ul></details>`).join('')}
+   ${Score.xon()?'':'<p class="sub">ملاحظة: أوقف معلمك احتساب التدريبات والألعاب الإضافية في الدرجة؛ نقاطها تذهب إلى البونص فقط.</p>'}
+   <div class="row dlg-row"><button class="btn ghost" type="button" data-act="x">إغلاق</button></div></div>`;
+  act(d,{x:close,sbv:b=>{this.view=b.dataset.v;this.open()},sbg:b=>{const r=this.rows[+b.dataset.i];close();if(r)this.goTo(r.go)}});d.onkeydown=e=>{if(e.key==='Escape')close()};
+  setTimeout(()=>{try{$('[data-act=x]',d).focus({preventScroll:true})}catch(e){}},60)}};
+
 /* --- report.js --- */
 /* ===== performance report: analysis, A4 sheet, PDF (save / print / send) ===== */
 const TP_ORDER=['s','n','f','o','d','e','j','z','k','m','r'];
@@ -5222,7 +5324,7 @@ const Mine={
    <h2 id="mnT">لوحتي · ${esc(NAME())}</h2>
    <p class="sub">رتبتك: <b>${c.n}</b>${c.next?` · بقي <b>${AR(c.need)}</b> نقطة لرتبة «${c.next.n}»`:' · أعلى رتبة في الرحلة!'}</p>
    <div class="rk-bar" role="img" aria-label="التقدّم إلى الرتبة التالية ${AR(c.pct)}٪"><i style="width:${c.pct}%"></i></div>
-   <p class="sub mn-parts" aria-label="تفصيل الدرجة">${Score.parts().map(x=>`${x.n}: <b>${AR(x.v)}</b>/${AR(x.max)}`).join(' · ')} · النجوم: <b>${AR(Score.stars())}</b>/${AR(Score.starsMax())} · بونص (منفصل): <b>${AR(Bonus.pts())}</b></p>
+   <p class="sub mn-parts" aria-label="تفصيل الدرجة">${Score.parts().map(x=>`${x.n}: <b>${AR(x.v)}</b>/${AR(x.max)}`).join(' · ')} · النجوم: <b>${AR(Score.stars())}</b>/${AR(Score.starsMax())} · بونص (منفصل): <b>${AR(Bonus.pts())}</b> · <button class="btn ghost sm" type="button" data-act="sbx">تفاصيل النجوم والنقاط</button></p>
    <div class="mn-body">
     <section class="mn-c"><h3>${em('compass')} مكان توقفك الأخير</h3>
      <p>${p?esc(Resume.where(p)):'لم تبدأ بعد؛ اختر كوكبًا من الشريط أعلى الصفحة.'}</p>
@@ -5256,7 +5358,7 @@ const Mine={
     <details class="mn-tr"><summary>${em('man_teacher')} أدوات المعلم</summary><div class="row"><button class="btn ghost sm" type="button" data-act="cls">${cls?'إنهاء وضع الحصة':'وضع الحصة'}</button><button class="btn ghost sm" type="button" data-act="brd">${em('1st_place_medal')} لوحة شرف الفصل</button></div></details>
    </div>
    <div class="row dlg-row"><button class="btn ghost" type="button" data-act="x">إغلاق</button></div></div>`;
-  act(d,{x:close,rc:()=>{close();Resume.goPos()},rf:()=>{close();Resume.goFirst()},rl:()=>{close();IncDlg.open('review')},pl:b=>{close();Resume.toPlanet(b.dataset.id)},
+  act(d,{x:close,sbx:()=>{close();StarBox.open('s')},rc:()=>{close();Resume.goPos()},rf:()=>{close();Resume.goFirst()},rl:()=>{close();IncDlg.open('review')},pl:b=>{close();Resume.toPlanet(b.dataset.id)},
    rd:()=>{close();Daily.open()},cab:()=>Cab.open(),bn:()=>Bonus.open(),rg:()=>{close();const u=Pg.unopened()[0];if(u)Pg.open(u.id)},rcert:()=>{close();goTab('certificate')},rrep:()=>{close();goTab('report')},
    cc:async()=>{toast(await copyTxt(code,$('#mnCode',d))?'نُسخ الرمز ✓':'حدّد الرمز وانسخه يدويًا')},
    bk:()=>Backup.open(),nm:()=>Prof.ask('edit'),cls:()=>{close();Cls.toggle()},brd:()=>Board.open()});
