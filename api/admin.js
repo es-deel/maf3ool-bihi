@@ -1,6 +1,6 @@
 'use strict';
 const crypto = require('crypto');
-const { redis, pipeline, send, deny, body, classes, h2o, hashPw, cfg, normPhone, normName, aidOf } = require('./_lib');
+const { redis, pipeline, send, deny, body, classes, h2o, hashPw, cfg, saveCfg, normPhone, normName, aidOf, classRows, rankRows, seasonBase } = require('./_lib');
 const err = e => ({ code: e.code === 'no_db' ? 503 : 500, o: { error: e.code === 'no_db' ? 'no_db' : 'server' } });
 
 /* delete one student and everything stored about him */
@@ -133,6 +133,22 @@ module.exports = async (req, res) => {
       top.forEach((a, i) => rows.push({ n: (info[i] && info[i][0]) || '—', c: (info[i] && info[i][1]) || '', v: m[a] }));
       return send(res, 200, { ok: true, wk: { id: w.id, t: w.t, goal: w.goal, end: w.end, cls: w.cls || [], from: w.from || 0 }, tot, parts: Object.keys(m).length, top: rows });
     }
+    if (op === 'season') {   // the honour board's seasons: {on:true, t} starts one (everyone's points now become the zero line); {on:false} ends it and keeps the top three of every class in the hall of fame
+      const g = Object.assign({}, await cfg(true)), tt = String(b.t || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40);
+      if (b.on) {
+        const cls = await classes(), flat = [];
+        for (const k of cls) (await classRows(k)).forEach(x => flat.push(x.k, String(x.p)));
+        await redis(['DEL', 'mf:bs']); for (let i = 0; i < flat.length; i += 400) await redis(['HSET', 'mf:bs'].concat(flat.slice(i, i + 400)));
+        g.boardSeason = { id: Date.now().toString(36), t: tt || 'موسم جديد', from: Date.now() };
+      } else {
+        const s0 = g.boardSeason; if (!s0) return send(res, 200, { ok: true });
+        const base = await seasonBase(), top = {}, hide = new Set(g.boardHide || []);
+        for (const k of await classes()) { const R = rankRows((await classRows(k)).filter(x => !hide.has(x.k)), 'pts', true, base).filter(x => x.sp > 0).slice(0, 3); if (R.length) top[k] = R.map(x => ({ n: x.n, sp: x.sp })); }
+        g.boardHall = [Object.assign({}, s0, { to: Date.now(), top })].concat(g.boardHall || []).slice(0, 8); g.boardSeason = null; await redis(['DEL', 'mf:bs']);
+      }
+      g.v = Date.now(); await saveCfg(g); return send(res, 200, { ok: true, cfg: g });
+    }
+    if (op === 'hallclear') { const g = Object.assign({}, await cfg(true)); g.boardHall = b.id ? (g.boardHall || []).filter(h => h.id !== String(b.id)) : []; g.v = Date.now(); await saveCfg(g); return send(res, 200, { ok: true, cfg: g }); }
     if (op === 'snapback') {   // bring back the safety copy of the student's progress (the current version becomes the new safety copy)
       const [snap, bk, rv] = await redis(['HMGET', 'mf:acc:' + aid, 'snap', 'bk', 'rv']);
       if (!bk) return send(res, 404, { error: 'no_backup' });

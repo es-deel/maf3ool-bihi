@@ -1624,6 +1624,7 @@ body.cls .opt{min-height:4.6rem}
 .rpt-parts{color:var(--muted);font-size:.93rem;margin:.35rem 0 0}
 #olTM{white-space:pre-wrap;word-break:break-all;direction:rtl}
 
+
 /* extra games + weekly class goal */
 .xg-lead{margin-top:1.4rem}
 .gcard.xg{--cc:#38bdf8}
@@ -1691,6 +1692,100 @@ body.cls .opt{min-height:4.6rem}
 /* the four new timed games */
 .dw.big{font-size:2rem;padding:.2rem 1.2rem}
 .dw.xtar{background:#ffd43b2a;border-color:#ffd43b;color:#ffe58a}
+
+/* ===== the class honour hall (students) ===== */
+.hn-on{overflow:hidden}
+.hn{position:fixed;inset:0;z-index:250;display:grid;place-items:center;padding:max(.6rem,env(safe-area-inset-top,0px)) max(.6rem,env(safe-area-inset-right,0px)) max(.6rem,env(safe-area-inset-bottom,0px)) max(.6rem,env(safe-area-inset-left,0px));background:radial-gradient(circle at 50% 0%,#4c1d95cc,#0e0730f2 62%);backdrop-filter:blur(6px);animation:hnfade .25s both}
+@keyframes hnfade{from{opacity:0}to{opacity:1}}
+.hn-box{position:relative;width:min(100%,38rem);max-height:100%;display:flex;flex-direction:column;border-radius:26px;border:1.5px solid var(--line);background:linear-gradient(180deg,#2d1c88,#1b0f50 38%,#150a3f);box-shadow:0 20px 70px #000a,0 0 0 1px #ffd43b22 inset;overflow:hidden}
+.hn-box::before{content:"";position:absolute;inset:0;pointer-events:none;background:radial-gradient(1.5px 1.5px at 12% 18%,#fff9,transparent),radial-gradient(1.5px 1.5px at 82% 12%,#fff8,transparent),radial-gradient(2px 2px at 68% 34%,#ffd43bbb,transparent),radial-gradient(1.5px 1.5px at 28% 44%,#fff7,transparent),radial-gradient(1.5px 1.5px at 92% 52%,#fff6,transparent)}
+.hn-x{position:absolute;top:.6rem;inset-inline-start:.6rem;z-index:5;width:2.4rem;height:2.4rem;border-radius:50%;border:1.5px solid var(--line);background:#0006;color:var(--ink);font:700 1rem/1 var(--f-text);cursor:pointer}
+.hn-x:hover{background:#0009}
+.hn-body{position:relative;overflow-y:auto;overscroll-behavior:contain;display:flex;flex-direction:column;min-height:0;flex:1}
+.hn-body>*{flex-shrink:0}
+.hn-wait{margin:2.5rem 1rem;text-align:center;color:var(--muted);line-height:1.8}
+.hn-hd{padding:1.1rem 1rem .2rem;text-align:center;display:grid;gap:.35rem;justify-items:center}
+.hn-cr .em{width:3.2rem;height:3.2rem;filter:drop-shadow(0 0 14px #ffd43b99);animation:hnbob 3s ease-in-out infinite}
+@keyframes hnbob{50%{transform:translateY(-5px) rotate(-4deg)}}
+.hn-hd h2{margin:0;font:400 clamp(1.5rem,6vw,2rem)/1.2 var(--f-display);color:var(--gold);text-shadow:0 2px 0 #7c2d12,0 0 24px #ffd43b66;text-wrap:balance}
+.hn-sub{margin:0;color:var(--muted);font-size:.92rem}
+.hn-tg{display:inline-flex;padding:.22rem;gap:.2rem;border-radius:99px;background:#0005;border:1.5px solid var(--line);margin-top:.3rem}
+.hn-tg button{border:0;border-radius:99px;padding:.4rem .95rem;background:transparent;color:var(--muted);font:700 .92rem/1.2 var(--f-text);cursor:pointer;display:inline-flex;align-items:center;gap:.35rem}
+.hn-tg button .em{width:1.15em;height:1.15em}
+.hn-tg button[aria-pressed=true]{background:linear-gradient(180deg,#ffd43b,#f59e0b);color:#2a1a00;box-shadow:0 2px 10px #f59e0b66}
+.hn-motto{margin:.4rem 0 0;padding:.45rem .95rem;border-radius:14px;background:linear-gradient(90deg,#f59e0b33,#ec489933);border:1.5px dashed #ffd43b88;color:#fff3c4;font-weight:700;line-height:1.6;max-width:100%;text-wrap:balance}
+/* podium */
+.hn-pod{display:flex;justify-content:center;align-items:flex-end;gap:.5rem;padding:1.6rem .7rem 0;direction:ltr}
+.hn-p{flex:1 1 0;max-width:10.5rem;min-width:0;display:grid;justify-items:center;gap:.2rem;position:relative;direction:rtl;animation:hnrise .7s calc(var(--d,1) * 160ms) cubic-bezier(.2,1.4,.4,1) backwards}
+@keyframes hnrise{from{opacity:0;transform:translateY(40px) scale(.9)}to{opacity:1;transform:none}}
+.hn-crown{position:absolute;top:-1.75rem;z-index:2;animation:hnbob 2.6s ease-in-out infinite}
+.hn-crown .em{width:2.1rem;height:2.1rem;filter:drop-shadow(0 0 10px #ffd43b)}
+.hn-av{display:grid;place-items:center;width:2.4rem;height:2.4rem;flex:none;border-radius:50%;font:400 1.15rem/1 var(--f-display);font-style:normal;color:#fff;background:linear-gradient(145deg,hsl(var(--h) 70% 55%),hsl(calc(var(--h) + 40) 70% 38%));border:2px solid #ffffff55;box-shadow:0 2px 8px #0006}
+.hn-av.big{width:3.6rem;height:3.6rem;font-size:1.7rem;border-width:3px}
+.hn-p.k1 .hn-av.big{width:4.4rem;height:4.4rem;font-size:2.1rem;border-color:#ffd43b;box-shadow:0 0 0 3px #ffd43b55,0 0 28px #ffd43b88}
+.hn-p.k2 .hn-av.big{border-color:#e2e8f0;box-shadow:0 0 18px #e2e8f066}
+.hn-p.k3 .hn-av.big{border-color:#fdba74;box-shadow:0 0 18px #fb923c66}
+.hn-pn{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.95rem;color:var(--ink);text-align:center}
+.hn-pv{font:700 .85rem/1.2 var(--f-text);color:var(--gold);white-space:nowrap}
+.hn-pi{display:flex;gap:.25rem;min-height:1.3rem}
+.hn-pi .em,.hn-lv,.hn-aw{width:1.3rem;height:1.3rem}
+.hn-st{width:100%;display:grid;place-items:center;border-radius:14px 14px 0 0;border:1.5px solid #ffffff33;border-bottom:0;margin-top:.15rem}
+.hn-st em{font-style:normal;font-size:1.8rem;filter:drop-shadow(0 2px 4px #0006)}
+.hn-p.k1 .hn-st{height:6.4rem;background:linear-gradient(180deg,#fcd34d,#b45309)}
+.hn-p.k2 .hn-st{height:4.6rem;background:linear-gradient(180deg,#cbd5e1,#64748b)}
+.hn-p.k3 .hn-st{height:3.5rem;background:linear-gradient(180deg,#fdba74,#9a3412)}
+.hn-p.me .hn-pn{color:#fde047}
+.hn-p.me .hn-pn::after{content:"";display:block;height:2px;margin-top:2px;border-radius:2px;background:#fde047}
+/* the rest of the list */
+.hn-l{list-style:none;margin:0;padding:.7rem .7rem .4rem;display:grid;gap:.4rem;border-top:1.5px solid var(--line);background:#0003}
+.hn-r{display:grid;grid-template-columns:2.1rem auto minmax(0,1fr) auto;grid-template-areas:"n av nm lv" "n av bar v";align-items:center;gap:.1rem .55rem;padding:.5rem .6rem;border-radius:14px;background:#ffffff0d;border:1.5px solid transparent;animation:hnrow .45s both}
+.hn-r:nth-child(2){animation-delay:.05s}.hn-r:nth-child(3){animation-delay:.1s}.hn-r:nth-child(4){animation-delay:.15s}.hn-r:nth-child(5){animation-delay:.2s}.hn-r:nth-child(n+6){animation-delay:.25s}
+@keyframes hnrow{from{opacity:0;transform:translateX(14px)}to{opacity:1;transform:none}}
+.hn-n{grid-area:n;text-align:center;font:400 1.2rem/1 var(--f-display);color:var(--muted)}
+.hn-r .hn-av{grid-area:av;grid-row:1 / span 2}
+.hn-nm{grid-area:nm;min-width:0;display:flex;gap:.35rem;align-items:center;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hn-nm em{font-style:normal;font-size:.72rem;padding:.05rem .45rem;border-radius:99px;background:#fde047;color:#2a1a00}
+.hn-r .hn-lv{grid-area:lv;justify-self:end}
+.hn-bar{grid-area:bar;height:.42rem;border-radius:99px;background:#0006;overflow:hidden}
+.hn-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#38bdf8,#a78bfa);transform-origin:right;animation:hngrow .8s .2s both}
+@keyframes hngrow{from{transform:scaleX(0)}}
+.hn-v{grid-area:v;justify-self:end;font:700 .85rem/1 var(--f-text);color:#e9e3ff;white-space:nowrap}
+.hn-r.me{background:linear-gradient(90deg,#fde04733,#f59e0b22);border-color:#fde047;box-shadow:0 0 18px #fde04733}
+.hn-r.me .hn-n{color:#fde047}
+.hn-r.far{margin-top:.5rem;position:relative}
+.hn-r.far::before{content:"⋯";position:absolute;top:-1.1rem;inset-inline:0;text-align:center;color:var(--muted);line-height:1}
+/* hall of fame */
+.hn-hall{margin:.5rem .7rem;padding:.7rem .85rem;border-radius:16px;background:linear-gradient(135deg,#78350f55,#4c1d9555);border:1.5px solid #ffd43b44}
+.hn-hall h3{margin:0 0 .4rem;font:400 1.1rem/1.3 var(--f-display);color:var(--gold);display:flex;gap:.4rem;align-items:center}
+.hn-hall h3 .em{width:1.3em;height:1.3em}
+.hn-hs{display:grid;gap:.1rem;padding:.35rem 0;border-top:1px dashed #ffffff22;line-height:1.7;font-size:.92rem}
+.hn-hs:first-of-type{border-top:0}
+.hn-hs b{color:#fff3c4}.hn-hs small{color:var(--muted)}
+/* my position: always visible at the bottom */
+.hn-ft{position:sticky;bottom:0;margin-top:auto;padding:.6rem .7rem max(.6rem,env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,transparent,#150a3f 28%)}
+.hn-me{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:.7rem;padding:.65rem .8rem;border-radius:18px;background:linear-gradient(135deg,#5b21b6,#7c3aed);border:2px solid #fde047;box-shadow:0 6px 24px #0008,0 0 24px #fde04744}
+.hn-pos{display:grid;place-items:center;min-width:3rem;height:3rem;padding:0 .3rem;border-radius:50%;background:radial-gradient(circle at 30% 25%,#fff7c2,#ffd43b 55%,#f59e0b);color:#2a1a00;font:400 1.5rem/1 var(--f-display)}
+.hn-mt{display:grid;gap:.1rem;min-width:0;font-size:.85rem;line-height:1.5;color:#ede9fe}
+.hn-mt b{font-size:1rem;color:#fff}
+.hn-mt b span{margin-inline-start:.4rem}
+.hn-up{color:#86efac;font-size:.85rem}.hn-dn{color:#fda4af;font-size:.85rem}
+@media (max-width:420px){.hn-me{grid-template-columns:auto minmax(0,1fr)}.hn-me .btn{grid-column:1 / -1}.hn-p.k1 .hn-av.big{width:3.9rem;height:3.9rem}.hn-av.big{width:3.1rem;height:3.1rem}}
+@media (prefers-reduced-motion:reduce){.hn,.hn-p,.hn-r,.hn-bar i,.hn-cr .em,.hn-crown{animation:none!important}}
+/* the small card on the home screen and in the games hub */
+.hn-mini:not(:empty){margin:.6rem 0}
+.hn-card{width:100%;display:grid;gap:.4rem;padding:.7rem .85rem;border-radius:20px;text-align:start;cursor:pointer;color:var(--ink);font-family:var(--f-text);background:linear-gradient(135deg,#4c1d95,#7c2d92 55%,#b45309);border:2px solid #ffd43b88;box-shadow:0 6px 22px #0006,0 0 0 1px #ffffff14 inset;transition:transform .15s,box-shadow .15s}
+.hn-card:hover{transform:translateY(-2px);box-shadow:0 10px 28px #0008,0 0 24px #ffd43b44}
+.hn-ct{display:flex;gap:.45rem;align-items:center;font:400 1.15rem/1.3 var(--f-display);color:var(--gold)}
+.hn-ct .em{width:1.5em;height:1.5em}
+.hn-ct em{font:700 .75rem/1 var(--f-text);font-style:normal;padding:.2rem .55rem;border-radius:99px;background:#fde047;color:#2a1a00}
+.hn-cp{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem}
+.hn-cm{display:grid;justify-items:center;gap:.1rem;padding:.4rem .2rem;border-radius:14px;background:#0004;min-width:0;text-align:center}
+.hn-cm.me{background:#fde04733;outline:2px solid #fde047}
+.hn-cm b{font-size:1.15rem}
+.hn-cm span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:.85rem;font-weight:700}
+.hn-cm small{font-size:.74rem;color:#fde68a}
+.hn-cs{font-size:.88rem;color:#fef3c7;line-height:1.5}
+.hn-cs b{color:#fde047;font-size:1.05rem}
 </style></head><body><div class="sky" aria-hidden="true"><div class="stars"></div><div class="stars b"></div><img class="float-pl a" data-em="p2" alt=""><img class="float-pl b" data-em="p3" alt=""><i class="comet"></i></div>
 <header class="top"><div class="top-in">
  <div class="brand"><img data-em="logo" alt=""><div><h1>مغامرة النحو والإعراب</h1><small>رحلة بين الكواكب مع الأستاذ إسلام قنديل</small></div></div>
@@ -2003,7 +2098,7 @@ const PMC=(()=>{const B=(k,t)=>irabParts(k,t,'').body,P=(t,w)=>irabParts('o',t,w
 
 /* --- core2.js --- */
 /* ===== question engine: mcq / tap-the-word / put-in-order, with consequence effects ===== */
-const RKEY={'الفعل':'v','الفاعل':'s','المفعول به':'o','المفعول لأجله':'j','المبتدأ':'mb','الخبر':'kh','الاسم':'nm','الحرف':'pt','حرف العطف':'pt','الظرف':'zt'};   // the colour class of the word a tap question asks for
+const RKEY={'الفعل':'v','الفاعل':'s','المفعول به':'o','المفعول لأجله':'j','المبتدأ':'mb','الخبر':'kh','الاسم':'nm','الحرف':'pt','حرف العطف':'pt','حرف الجرّ':'pt','الاسم المجرور':'nm','المعطوف':'nm','الظرف':'zt'};   // the colour class of the word a tap question asks for
 const roleKey=r=>RKEY[r]||(/^الاسم المنصوب/.test(r)?'o':'s');
 const Q={
  render(host,q,o={}){
@@ -2087,10 +2182,11 @@ function progress(){const V=typeof Hid!=='undefined'?Hid.tabs():TABS,n=V.filter(
 function markDone(id,quiet){if(S.done[id])return;S.done[id]=1;store.set('done',S.done);progress();if(!quiet){const t=TABS.find(x=>x.id===id);toast(`${em('star')} أنجزتَ «${t.title}»`);FX.confetti(26)}Nav.paint();if(typeof Eng!=='undefined')Eng.onDone(id,!!quiet)}
 
 /* ---- parts of a planet: every step must be completed (read, or answered when it has questions / rows to reveal) before the planet counts as finished ---- */
-const stepDone=(id,si)=>!!(S.done[id]||(S.sd[id]&&S.sd[id][si]));          // a planet finished in an older version counts as fully done
+const SK=(id,si)=>{const T=TABS.find(t=>t.id===id),s=T&&T.steps[si];return s&&s.ks!==undefined?s.ks:si};   // a step's stable key: steps added in the middle of a planet keep the saved results of the old ones (st.ks)
+const stepDone=(id,si)=>!!(S.done[id]||(S.sd[id]&&S.sd[id][SK(id,si)]));          // a planet finished in an older version counts as fully done
 const firstOpen=T=>T.steps.findIndex((_,i)=>!stepDone(T.id,i));
 function paintDots(){const T=TABS[S.tab];if(!T)return;$$('#dots .dot').forEach((d,i)=>{const dn=stepDone(T.id,i);d.classList.toggle('on',i===S.step);d.classList.toggle('fin',dn);d.classList.toggle('seen',!dn&&(S.seen[T.id]||[]).includes(i))})}
-function stepComplete(ti,si){const T=TABS[ti];if(!T)return;const a=S.sd[T.id]||(S.sd[T.id]={});if(!a[si]){a[si]=1;store.set('sd',S.sd)}
+function stepComplete(ti,si){const T=TABS[ti];if(!T)return;const a=S.sd[T.id]||(S.sd[T.id]={}),ks=SK(T.id,si);if(!a[ks]){a[ks]=1;store.set('sd',S.sd)}
  if(!T.solo&&!T.manualDone&&firstOpen(T)<0)markDone(T.id);paintDots()}
 
 /* ---- ONE navigation button. A step that has parts (questions, table rows, a builder) opens a "gate":
@@ -2279,8 +2375,8 @@ const Score={
 const Ledger={
  index(){LQ.length=0;
   TABS.forEach(T=>T.steps.forEach((st,si)=>{
-   (st.qs||[]).forEach((q,k,a)=>{q.lk=`${T.id}/${si}/${k}`;LQ.push({key:q.lk,tab:T.id,step:si,pts:10*Math.max(1,q.lv||1),n:k+1,of:a.length,q})});
-   (st.cells||[]).forEach((c,k,a)=>LQ.push({key:`${T.id}/${si}/${c.k}`,tab:T.id,step:si,pts:c.pts,n:k+1,of:a.length,cell:true}))}))},
+   (st.qs||[]).forEach((q,k,a)=>{q.lk=`${T.id}/${SK(T.id,si)}/${k}`;LQ.push({key:q.lk,tab:T.id,step:si,pts:10*Math.max(1,q.lv||1),n:k+1,of:a.length,q})});
+   (st.cells||[]).forEach((c,k,a)=>LQ.push({key:`${T.id}/${SK(T.id,si)}/${c.k}`,tab:T.id,step:si,pts:c.pts,n:k+1,of:a.length,cell:true}))}))},
  has(key){return LED[key]!==undefined},
  credit(key,pts){const prev=LED[key];if(prev!==undefined&&pts<=prev)return 0;LED[key]=pts;store.set('led',LED);const gain=Math.max(0,pts-(prev||0));paintScore(gain);return gain}};
 
@@ -2500,7 +2596,7 @@ const Prof={
    · everything keeps moving all the time; choosing a planet zooms the camera onto it (and follows it) and opens a short summary
      of what is inside, with a button for every part
    · two small buttons make the planets bigger or smaller, and one button hides / shows the finished planets */
-const PLDESC={kalam:'اسم وفعل وحرف، وعلامات الاسم',nom:'المبتدأ والخبر',rafa:'علامات الرفع وإعراب المبتدأ والخبر',ajl:'سبب الفعل، وفرقه عن المفعول به',zarf:'متى؟ وأين؟ وفرقهما عن الجار والمجرور',start:'من هنا تبدأ الرحلة',sentence:'أركانها وترتيبها وأنواع الفعل',numbers:'نكوّن كل نوع ونميّزه',subject:'تعريفه وعلامات رفعه',object:'تعريفه وعلامات نصبه',signs:'شرح كل قسم ومقارنته بالفاعل مع تدريبات',compare:'كيف نفرّق بين الفاعل والمفعول به',parse:'نُعرب المفعول به خطوة بخطوة',maps:'خرائط ولوحات تلخّص الدرس',practice:'ثلاث مراحل من السهل إلى الصعب',games:'ألعاب تفاعلية ممتعة',certificate:'الملخص وشهادة بطل النحو والإعراب',report:'تقرير أدائك ونقاط قوتك'};
+const PLDESC={kalam:'اسم وفعل وحرف، وحروف الجرّ والعطف',nom:'المبتدأ والخبر',rafa:'علامات الرفع وإعراب المبتدأ والخبر',ajl:'سبب الفعل، وفرقه عن المفعول به',zarf:'متى؟ وأين؟ وفرقهما عن الجار والمجرور',start:'من هنا تبدأ الرحلة',sentence:'أركانها وترتيبها وأنواع الفعل',numbers:'نكوّن كل نوع ونميّزه',subject:'تعريفه وعلامات رفعه',object:'تعريفه وعلامات نصبه',signs:'شرح كل قسم ومقارنته بالفاعل مع تدريبات',compare:'كيف نفرّق بين الفاعل والمفعول به',parse:'نُعرب المفعول به خطوة بخطوة',maps:'خرائط ولوحات تلخّص الدرس',practice:'ثلاث مراحل من السهل إلى الصعب',games:'ألعاب تفاعلية ممتعة',certificate:'الملخص وشهادة بطل النحو والإعراب',report:'تقرير أدائك ونقاط قوتك'};
 /* the lesson in four groups (+ a closing one). A planet belongs to the group that lists its id; the groups that have no planets yet are being written */
 const GROUPS=[
  {id:'g1',t:'أنواع الكلمة',d:'الاسم والفعل والحرف',c:'#38bdf8',tabs:['kalam']},
@@ -2520,6 +2616,7 @@ function orrery(host){
  const P0=store.get('pos'),PT=P0&&TABS.find(t=>t.id===P0.t),cont=PT&&PT.id!=='start'&&!Hid.lesson(PT.id)&&!done(PT)?{T:PT,s:Math.max(0,Math.min(+P0.s||0,PT.steps.length-1))}:null;
  host.innerHTML=`<div class="orr">
   ${cont?`<div class="orr-cont rise">${em('rocket','lg')}<span class="oc-t">تابع من حيث توقفتَ<b>${esc(cont.T.title)}</b><small>${esc(cont.T.steps[cont.s].t)}</small></span><button class="btn go sm" type="button" data-act="ocn">تابع ←</button></div>`:''}
+  <div class="hn-mini"></div>
   <div class="orr-bar"><div class="orr-cnt" id="ocnt" aria-live="polite"></div>
    <div class="orr-ctl"><span class="orr-sz" role="group" aria-label="حجم الكواكب"><span class="orr-szl" aria-hidden="true">حجم الكواكب</span><button type="button" id="ozm" data-act="oz" data-d="-1" aria-label="تصغير الكواكب">−</button><output id="ozl"></output><button type="button" id="ozp" data-act="oz" data-d="1" aria-label="تكبير الكواكب">+</button></span>
     <button class="orr-tg" id="otg" type="button" data-act="oh" aria-pressed="false"></button></div></div>
@@ -2939,8 +3036,9 @@ TABS.push({id:'compare',title:'التمييز',pl:'p8',color:'#facc15',mentor:'b
 
 /* --- tab_d.js --- */
 /* ===== tab 7: mind maps and boards ===== */
-const MM_COL=['#fde68a','#fdba74','#f9a8d4','#7dd3fc','#86efac','#c4b5fd'];
+const MM_COL=['#fde68a','#fdba74','#f9a8d4','#7dd3fc','#86efac','#c4b5fd','#fca5a5','#5eead4'];
 const MM_SLOT=[[80,20],[20,20],[80,80],[20,80],[50,9],[50,91]];
+const MM_SLOT8=[[27,12],[73,12],[19,32],[81,32],[19,68],[81,68],[27,88],[73,88]];
 const MAPS=[
  {n:'الدرس كاملًا',c:'المفعول به والفاعل',b:[['الجملة الفعلية','فعل + فاعل + مفعول به','يلعبُ الطفلُ الكرةَ'],['الفاعل','مرفوع: ضمة • ألف • واو','نجحَ الطالبُ'],['المفعول به','منصوب: فتحة • ياء • كسرة','قرأَ الولدُ الكتابَ'],['المفرد والجمع','نحدّد نوع الاسم أولًا','طالبٌ • طالبانِ • طلابٌ'],['التمييز','مَن فعل؟ ماذا وقع عليه؟','شكرَ التلميذُ المعلمَ'],['اختبر نفسك','تدريبات وألعاب','الهروب من الثقب الأسود']]},
  {n:'الجملة الفعلية',c:'الجملة الفعلية',b:[['تبدأ بفعل','دائمًا','يجتهدُ المعلمُ'],['الفعل','ماضٍ • مضارع • أمر','كتبَ • يكتبُ • اكتبْ'],['الفاعل','مَن فعل؟','الطالبُ'],['المفعول به','ماذا وقع عليه؟','الدرسَ'],['الترتيب','فعل ← فاعل ← مفعول به','كتبَ الطالبُ الدرسَ']]},
@@ -2956,13 +3054,13 @@ const BOARDS=[
 ];
 /* the lessons added later: their maps and boards join the first five, then everything is put in the order of the lessons */
 MAPS.push(
- {n:'أقسام الكلام',c:'أقسام الكلام',b:[['الاسم','إنسان • حيوان • نبات • جماد • مكان • صفة','كتابٌ • أسدٌ • مصرُ'],['الفعل','حدث + زمن','كتبَ • يكتبُ • اكتبْ'],['الحرف','لا يُفهم معناه إلا مع غيره','في • على • و • ثم'],['علامات الاسم','ال • تنوين • تاء مربوطة • جرّ • نداء','المدرسةُ • كتابٌ • يا محمدُ'],['أنواع الفعل','ماضٍ • مضارع • أمر','سافرَ • يسافرُ • سافرْ'],['أنواع الحرف','جرّ • عطف','من • إلى • و • ثم']]},
+ {n:'أقسام الكلام',c:'أقسام الكلام',b:[['الاسم','إنسان • حيوان • نبات • جماد • مكان • صفة','كتابٌ • أسدٌ • مصرُ'],['الفعل','حدث + زمن','كتبَ • يكتبُ • اكتبْ'],['الحرف','لا يُفهم معناه إلا مع غيره','في • على • و • ثم'],['علامات الاسم','ال • تنوين • تاء مربوطة • جرّ • نداء','المدرسةُ • كتابٌ • يا محمدُ'],['أنواع الفعل','ماضٍ • مضارع • أمر','سافرَ • يسافرُ • سافرْ'],['أنواع الحرف','جرّ • عطف','من • إلى • و • ثم'],['حروف الجرّ','تسبق الاسم فتجرّه','من • إلى • عن • على • في • ب • ل • ك'],['حروف العطف','تربط كلمة بكلمة','و • ف • ثم • أو • بل • لكن']]},
  {n:'الجملة الاسمية',c:'الجملة الاسمية',b:[['تبدأ باسم','دائمًا','الأزهارُ متفتحةٌ'],['المبتدأ','عمّن نتحدّث؟','الأزهارُ'],['الخبر','ماذا نقول عنه؟','متفتحةٌ'],['حكمهما','مرفوعان','ضمة • ألف • واو'],['المبتدأ اسم','لا فعل ولا حرف','البائعُ أمينٌ'],['الفرق عن الفعلية','اسم ← مبتدأ وخبر · فعل ← فعل وفاعل','الطالبُ مجتهدٌ ≠ يجتهدُ الطالبُ']]},
  {n:'علامات رفع المبتدأ والخبر',c:'علامات الرفع',b:[['الضمة','المفرد • جمع التكسير • جمع المؤنث السالم','البائعُ أمينٌ'],['الألف','المثنى','البائعانِ أمينانِ'],['الواو','جمع المذكر السالم','البائعونَ أمينونَ'],['الإعراب','الوظيفة • الحكم • العلامة • السبب','مبتدأ مرفوع وعلامة رفعه الضمة'],['الخبر يطابق المبتدأ','في النوع والعلامة','الأختانِ متشابهتانِ'],['مثال','جمع مؤنث سالم: الضمة','العاملاتُ ماهراتٌ']]},
  {n:'المفعول لأجله',c:'المفعول لأجله',b:[['تعريفه','مصدر يبيّن سبب الفعل','يجتهدُ حبًّا في العلمِ'],['سؤاله','لماذا؟','لماذا وقفَ التلاميذُ؟'],['حكمه','اسم منصوب','حبًّا • خوفًا • رغبةً'],['علامة نصبه','الفتحة (أو التنوين)','احترامًا'],['الفرق عن المفعول به','يبيّن السبب لا ما وقع عليه الفعل','شكرتُ المعلمَ تقديرًا']]},
  {n:'ظرفا الزمان والمكان',c:'الظرفان',b:[['ظرف الزمان','يجيب عن متى؟','صباحًا • مساءً • ليلًا'],['ظرف المكان','يجيب عن أين؟','فوقَ • تحتَ • أمامَ • خلفَ'],['حكمهما','منصوبان دائمًا','علامة نصبهما الفتحة'],['الظرف ≠ الجار والمجرور','«في الصفِّ» جار ومجرور','جلسَ أمامَ المعلمِ'],['إعرابه','ظرف مكان منصوب وعلامة نصبه الفتحة','وقفَ خلفَ القائدِ']]});
 BOARDS.push(
- {n:'أقسام الكلام وعلامات الاسم',h:['القسم أو العلامة','معناه','مثال'],hc:['#c4b5fd','#fde68a','#a5f3fc'],r:[['الاسم','إنسان أو حيوان أو نبات أو جماد أو مكان أو صفة','طالبٌ • أسدٌ • مصرُ'],['الفعل','حدث في زمن معيّن','كتبَ • يكتبُ • اكتبْ'],['الحرف','لا يُفهم معناه إلا مع غيره','في • على • و • ثم'],['«ال»','تدخل على الاسم','الكتابُ'],['التنوين','في آخر الاسم','كتابٌ • تفاحًا'],['التاء المربوطة','في آخر الاسم','مدرسةٌ'],['حرف الجرّ','يسبق الاسم فيجرّه','من معرضِ الكتبِ'],['أداة النداء','تسبق الاسم','يا محمدُ']]},
+ {n:'أقسام الكلام وعلامات الاسم',h:['القسم أو العلامة','معناه','مثال'],hc:['#c4b5fd','#fde68a','#a5f3fc'],r:[['الاسم','إنسان أو حيوان أو نبات أو جماد أو مكان أو صفة','طالبٌ • أسدٌ • مصرُ'],['الفعل','حدث في زمن معيّن','كتبَ • يكتبُ • اكتبْ'],['الحرف','لا يُفهم معناه إلا مع غيره','في • على • و • ثم'],['«ال»','تدخل على الاسم','الكتابُ'],['التنوين','في آخر الاسم','كتابٌ • تفاحًا'],['التاء المربوطة','في آخر الاسم','مدرسةٌ'],['حرف الجرّ','يسبق الاسم فيجرّه','من معرضِ الكتبِ'],['أداة النداء','تسبق الاسم','يا محمدُ'],['حروف العطف','تربط كلمة بكلمة','و • ف • ثم • أو']]},
  {n:'المبتدأ والخبر',h:['وجه المقارنة','المبتدأ','الخبر'],hc:['#c4b5fd','#f9a8d4','#93c5fd'],r:[['التعريف','الاسم الذي تبدأ به الجملة الاسمية','ما يتمّم معنى الجملة ويُخبر عن المبتدأ'],['السؤال','عمّن نتحدّث؟','ماذا نقول عنه؟'],['الحكم','مرفوع','مرفوع'],['مثال','<b>الأزهارُ</b> متفتحةٌ','الأزهارُ <b>متفتحةٌ</b>']]},
  {n:'علامات رفع المبتدأ والخبر',h:['نوع الاسم','علامة الرفع','المبتدأ','الخبر'],hc:['#c4b5fd','#fde047','#f9a8d4','#93c5fd'],r:[['المفرد','الضمة',hl('البائعُ',1,'d'),hl('أمينٌ',1,'d')],['جمع التكسير','الضمة',hl('الباعةُ',1,'d'),hl('أمناءُ',1,'d')],['جمع المؤنث السالم','الضمة',hl('البائعاتُ',2,'d'),hl('أميناتٌ',2,'d')],['المثنى','الألف',hl('البائعانِ',2,'a'),hl('أمينانِ',2,'a')],['جمع المذكر السالم','الواو',hl('البائعونَ',2,'a'),hl('أمينونَ',2,'a')]]},
  {n:'المفعول به والمفعول لأجله',h:['وجه المقارنة','المفعول به','المفعول لأجله'],hc:['#c4b5fd','#fde047','#fdba74'],r:[['التعريف','ما وقع عليه الفعل','مصدر يبيّن سبب الفعل'],['السؤال','ماذا؟ / مَن؟','لماذا؟'],['الحكم','منصوب','منصوب'],['مثال','شكرتُ <b>المعلمَ</b>','شكرتُ المعلمَ <b>تقديرًا</b> لجهدِه']]},
@@ -2980,7 +3078,7 @@ TABS.push({id:'maps',title:'خرائط ولوحات',pl:'p3',color:'#38bdf8',men
   render(sc){const VM=MAPS.filter(m=>!Hid.any(m.l)),VU=[];VM.forEach((m,mi)=>m.b.forEach((_,k)=>VU.push([mi,k])));const VUI=(m,k)=>VU.findIndex(u=>u[0]===m&&u[1]===k);
    if(!VM.length){sc.innerHTML='<p class="lead rise">لا توجد خرائط متاحة الآن.</p>';Nav.finish();return()=>{}}
    let mi=-1,sq;sc.innerHTML=`<div class="chips rise">${VM.map((m,i)=>`<button class="chip ${i?'':'on'}" data-act="mp" data-i="${i}">${m.n}</button>`).join('')}</div><div class="mm rise" style="--d:1" id="mm"></div><p class="hintline">اضغط على أي فرع لتفتح مثاله.</p>`;
-   const draw=()=>{const m=VM[mi],sl=MM_SLOT.slice(0,m.b.length);$$('.chip',sc).forEach((c,k)=>c.classList.toggle('on',k===mi));
+   const draw=()=>{const m=VM[mi],sl=(m.b.length>6?MM_SLOT8:MM_SLOT).slice(0,m.b.length);$$('.chip',sc).forEach((c,k)=>c.classList.toggle('on',k===mi));
     $('#mm').innerHTML=`<svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${sl.map((s,k)=>`<path class="ln" pathLength="1" style="--d:${k+1};stroke:${MM_COL[k]}" d="M50 50L${s[0]} ${s[1]}"/>`).join('')}</svg>
      <div class="node center" style="left:50%;top:50%">${m.c}</div>${m.b.map((b,k)=>`<button class="node br" style="--d:${k+1};--nc:${MM_COL[k]};left:${sl[k][0]}%;top:${sl[k][1]}%" data-act="nd"><b>${b[0]}</b><small>${b[1]}</small><em class="ex">${b[2]}</em></button>`).join('')}`;};
    const openBr=k=>$$('#mm .node.br',sc).forEach((x,j)=>x.classList.toggle('open',j===k));            // one example open at a time (the map stays clear on a phone)
@@ -3124,7 +3222,7 @@ TABS.push({id:'signs',title:'علامات النصب',pl:'p3',color:'#60a5fa',me
   cells:SGROWS.flatMap((_,i)=>[i+'s',i+'o']).map((k,n)=>({k,pts:20,n:n+1})),
   render(sc){const OPT=['الضمة','الفتحة','الكسرة','الياء','الألف','الواو'],val={},res={};let sel=null;
    const exp=k=>{const r=SGROWS[parseInt(k)];const N=NT[r[0]];return k.endsWith('s')?N.r[0]:N.a[0]};
-   const LK=k=>`${TABS[S.tab].id}/${S.step}/${k}`;
+   const LK=k=>`${TABS[S.tab].id}/${SK(TABS[S.tab].id,S.step)}/${k}`;
    Nav.hold('عبّئ كل الخانات، ثم اضغط «تحقّق من إجاباتي» قبل أن تتابع.','عبّئ الجدول وتحقّق');
    sc.innerHTML=`<p class="lead rise">لكل نوع من الأسماء علامتان: واحدة في <b>الرفع</b> (الفاعل) وواحدة في <b>النصب</b> (المفعول به). اضغط على الخانة ثم اختر العلامة.</p>
     <div class="scroll-x fit rise" style="--d:1"><table class="board tbl"><thead><tr><th style="background:#c4b5fd">نوع الاسم</th><th style="background:#7dd3fc">علامة رفع الفاعل</th><th style="background:#fde047">علامة نصب المفعول به</th></tr></thead><tbody>
@@ -3225,7 +3323,7 @@ TABS.push({id:'games',title:'الألعاب',pl:'p6',color:'#fb923c',mentor:'boy
   render(sc){let cur=null;const api={exit:()=>{if(cur){try{cur()}catch(e){}cur=null}PU.unmount();hub()}};S.cleanup=()=>{PU.unmount();if(cur)try{cur()}catch(e){}};
    const play=g=>{sfx('level');const start=()=>{if(cur){try{cur()}catch(e){}}sc.onclick=null;PU.unmount();cur=g.run(sc,api,start)||null;PU.mount(sc,g.id);const gm=$('.gm',sc);if(gm)try{gm.scrollIntoView({behavior:RM?'auto':'smooth',block:'start'})}catch(e){}};start()};
    S.play=id=>{const g=id==='final'?FINAL_G:(GAMES.find(x=>x.id===id)||(typeof EXTRA!=='undefined'&&EXTRA.find(x=>x.id===id)));if(g)play(g)};
-   const hub=()=>{sc.innerHTML=`<p class="lead rise">${AR(Hid.games().length)} مهمّات فضائية. كل إجابة صحيحة أو خاطئة لها <b>تأثير</b> تراه أمامك، والأسئلة متدرّجة من السهل إلى الصعب. فُز بكل لعبة مرة واحدة على الأقل لتُنجز الكوكب، وتُحسب لك <b>أفضل نتيجة</b> في كل لعبة (حتى ٣ نجوم، وكل نجمة تعادل ${AR(10)} نقاط في درجتك). وإذا أعدتَ لعبة سبق أن نلتَ نجومها فلك <b>بونص</b> منفصل عن الدرجة.</p><div id="wkBox">${typeof Week!=='undefined'?Week.card():''}</div><div class="games">${Hid.games().map((g,i)=>`<button class="gcard rise" style="--d:${i}" data-act="pl" data-i="${i}" data-id="${g.id}"><span class="gic">${em(g.ic,'xl')}</span><h3>${g.t}</h3><p>${g.d}</p><div class="gmeta"><span>${g.g}</span><span class="lvl l2">${g.lv}</span></div><div class="sstars">${starsRow(GB[g.id]||0)}</div></button>`).join('')}${Final.card(Hid.games().length)}${typeof Daily!=='undefined'?Daily.card(Hid.games().length+1):''}</div>${Hid.extra().length?`<p class="lead xg-lead rise">${em('sparkles')} <b>ألعاب إضافية</b> للمتعة والتدريب: ${Score.xon()?'كل نجمة فيها تعادل '+AR(10)+' نقاط في درجتك مثل بقية الألعاب':'نقاطها ونجومها في «البونص» ولا تغيّر درجتك'}.</p><div class="games">${Hid.extra().map((g,i)=>`<button class="gcard xg rise" style="--d:${i}" data-act="pl" data-id="${g.id}"><span class="gic">${em(g.ic,'xl')}</span><h3>${g.t}</h3><p>${g.d}</p><div class="gmeta"><span>${g.g}</span><span class="lvl l2">${g.lv}</span></div><div class="sstars">${starsRow(GB[g.id]||0)}</div></button>`).join('')}</div>`:''}`;
+   const hub=()=>{sc.innerHTML=`<p class="lead rise">${AR(Hid.games().length)} مهمّات فضائية. كل إجابة صحيحة أو خاطئة لها <b>تأثير</b> تراه أمامك، والأسئلة متدرّجة من السهل إلى الصعب. فُز بكل لعبة مرة واحدة على الأقل لتُنجز الكوكب، وتُحسب لك <b>أفضل نتيجة</b> في كل لعبة (حتى ٣ نجوم، وكل نجمة تعادل ${AR(10)} نقاط في درجتك). وإذا أعدتَ لعبة سبق أن نلتَ نجومها فلك <b>بونص</b> منفصل عن الدرجة.</p><div class="hn-mini"></div><div id="wkBox">${typeof Week!=='undefined'?Week.card():''}</div><div class="games">${Hid.games().map((g,i)=>`<button class="gcard rise" style="--d:${i}" data-act="pl" data-i="${i}" data-id="${g.id}"><span class="gic">${em(g.ic,'xl')}</span><h3>${g.t}</h3><p>${g.d}</p><div class="gmeta"><span>${g.g}</span><span class="lvl l2">${g.lv}</span></div><div class="sstars">${starsRow(GB[g.id]||0)}</div></button>`).join('')}${Final.card(Hid.games().length)}${typeof Daily!=='undefined'?Daily.card(Hid.games().length+1):''}</div>${Hid.extra().length?`<p class="lead xg-lead rise">${em('sparkles')} <b>ألعاب إضافية</b> للمتعة والتدريب: ${Score.xon()?'كل نجمة فيها تعادل '+AR(10)+' نقاط في درجتك مثل بقية الألعاب':'نقاطها ونجومها في «البونص» ولا تغيّر درجتك'}.</p><div class="games">${Hid.extra().map((g,i)=>`<button class="gcard xg rise" style="--d:${i}" data-act="pl" data-id="${g.id}"><span class="gic">${em(g.ic,'xl')}</span><h3>${g.t}</h3><p>${g.d}</p><div class="gmeta"><span>${g.g}</span><span class="lvl l2">${g.lv}</span></div><div class="sstars">${starsRow(GB[g.id]||0)}</div></button>`).join('')}</div>`:''}`;
     act(sc,{pl:b=>{if(b.dataset.id==='daily'){Daily.open();return}play(b.dataset.id==='final'?FINAL_G:(GAMES.find(x=>x.id===b.dataset.id)||(typeof EXTRA!=='undefined'&&EXTRA.find(x=>x.id===b.dataset.id))))}})};
    hub()}},
 ]});
@@ -3537,8 +3635,70 @@ TABS.push({id:'kalam',title:'أقسام الكلام',pl:'p8',color:'#f59e0b',me
  {t:'اضغط على نوع الكلمة',tip:'اقرأ الجملة جيدًا ثم اضغط على الكلمة التي يطلبها السؤال.',qs:KQ1,render(sc){miniQuiz(sc,KQ1,'<h3>أحسنتَ!</h3><p>صرتَ تميّز الاسم والفعل والحرف.</p>','trophy')}},
  {t:'أكمل بكلمة من النوع المطلوب',tip:'فكّر في نوع الكلمة المطلوبة ثم اختر.',qs:KQ2,render(sc){miniQuiz(sc,KQ2,'<h3>رائع!</h3><p>أكملتَ الجمل بالأنواع المناسبة.</p>','star')}},
  {t:'لماذا هذه الكلمة اسم؟',tip:'ابحث عن علامة الاسم: «ال» أو التنوين أو التاء المربوطة أو حرف الجرّ أو النداء.',qs:KQ3,render(sc){miniQuiz(sc,KQ3,'<h3>تعرف علامات الاسم!</h3><p>بقي أن تراجع أنواع الفعل والحرف.</p>','crown')}},
- {t:'أنواع الفعل والحرف',tip:'الفعل ماضٍ أو مضارع أو أمر. وللحرف أنواع منها حروف الجرّ وحروف العطف.',qs:KQ4,render(sc){miniQuiz(sc,KQ4,'<h3>أنت بطل أقسام الكلام!</h3><p>انتقل إلى الجملة الاسمية.</p>','trophy')}},
+ {t:'أنواع الفعل وأنواع الحرف',tip:'الفعل ماضٍ أو مضارع أو أمر. وللحرف أنواع منها حروف الجرّ وحروف العطف.',qs:KQ4,render(sc){miniQuiz(sc,KQ4,'<h3>أنت بطل أقسام الكلام!</h3><p>ميّزتَ الاسم والفعل والحرف، وعرفتَ حروف الجرّ وحروف العطف. انتقل إلى الجملة الاسمية.</p>','trophy')}},
 ]});
+
+/* ---- الحرف وحروف الجرّ وحروف العطف (تُضاف إلى كوكب أقسام الكلام؛ الأسئلة الجديدة بأرقام ثابتة 6500+ حتى لا تتغيّر أرقام ما بعدها) ---- */
+const PSENT=[
+ {w:['ذهبَ','الطالبُ','إلى','المدرسةِ'],st:[{i:[0],r:'v',n:'فعل',q:'ماذا حدث؟',t:'«ذهبَ» يدلّ على حدث في زمن ماضٍ، فهو <b>فعل</b>.'},{i:[2],r:'pt',n:'حرف جرّ',q:'ما الكلمة التي لا يُفهم معناها وحدها وتسبق الاسم؟',t:'«إلى» لا معنى لها وحدها، وتسبق الاسم «المدرسةِ»، فهي <b>حرف جرّ</b>.'},{i:[3],r:'nm',n:'اسم مجرور',q:'ماذا جاء بعد حرف الجرّ؟',t:'«المدرسةِ» اسم جاء بعد حرف الجرّ فصار <b>مجرورًا</b>، وتظهر الكسرة في آخره.',e:[1,'k']}]},
+ {w:['جلسَ','الطفلُ','على','الكرسيِّ'],st:[{i:[0],r:'v',n:'فعل',q:'ماذا حدث؟',t:'«جلسَ» حدث (الجلوس) في الزمن الماضي، فهو <b>فعل</b>.'},{i:[2],r:'pt',n:'حرف جرّ',q:'ما الحرف الذي سبق الاسم؟',t:'«على» حرف جرّ يدلّ على الاستعلاء (فوق).'},{i:[3],r:'nm',n:'اسم مجرور',q:'وماذا فعل حرف الجرّ بالاسم بعده؟',t:'جرّ «الكرسيِّ»، فهو <b>اسم مجرور</b>.'}]},
+ {w:['كتبتُ','الدرسَ','في','الكراسةِ'],st:[{i:[0],r:'v',n:'فعل',q:'ماذا حدث؟',t:'«كتبتُ» حدث (الكتابة) في الزمن الماضي، فهو <b>فعل</b>.'},{i:[2],r:'pt',n:'حرف جرّ',q:'ما الحرف الذي يربط الفعل بالمكان؟',t:'«في» حرف جرّ يدلّ على الظرفية (داخل شيء).'},{i:[3],r:'nm',n:'اسم مجرور',q:'وما الاسم المجرور؟',t:'«الكراسةِ» اسم مجرور بعد «في».',e:[1,'k']}]},
+ {w:['سافرَ','أبي','من','القاهرةِ','إلى','أسوانَ'],st:[{i:[0],r:'v',n:'فعل',q:'ماذا حدث؟',t:'«سافرَ» حدث (السفر) في الزمن الماضي، فهو <b>فعل</b>.'},{i:[2,4],r:'pt',n:'حرفا جرّ',q:'ما الحرفان اللذان يبيّنان بداية السفر ونهايته؟',t:'«من» تدلّ على <b>الابتداء</b> و«إلى» على <b>الانتهاء</b>، وكلاهما حرف جرّ.'},{i:[3],r:'nm',n:'اسم مجرور',q:'وما الاسم المجرور بـ«من»؟',t:'«القاهرةِ» اسم مجرور بحرف الجرّ «من».'}]},
+ {w:['ابتعدَ','الولدُ','عن','النارِ'],st:[{i:[0],r:'v',n:'فعل',q:'ماذا حدث؟',t:'«ابتعدَ» حدث في الزمن الماضي، فهو <b>فعل</b>.'},{i:[2],r:'pt',n:'حرف جرّ',q:'ما الحرف الذي يدلّ على الابتعاد؟',t:'«عن» حرف جرّ يدلّ على المجاوزة والابتعاد.'},{i:[3],r:'nm',n:'اسم مجرور',q:'وما الاسم المجرور؟',t:'«النارِ» اسم مجرور بعد «عن».'}]}];
+const CSENT=[
+ {w:['اشتريتُ','كتابًا','و','قلمًا'],st:[{i:[0],r:'v',n:'فعل',q:'ماذا حدث؟',t:'«اشتريتُ» حدث في الزمن الماضي، فهو <b>فعل</b>.'},{i:[2],r:'pt',n:'حرف عطف',q:'ما الحرف الذي يربط بين كلمتين؟',t:'«و» تربط «قلمًا» بـ«كتابًا» وتفيد <b>الجمع</b>، فهي <b>حرف عطف</b>.'},{i:[1,3],r:'nm',n:'اسمان متشابهان',q:'وكيف جاء الاسمان؟',t:'«كتابًا» و«قلمًا» كلاهما منصوب؛ فالاسم بعد حرف العطف يأخذ <b>حركة الاسم الذي قبله</b>.',e:[2,'f']}]},
+ {w:['حضرَ','الأبُ','ثم','الأمُ'],st:[{i:[0],r:'v',n:'فعل',q:'ماذا حدث؟',t:'«حضرَ» حدث في الزمن الماضي، فهو <b>فعل</b>.'},{i:[2],r:'pt',n:'حرف عطف',q:'ما الحرف الذي يدلّ على الترتيب مع مهلة؟',t:'«ثم» حرف عطف يدلّ على أن الأم حضرت <b>بعد الأب بمهلة</b>.'},{i:[1,3],r:'nm',n:'اسمان مرفوعان',q:'وكيف جاء الاسمان؟',t:'«الأبُ» و«الأمُ» كلاهما مرفوع بالضمة.',e:[1,'d']}]},
+ {w:['اختر','الشايَ','أو','القهوةَ'],st:[{i:[0],r:'v',n:'فعل',q:'ماذا نطلب؟',t:'«اختر» فعل أمر فيه طلب.'},{i:[2],r:'pt',n:'حرف عطف',q:'ما الحرف الذي يجعلنا نختار أحد الشيئين؟',t:'«أو» حرف عطف يفيد <b>التخيير</b> بين أمرين.'},{i:[1,3],r:'nm',n:'اسمان منصوبان',q:'وكيف جاء الاسمان؟',t:'«الشايَ» و«القهوةَ» كلاهما منصوب بالفتحة.',e:[1,'f']}]}];
+const _jsv=_jid;_jid=6500;
+const PQ1=[TJ('k',1,['ذهبَ','عليٌّ','إلى','الحديقةِ'],2,'حرف الجرّ','«إلى» حرف جرّ يسبق الاسم «الحديقةِ».'),
+ TJ('k',1,['وضعتُ','الكتابَ','على','المنضدةِ'],2,'حرف الجرّ','«على» حرف جرّ، والاسم بعده «المنضدةِ» مجرور.'),
+ TJ('k',2,['جلسَ','الطالبُ','في','الصفِّ'],3,'الاسم المجرور','«الصفِّ» اسم جاء بعد حرف الجرّ «في» فهو مجرور.'),
+ TJ('k',2,['خرجَ','الولدُ','من','البيتِ'],2,'حرف الجرّ','«من» حرف جرّ يدلّ على الابتداء.'),
+ TJ('k',3,['ابتعدَ','الطفلُ','عن','النارِ'],3,'الاسم المجرور','«النارِ» اسم مجرور بحرف الجرّ «عن».')];
+const PQ2=[MJ('k',1,'ذهبتُ ______ المدرسةِ.',['إلى','و','ثم'],0,'«إلى» حرف جرّ يسبق الاسم، أما «و» و«ثم» فحرفا عطف.'),
+ MJ('k',1,'الكتابُ ______ الحقيبةِ.',['في','أو','ثم'],0,'«في» حرف جرّ يدلّ على الظرفية.'),
+ MJ('k',1,'جلستُ ______ الكرسيِّ.',['على','ثم','و'],0,'«على» حرف جرّ يدلّ على الاستعلاء.'),
+ MJ('k',2,'خرجَ الولدُ ______ البيتِ. (ابتداء المكان)',['من','إلى','في'],0,'«من» تدلّ على ابتداء المكان.'),
+ MJ('k',2,'ابتعدتُ ______ الخطرِ.',['عن','أو','ثم'],0,'«عن» حرف جرّ يدلّ على الابتعاد.')];
+const CQ1=[TJ('k',1,['أكلَ','الولدُ','تفاحةً','و','موزةً'],3,'حرف العطف','«و» حرف عطف يربط «موزةً» بـ«تفاحةً».'),
+ TJ('k',1,['شربتُ','الشايَ','أو','القهوةَ'],2,'حرف العطف','«أو» حرف عطف يفيد التخيير.'),
+ TJ('k',2,['وصلَ','الضيفُ','ثم','جلسَ'],2,'حرف العطف','«ثم» حرف عطف يربط الفعلين بترتيب ومهلة.'),
+ TJ('k',2,['زرتُ','القاهرةَ','و','الإسكندريةَ'],2,'حرف العطف','«و» تجمع بين الاسمين.'),
+ TJ('k',3,['حضرَ','الأبُ','ثم','الأمُ'],2,'حرف العطف','«ثم» تدلّ على ترتيب الحضور مع مهلة.')];
+const CQ2=[MJ('k',1,'حضرَ محمدٌ ______ عليٌّ. (للجمع)',['و','أو','ثم'],0,'«و» تفيد الجمع بين الاثنين.'),
+ MJ('k',1,'اختر الشايَ ______ القهوةَ. (للتخيير)',['أو','و','ثم'],0,'«أو» تفيد التخيير.'),
+ MJ('k',2,'استيقظَ الولدُ ______ تناولَ فطورَهُ. (للترتيب مع مهلة)',['ثم','أو','بل'],0,'«ثم» تفيد الترتيب مع مهلة.'),
+ MJ('k',2,'عطفَ حرفُ ______ على «كتابًا» في: اشتريتُ كتابًا و قلمًا.',['الواو','إلى','في'],0,'«و» حرف عطف، أما «إلى» و«في» فحرفا جرّ.'),
+ MJ('k',3,'ما حضرَ محمدٌ ______ عليٌّ. (للإضراب)',['بل','و','ثم'],0,'«بل» تفيد الإضراب: تنفي عن الأول وتثبت للثاني.')];
+const PQ3=[MJ('k',1,'ما الذي يأتي بعد حرف الجرّ؟',['اسم','فعل','حرف'],0,'يأتي بعد حرف الجرّ اسم فيكون مجرورًا.'),
+ MJ('k',1,'في «ذهبتُ إلى المدرسةِ» كلمة «إلى» …',['حرف جرّ','حرف عطف','فعل'],0,'«إلى» تسبق الاسم «المدرسةِ» فهي حرف جرّ.'),
+ MJ('k',2,'في «اشتريتُ كتابًا و قلمًا» كلمة «و» …',['حرف عطف','حرف جرّ','اسم'],0,'«و» تربط بين اسمين فهي حرف عطف.'),
+ MJ('k',2,'أيُّ الكلمات الآتية حرف جرّ؟',['على','ثم','كتبَ'],0,'«على» تسبق الاسم فتجرّه.'),
+ MJ('k',3,'أيُّ الجمل الآتية فيها حرف عطف؟',['جلستُ على الكرسيِّ.','أكلتُ تفاحةً وموزةً.','ذهبتُ إلى المدرسةِ.'],1,'«و» في الجملة الثانية تربط «تفاحةً» بـ«موزةً».')];
+_jid=_jsv;
+{const T=TABS.find(t=>t.id==='kalam');T.steps.forEach((s,i)=>{s.ks=i});     // every old step keeps the key its saved results already use
+ const qz=(t,tip,qs,html,ic,ks)=>({t,tip,qs,ks,render(sc){miniQuiz(sc,qs,html,ic)}}),
+ head=[
+  {t:'الحرف وأنواعه',tip:'الحرف كلمة لا يُفهم معناها وحدها. اكشف الصفوف واحدًا بعد الآخر لتتعرّف الحرف وأنواعه.',ks:7,
+   render(sc){tbl(sc,['السؤال','الجواب','أمثلة'],[['ما الحرف؟','كلمة <b>لا يُفهم معناها وحدها</b>؛ لا تدلّ على حدث ولا على إنسان أو شيء، وإنما تربط بين الكلمات','في • على • و • ثم'],['علامته','لا تدخل عليه «ال»، ولا يلحقه تنوين، ولا يتصل به ضمير الفاعل (تُ)','لا نقول: الفي • فيٌّ • فيتُ'],['حروف الجرّ','تسبق <b>الاسم</b> فيصير مجرورًا','من • إلى • عن • على • في'],['حروف العطف','تربط كلمة بكلمة أو جملة بجملة','و • ف • ثم • أو • بل • لكن'],['أدوات أخرى','مثل النداء والنفي والاستفهام','يا • لا • لم • هل']],['#c4b5fd','#fde68a','#a5f3fc']);
+    sc.insertAdjacentHTML('beforeend',`<div class="note rise" style="--d:2">اختبر أي كلمة: إن لم تقبل «ال» ولا التنوين، ولم تدلّ على حدث، فهي غالبًا <b>حرف</b>.</div>`)}},
+  {t:'حروف الجرّ',tip:'حرف الجرّ يسبق الاسم فيجرّه. اختر جملة وشاهد حرف الجرّ والاسم المجرور. اضغط الزرّ لترى الجملة التالية.',ks:8,
+   render(sc){return labelStep(sc,PSENT,{lead:'حرف الجرّ يسبق <b>الاسم</b> ويجعله <b>مجرورًا</b>. شاهد كيف نكتشفه.',color:'#f59e0b'})}},
+  {t:'حروف الجرّ ومعانيها',tip:'اكشف الصفوف واحدًا بعد الآخر لتحفظ كل حرف ومعناه.',ks:9,
+   render(sc){tbl(sc,['حرف الجرّ','معناه','مثال'],[['مِن','ابتداء المكان أو الزمان','خرجتُ <b>من</b> البيتِ'],['إلى','انتهاء الغاية','ذهبتُ <b>إلى</b> المدرسةِ'],['عن','الابتعاد والمجاوزة','ابتعدتُ <b>عن</b> الخطرِ'],['على','الاستعلاء (فوق)','جلستُ <b>على</b> الكرسيِّ'],['في','الظرفية (داخل)','الكتابُ <b>في</b> الحقيبةِ'],['الباء','الإلصاق والاستعانة','كتبتُ <b>بـ</b>القلمِ'],['اللام','الملك والاختصاص','الكتابُ <b>لـ</b>لطالبِ'],['الكاف','التشبيه','وجهُهُ <b>كـ</b>البدرِ']],['#fde68a','#a5f3fc','#c4b5fd']);
+    sc.insertAdjacentHTML('beforeend',`<div class="note rise" style="--d:2">الباء واللام والكاف حروف جرّ تتصل بالكلمة بعدها، أما الباقي فتُكتب منفصلة. والاسم بعد حرف الجرّ يكون <b>مجرورًا</b> وتظهر الكسرة غالبًا في آخره.</div>`)}},
+  {t:'حروف العطف',tip:'حرف العطف يربط بين كلمتين أو جملتين. اختر جملة وشاهد حرف العطف والكلمتين المرتبطتين. اضغط الزرّ لترى الجملة التالية.',ks:10,
+   render(sc){return labelStep(sc,CSENT,{lead:'حرف العطف <b>يربط</b> بين كلمتين، والاسم بعده يأخذ حركة الاسم الذي قبله.',color:'#38bdf8'})}},
+  {t:'حروف العطف ومعانيها',tip:'اكشف الصفوف واحدًا بعد الآخر لتحفظ كل حرف ومعناه.',ks:11,
+   render(sc){tbl(sc,['حرف العطف','معناه','مثال'],[['الواو','مطلق الجمع','حضرَ محمدٌ <b>و</b>عليٌّ'],['الفاء','الترتيب مع التعقيب (مباشرةً)','دخلَ المعلمُ <b>ف</b>جلسَ'],['ثم','الترتيب مع مهلة','استيقظتُ <b>ثم</b> تناولتُ الفطورَ'],['أو','التخيير أو الشك','اشربْ شايًا <b>أو</b> قهوةً'],['بل','الإضراب: ينفي عن الأول ويثبت للثاني','ما حضرَ محمدٌ <b>بل</b> عليٌّ'],['لكن','الاستدراك','ما حضرَ محمدٌ <b>لكن</b> عليٌّ']],['#fde68a','#a5f3fc','#c4b5fd']);
+    sc.insertAdjacentHTML('beforeend',`<div class="note rise" style="--d:2">الواو والفاء تتصلان بالكلمة بعدهما في الكتابة. وحروف العطف تربط بين الأسماء وبين الأفعال وبين الجمل.</div>`)}}],
+ tail=[
+  qz('اضغط على حرف الجرّ','حرف الجرّ يسبق الاسم، والاسم بعده مجرور. اقرأ الجملة ثم اضغط على ما يطلبه السؤال.',PQ1,'<h3>أحسنتَ!</h3><p>تعرف حرف الجرّ والاسم المجرور.</p>','trophy',12),
+  qz('أكمل بحرف جرّ مناسب','اختر حرف الجرّ المناسب للمعنى، وانتبه ألا تختار حرف عطف.',PQ2,'<h3>رائع!</h3><p>اخترتَ حروف الجرّ المناسبة.</p>','star',13),
+  qz('اضغط على حرف العطف','حرف العطف يربط بين كلمتين أو جملتين.',CQ1,'<h3>أحسنتَ!</h3><p>تعرف حروف العطف.</p>','trophy',14),
+  qz('أكمل بحرف عطف مناسب','اختر حرف العطف الذي يناسب المعنى بين القوسين.',CQ2,'<h3>رائع!</h3><p>اخترتَ حرف العطف المناسب لكل معنى.</p>','star',15),
+  qz('جرّ أم عطف؟','الحرف الذي يسبق الاسم فيجرّه حرف جرّ، والذي يربط بين كلمتين حرف عطف.',PQ3,'<h3>ممتاز!</h3><p>تفرّق الآن بين حرف الجرّ وحرف العطف.</p>','crown',16)];
+ T.steps.splice(3,0,...head);T.steps.splice(T.steps.length-1,0,...tail)}
 
 /* ---- الجملة الاسمية ---- */
 const NSENT=[
@@ -3666,7 +3826,11 @@ DG.kalam=lv=>lv===1?dTake(8,i=>{const k=i%8,a=k<3?0:k<6?1:2,w=dRnd(a===0?K_NOUN:
   dM('k',2,'«تفاحًا» اسم لأنه فيه …',['التنوين','أداة نداء','حرف عطف'],0,'التنوين علامة من علامات الاسم.','ابحث عن علامة في آخر الكلمة.'),
   dM('k',2,'اشتريتُ الكتابَ من معرضِ الكتبِ. «معرضِ» اسم لأنه …',['مسبوق بحرف جرّ','فيه تاء مربوطة','مسبوق بأداة نداء'],0,'«معرضِ» جاء بعد حرف الجرّ «من»، وهذه علامة الاسم.'),
   dM('k',2,'يا محمدُ، اجتهدْ. «محمدُ» اسم لأنه …',['مسبوق بأداة نداء','فيه تنوين','مسبوق بحرف جرّ'],0,'«محمدُ» جاء بعد أداة النداء «يا».'),
-  dM('k',2,'«مدرسةٌ» اسم لأن فيه …',['التاء المربوطة والتنوين','أداة نداء','حرف جرّ'],0,'التاء المربوطة والتنوين من علامات الاسم.')]
+  dM('k',2,'«مدرسةٌ» اسم لأن فيه …',['التاء المربوطة والتنوين','أداة نداء','حرف جرّ'],0,'التاء المربوطة والتنوين من علامات الاسم.'),
+  dT('k',2,['وضعتُ','الكتابَ','على','المنضدةِ'],2,'حرف الجرّ','«على» حرف جرّ يسبق الاسم «المنضدةِ».'),
+  dT('k',2,['شربتُ','الشايَ','أو','القهوةَ'],2,'حرف العطف','«أو» حرف عطف يفيد التخيير.'),
+  dM('k',2,'ذهبتُ ______ المدرسةِ.',['إلى','و','ثم'],0,'«إلى» حرف جرّ يسبق الاسم.'),
+  dM('k',2,'حضرَ محمدٌ ______ عليٌّ. (للجمع)',['و','إلى','على'],0,'«و» حرف عطف يفيد الجمع.')]
 :[dM('k',3,'«سافرَ» فعل …',['ماضٍ','مضارع','أمر'],0,'«سافرَ» يدلّ على حدث وقع وانتهى، فهو ماضٍ.'),
   dM('k',3,'«يسافرُ» فعل …',['مضارع','ماضٍ','أمر'],0,'«يسافرُ» يدلّ على حدث في الحاضر، وأوله حرف المضارعة.'),
   dM('k',3,'«سافرْ» فعل …',['أمر','ماضٍ','مضارع'],0,'«سافرْ» فيه طلب، فهو فعل أمر.'),
@@ -3674,6 +3838,10 @@ DG.kalam=lv=>lv===1?dTake(8,i=>{const k=i%8,a=k<3?0:k<6?1:2,w=dRnd(a===0?K_NOUN:
   dM('k',3,'«و» و«ثم» و«أو» حروف …',['عطف','جرّ','نداء'],0,'هذه حروف عطف تربط بين كلمتين أو جملتين.'),
   dM('k',3,'أيُّ الكلمات الآتية اسم؟',['أسدٌ','سافرَ','في'],0,'«أسدٌ» اسم حيوان وفيه التنوين، وهو يقبل «ال».'),
   dM('k',3,'أيُّ الكلمات الآتية فعل؟',['يرسمُ','الرسمُ','على'],0,'«يرسمُ» يدلّ على حدث في الزمن الحاضر.'),
+  dM('k',3,'ما الذي يأتي بعد حرف الجرّ؟',['اسم','فعل','حرف'],0,'يأتي بعد حرف الجرّ اسم فيكون مجرورًا.'),
+  dM('k',3,'«بل» حرف …',['عطف','جرّ','نداء'],0,'«بل» حرف عطف يفيد الإضراب.'),
+  dM('k',3,'أيُّ الجمل الآتية فيها حرف جرّ؟',['جلستُ على الكرسيِّ.','أكلتُ تفاحةً وموزةً.','حضرَ الأبُ ثم الأمُ.'],0,'«على» حرف جرّ يسبق «الكرسيِّ».'),
+  dM('k',3,'«ثم» تدلّ على …',['الترتيب مع مهلة','الابتداء','التشبيه'],0,'«ثم» حرف عطف يفيد الترتيب مع مهلة.'),
   dM('k',3,'أيُّ الكلمات الآتية حرف؟',['إلى','المدرسةُ','ذهبَ'],0,'«إلى» حرف جرّ، أما «المدرسةُ» فاسم و«ذهبَ» فعل.'),
   dM('k',3,'أيُّ الجمل الآتية فيها فعل أمر؟',['اقرأْ كتابَك','قرأَ الولدُ','الكتابُ مفيدٌ'],0,'«اقرأْ» فيه طلب، فهو فعل أمر.')];
 
@@ -5345,11 +5513,13 @@ function xChoice(host,api,restart,o){
  return()=>{dead=true;cancelAnimationFrame(raf);timers.forEach(clearTimeout)}}
 const xWd=w=>`<span class="dw">${esc(w)}</span>`;
 /* 5: the parts of speech race (أقسام الكلام) */
+const K_PJ=['في','على','من','إلى','عن'];   // the prepositions among K_PART (the rest are conjunctions)
 const gKind=(host,api,restart)=>xChoice(host,api,restart,{id:'kind',ic:'flying_saucer',title:'سباق الأقسام',unit:'الكلمة',sec:6,
- intro:'تظهر كلمة وعليك أن تختار قسمها: <b>اسم</b> أم <b>فعل</b> أم <b>حرف</b>، قبل أن ينتهي الوقت. كل خطأ يُنقص قلبًا.',
- win:['فزتَ بالسباق!','ميّزتَ الاسم والفعل والحرف في كل الكلمات.'],lose:['خسرتَ السباق','نفدت قلوبك. راجع أقسام الكلام: الاسم والفعل والحرف.'],
+ intro:'تظهر كلمة وعليك أن تختار قسمها: <b>اسم</b> أم <b>فعل</b> أم <b>حرف</b>، قبل أن ينتهي الوقت. وإن كان حرفًا فحدّد نوعه: <b>جرّ</b> أم <b>عطف</b>. كل خطأ يُنقص قلبًا.',
+ win:['فزتَ بالسباق!','ميّزتَ الاسم والفعل والحرف، وعرفتَ حروف الجرّ وحروف العطف.'],lose:['خسرتَ السباق','نفدت قلوبك. راجع أقسام الكلام: الاسم والفعل والحرف.'],
  items:()=>shuffle([...shuffle(K_NOUN).slice(0,4).map(w=>[w,0]),...shuffle(K_VERB).slice(0,3).map(w=>[w,1]),...shuffle(K_PART).slice(0,3).map(w=>[w,2])]).map(([w,a])=>({sent:`<span class="dw big">${esc(w)}</span>`,
-  steps:[{p:'ما قسم هذه الكلمة؟',a:['اسم','فعل','حرف'],fixed:1,k:a,e:`«${w}» ${K_WHY[a]}.`,tp:'k',lv:1,rid:'xk:'+w,q:`ما نوع الكلمة «${w}»؟`}]}))});
+  steps:[{p:'ما قسم هذه الكلمة؟',a:['اسم','فعل','حرف'],fixed:1,k:a,e:`«${w}» ${K_WHY[a]}.`,tp:'k',lv:1,rid:'xk:'+w,q:`ما نوع الكلمة «${w}»؟`},
+   ...(a===2?[{p:`وما نوع الحرف «${w}»؟`,a:['حرف جرّ','حرف عطف','حرف نداء'],fixed:1,k:K_PJ.includes(w)?0:1,e:K_PJ.includes(w)?`«${w}» حرف جرّ يسبق الاسم فيجرّه.`:`«${w}» حرف عطف يربط بين كلمتين.`,tp:'k',lv:2,rid:'xk2:'+w,q:`ما نوع الحرف «${w}»؟`}]:[])]}))});
 /* 6: the subject-and-predicate hunter (الجملة الاسمية) */
 const NOM3=[['العاملاتُ','المصرياتُ','ماهراتٌ'],['الطالباتُ','المجتهداتُ','فائزاتٌ'],['المعلمونَ','المخلصونَ','قدوةٌ'],['الأطباءُ','الماهرونَ','مشاركونَ']];
 const gMub=(host,api,restart)=>xChoice(host,api,restart,{id:'mub',ic:'bullseye',title:'صائد المبتدأ والخبر',unit:'الجملة',sec:9,
@@ -5715,11 +5885,11 @@ const Dash={
   const multi=S.scope==='all',sec=S.sec||'over',now=this.now();
   const scopeSel=`<label class="sr" for="dhSc">اختر الفصل</label><select id="dhSc" class="inp dh-sel"><option value="all"${multi?' selected':''}>كل الفصول</option>${S.classes.map(c=>`<option value="${esc(c)}"${S.scope===c?' selected':''}>${esc(c)}</option>`).join('')}</select>`;
   const top=`<div class="dh-top"><b>${em('man_teacher')} لوحة المعلم</b><span>${scopeSel}<button class="btn ghost sm" id="dhR" type="button">تحديث</button><button class="btn ghost sm" id="dhX" type="button">إغلاق</button></span></div>
-   <div class="dh-nav2"><button class="btn gold sm" id="dhG" type="button">${em('bullseye')} التحكم باللعبة</button><button class="btn gold sm" id="dhCt" type="button">${em('books')} محتوى الدرس</button><button class="btn gold sm" id="dhWk" type="button">${em('trophy')} تحدّي الأسبوع</button><button class="btn sky sm" id="dhRd" type="button">${em('closed_book')} تصميم التقارير</button><button class="btn gold sm" id="dhCe" type="button">${em('1st_place_medal')} الشهادة</button><button class="btn ghost sm" id="dhM2" type="button">إدارة الفصول</button><button class="btn ghost sm" id="dhCm" type="button">وضع الحصة</button><button class="btn ghost sm" id="dhAc" type="button">حسابي</button><button class="btn red sm" id="dhLo" type="button">تسجيل الخروج</button></div>`;
+   <div class="dh-nav2"><button class="btn gold sm" id="dhG" type="button">${em('bullseye')} التحكم باللعبة</button><button class="btn gold sm" id="dhCt" type="button">${em('books')} محتوى الدرس</button><button class="btn gold sm" id="dhWk" type="button">${em('trophy')} تحدّي الأسبوع</button><button class="btn gold sm" id="dhHo" type="button">${em('1st_place_medal')} لوحة الشرف</button><button class="btn sky sm" id="dhRd" type="button">${em('closed_book')} تصميم التقارير</button><button class="btn gold sm" id="dhCe" type="button">${em('1st_place_medal')} الشهادة</button><button class="btn ghost sm" id="dhM2" type="button">إدارة الفصول</button><button class="btn ghost sm" id="dhCm" type="button">وضع الحصة</button><button class="btn ghost sm" id="dhAc" type="button">حسابي</button><button class="btn red sm" id="dhLo" type="button">تسجيل الخروج</button></div>`;
   const bind=()=>{$('#dhX',d).onclick=()=>this.close();
    $('#dhR',d).onclick=async()=>{const r=await this.load();if(r.ok)this.classView(d)};
    $('#dhSc',d).onchange=async e=>{S.scope=e.target.value;S.q='';S.sel=new Set();const r=await this.load();if(r.ok)this.classView(d)};
-   $('#dhM2',d).onclick=()=>this.manage();$('#dhG',d).onclick=()=>this.ctl();$('#dhCt',d).onclick=()=>this.content();$('#dhWk',d).onclick=()=>this.week();$('#dhRd',d).onclick=()=>this.design();$('#dhCe',d).onclick=()=>this.certDesign();$('#dhAc',d).onclick=()=>this.account();$('#dhLo',d).onclick=()=>Online.teacherLogout();$('#dhCm',d).onclick=()=>{this.close();try{Cls.toggle()}catch(e){toast('وضع الحصة غير متاح')}}};
+   $('#dhM2',d).onclick=()=>this.manage();$('#dhG',d).onclick=()=>this.ctl();$('#dhCt',d).onclick=()=>this.content();$('#dhWk',d).onclick=()=>this.week();$('#dhHo',d).onclick=()=>this.honorAdmin();$('#dhRd',d).onclick=()=>this.design();$('#dhCe',d).onclick=()=>this.certDesign();$('#dhAc',d).onclick=()=>this.account();$('#dhLo',d).onclick=()=>Online.teacherLogout();$('#dhCm',d).onclick=()=>{this.close();try{Cls.toggle()}catch(e){toast('وضع الحصة غير متاح')}}};
   if(!A.regs){d.innerHTML=top+`<div class="dh-wrap"><div class="dh-wait"><p>لا يوجد طلاب مسجّلون ${S.scope==='all'?'بعد':'في هذا الفصل بعد'}. أعطِ طلابك رابط الدرس؛ يسجّل كل طالب اسمه وفصله ورقم هاتفه.</p></div></div>`;bind();return}
   const tile=(v,l,c)=>`<div class="dh-tile"${c?` style="--tc:${c}"`:''}><b>${v}</b><small>${l}</small></div>`;
   const bar=(l,pct,txt,col)=>`<div class="dh-bar"><span>${l}</span><i><u style="width:${Math.max(pct,pct>0?3:0)}%;background:${col}"></u></i><em>${txt}</em></div>`;
@@ -5762,7 +5932,7 @@ const Dash={
   $('#dhT',d).onclick=async()=>{const ok=await copyTxt(Board.text({rows:A.act,N:A.N,avg:A.avg,weakest:A.weakest&&{name:A.weakest.name,a:A.weakest.a}}));toast(ok?'نُسخ ترتيب الفصل ✓ (الخمسة الأوائل فقط)':'تعذّر النسخ تلقائيًا')};
   const redraw=()=>{const y=d.scrollTop;this.classView(d);d.scrollTop=y};
   const rm=$('#dhRm',d);if(rm)rm.onclick=()=>{this.remind=true;this.waAll()};
-  const bc=$('#dhBdC',d);if(bc)bc.onclick=()=>this.ctl();
+  const bc=$('#dhBdC',d);if(bc)bc.onclick=()=>this.honorAdmin();
   d.onclick=e=>{const sc=e.target.closest('[data-sec]');if(sc){S.sec=sc.dataset.sec;d.scrollTop=0;this.classView(d);return}
    const ed=e.target.closest('[data-ed]');if(ed){const r=A.by.find(x=>x.k===ed.dataset.ed);if(r)this.editStudent(r);return}
    const b=e.target.closest('[data-o]');if(b){this.show('student',b.dataset.o);return}
@@ -5803,7 +5973,7 @@ const Dash={
    ${body||`<tr><td colspan="${cols}">لا نتائج مطابقة.</td></tr>`}</table></div></section>`},
  /* ---------- the class honour board (built automatically from the results) ---------- */
  honorFull(A,multi){const S=this.S,top=A.act.filter(r=>r.n>0||r.pts>0),vis=S.cfg&&S.cfg.board&&S.cfg.board!=='off';
-  const status=`<div class="dh-set"><b>${vis?'اللوحة ظاهرة للطلاب الآن':'اللوحة مخفية عن الطلاب'}</b><small>${vis?`يرى الطالب ${{top5:'أفضل ٥',top10:'أفضل ١٠',all:'كل'}[S.cfg.board]||''} طلاب فصله ${S.cfg.boardNames==='full'?'بأسمائهم الكاملة':'بالاسم الأول'}.`:'أظهرها ليتنافس الطلاب في فصولهم.'}</small><div class="row"><button class="btn gold sm" id="dhBdC" type="button">${vis?'إعدادات لوحة الترتيب':'أظهر اللوحة للطلاب'}</button></div></div>`;
+  const status=`<div class="dh-set"><b>${vis?'اللوحة ظاهرة للطلاب الآن':'اللوحة مخفية عن الطلاب'}</b><small>${vis?`يرى الطالب ${{top3:'أفضل ٣',top5:'أفضل ٥',top10:'أفضل ١٠',all:'كل'}[S.cfg.board]||''} طلاب فصله ${{full:'بأسمائهم الكاملة',initial:'بالاسم الأول وحرف العائلة'}[S.cfg.boardNames]||'بالاسم الأول'}${S.cfg.boardSeason?' · الموسم الجاري: '+esc(S.cfg.boardSeason.t):''}.`:'أظهرها ليتنافس الطلاب في فصولهم.'}</small><div class="row"><button class="btn gold sm" id="dhBdC" type="button">${vis?'إدارة لوحة الشرف':'أظهر اللوحة للطلاب'}</button></div></div>`;
   if(!top.length)return`<section class="dh-card"><h3>${em('1st_place_medal')} لوحة الشرف</h3><p class="dh-sub">ستظهر هنا تلقائيًا عندما يرسل الطلاب نتائجهم.</p></section>${status}`;
   const M=['🥇','🥈','🥉'],pod=top.slice(0,3),order=pod.length===3?[1,0,2]:pod.map((_,i)=>i);
   const podium=`<div class="dh-pod">${order.map(i=>{const r=pod[i];return`<button type="button" class="dh-pd p${i+1}" data-o="${esc(r.k)}"><span class="m">${M[i]}</span><b>${esc(r.name)}</b>${multi?`<small>${esc(r.cls)}</small>`:''}<em>${AR(r.pts)}</em><small>${AR(r.spct)}٪ · ${RANKS[r.rk].n}</small></button>`}).join('')}</div>`;
@@ -5845,13 +6015,12 @@ const Dash={
     <div class="row"><button class="btn ghost sm" id="dhLn" type="button">افتح الكل</button><button class="btn ghost sm" id="dhLa" type="button">أغلِق الكل</button><button class="btn ghost sm" id="dhLh" type="button">أخفِ الدروس كلها</button></div></div>
    <div class="dh-set"><b>الألعاب</b><small>أزل العلامة لإغلاق لعبة بعينها. اللعبة المبنية على درس مخفي تختفي وحدها (تظهر بعلامة «مخفية»).</small><div class="dh-lk">${(typeof GAMES!=='undefined'?GAMES:[]).concat(typeof EXTRA!=='undefined'?EXTRA:[]).map(g=>`<label class="dh-sw"><input type="checkbox" data-gm="${g.id}"${goff.has(g.id)?'':' checked'}> ${esc(g.t)}<span class="dh-an" hidden>مخفية بإخفاء درسها</span></label>`).join('')}</div></div>
    <div class="dh-set"><b>رسالة تشجيع لحظية</b><div class="dh-cr"><input id="dhCh" class="inp" maxlength="100" placeholder="مثال: أحسنتم يا أبطال!"><button class="btn gold sm" id="dhCs2" type="button">أرسل${cl?' للفصل':' للجميع'}</button></div></div>
-   ${cl?'<p class="dh-sub">الخيارات التالية تخص كل الفصول؛ اخترها من «كل الفصول».</p>':`<div class="dh-set"><b>لوحة ترتيب الفصل للطلاب</b><label class="sr" for="dhBd">عرض لوحة الترتيب</label><select id="dhBd" class="inp dh-sel"><option value="off">مغلقة (لا يراها الطلاب)</option><option value="top5">أفضل ٥ في الفصل</option><option value="top10">أفضل ١٠ في الفصل</option><option value="all">كل طلاب الفصل</option></select>
-    <label class="sr" for="dhBn">الأسماء</label><select id="dhBn" class="inp dh-sel"><option value="first">الاسم الأول فقط</option><option value="full">الاسم الكامل</option></select><small>يرى الطالب ترتيب فصله فقط، ويظهر ترتيبه هو دائمًا.</small></div>
+   ${cl?'<p class="dh-sub">الخيارات التالية تخص كل الفصول؛ اخترها من «كل الفصول».</p>':`<div class="dh-set"><b>لوحة الشرف للطلاب</b><small>${c.board&&c.board!=='off'?'اللوحة ظاهرة للطلاب.':'اللوحة مخفية عن الطلاب.'} عدد الظاهرين، وطريقة الترتيب، والأسماء، والمواسم، وإخفاء طلاب: كلها من نافذة اللوحة.</small><div class="row"><button class="btn gold sm" id="dhBdO" type="button">افتح إدارة لوحة الشرف</button></div></div>
    <div class="dh-set"><b>خيارات عامة</b><label class="dh-sw"><input type="checkbox" id="dhRg"${c.reg===false?'':' checked'}> التسجيل مفتوح للطلاب الجدد</label><label class="dh-sw"><input type="checkbox" id="dhSx"${(c.sc&&c.sc.x===false)?'':' checked'}> تُحتسب الألعاب الإضافية والمعركة الأخيرة في الدرجة والنجوم (وإلا فهي بونص فقط)</label><label class="dh-sw"><input type="checkbox" id="dhHn"${c.hints===false?'':' checked'}> السماح بالتلميحات في الأسئلة</label><label class="dh-sw"><input type="checkbox" id="dhSn"${c.sound===false?'':' checked'}> الأصوات مفعّلة</label><label class="dh-sw"><input type="checkbox" id="dhFx"${c.fx===false?'':' checked'}> المؤثرات (قصاصات الاحتفال)</label></div>
    <div class="dh-set"><b>ساعات إتاحة اللعبة يوميًا</b><label class="dh-sw"><input type="checkbox" id="dhWn"${w.on?' checked':''}> لا تعمل اللعبة إلا في هذه الساعات (بتوقيت جهاز الطالب)</label><div class="dh-cr"><label for="dhWf">من</label><input type="time" id="dhWf" class="inp" value="${esc(w.from||'08:00')}"><label for="dhWt">إلى</label><input type="time" id="dhWt" class="inp" value="${esc(w.to||'14:00')}"></div><small>خارج الساعات تظهر شاشة انتظار، ولا تنطبق عليك أنت.</small></div>`}
    <p class="dh-msg" id="dhGm" role="status"></p>
    <div class="row"><button class="btn go sm" id="dhGs" type="button">حفظ التغييرات</button>${cl&&has?'<button class="btn ghost sm" id="dhGr" type="button">إلغاء إعدادات هذا الفصل</button>':''}<button class="btn ghost sm" id="dhGx" type="button">إغلاق</button></div>`,m=>{
-   if(!cl){$('#dhBd',m).value=c.board||'off';$('#dhBn',m).value=c.boardNames||'first'}
+   const bo=$('#dhBdO',m);if(bo)bo.onclick=()=>this.honorAdmin();
    const msg=t=>{$('#dhGm',m).textContent=t},sels=()=>$$('[data-tb]',m);
    $('#dhGx',m).onclick=()=>this.modal();
    const paintLs=()=>{const cnt={open:0,lock:0,hide:0},hid=new Set();sels().forEach(b=>{cnt[b.value]++;if(b.value==='hide')hid.add(b.dataset.tb);const r=b.closest('.dh-tr');if(r)r.className='dh-tr dh-s-'+b.value});
@@ -5865,7 +6034,7 @@ const Dash={
    $('#dhSco',m).onchange=e=>this.ctl(e.target.value);
    $('#dhRf',m).onclick=async()=>{await this.load();this.ctl(scope)};
    const post=async cfg=>{msg('جارٍ الحفظ…');const r=await Online.api('config',{cfg},S.key);if(!r.ok){msg(this.err(r));if(r.error==='login'){this.close();Online.teacherForget();Online.teacherAsk(Online.why.login)}return false}S.cfg=r.cfg;return true};
-   const fields=extra=>Object.assign({scope,notice:$('#dhNt',m).value,pause:$('#dhPs',m).checked,pauseMsg:$('#dhPm',m).value,lock:sels().filter(b=>b.value==='lock').map(b=>b.dataset.tb),hide:sels().filter(b=>b.value==='hide').map(b=>b.dataset.tb),gamesOff:$$('[data-gm]',m).filter(b=>!b.checked).map(b=>b.dataset.gm)},cl?{}:{reg:$('#dhRg',m).checked,sc:{x:$('#dhSx',m).checked},hints:$('#dhHn',m).checked,sound:$('#dhSn',m).checked,fx:$('#dhFx',m).checked,win:{on:$('#dhWn',m).checked,from:$('#dhWf',m).value||'08:00',to:$('#dhWt',m).value||'14:00'},board:$('#dhBd',m).value,boardNames:$('#dhBn',m).value},extra||{});
+   const fields=extra=>Object.assign({scope,notice:$('#dhNt',m).value,pause:$('#dhPs',m).checked,pauseMsg:$('#dhPm',m).value,lock:sels().filter(b=>b.value==='lock').map(b=>b.dataset.tb),hide:sels().filter(b=>b.value==='hide').map(b=>b.dataset.tb),gamesOff:$$('[data-gm]',m).filter(b=>!b.checked).map(b=>b.dataset.gm)},cl?{}:{reg:$('#dhRg',m).checked,sc:{x:$('#dhSx',m).checked},hints:$('#dhHn',m).checked,sound:$('#dhSn',m).checked,fx:$('#dhFx',m).checked,win:{on:$('#dhWn',m).checked,from:$('#dhWf',m).value||'08:00',to:$('#dhWt',m).value||'14:00'}},extra||{});
    const ov=$('#dhOv',m);
    $('#dhGs',m).onclick=async()=>{if(cl&&ov&&!ov.checked){if(has&&await post({scope,reset:true}))msg('عاد الفصل إلى إعدادات «كل الفصول» ✓');else if(!has)msg('فعّل «إعدادات خاصة بهذا الفصل» أولًا.');return}
     if(await post(fields())){msg('حُفظت ✓ — تصل إلى الطلاب خلال نحو نصف دقيقة.');await this.load()}};
@@ -5996,6 +6165,61 @@ const Dash={
    $('#dhWs',m).onclick=()=>{const cls=$$('[data-wc]',m).filter(x=>x.checked).map(x=>x.dataset.wc);if(!cls.length){msg('اختر فصلًا واحدًا على الأقل.');return}post({on:true,t:$('#dhWt',m).value,goal:+$('#dhWg',m).value||300,days:+$('#dhWd',m).value||7,cls:cls.length===S.classes.length?[]:cls})};
    $('#dhWe',m).onclick=()=>post({on:false});
    load()})},
+
+ /* ---------- the honour hall's management window: visibility, ranking rule, names, title, seasons, hidden students, hall of fame ---------- */
+ honorAdmin(sc0){const S=this.S,BK=['board','boardBy','boardNames','boardTitle','boardMotto'];
+  let scope=sc0||(S.scope&&S.scope!=='all'?S.scope:'all'),rows=[],bs={},pv='auto',loaded=false;
+  const g=()=>S.cfg||{},ef=cl=>Object.assign({},g(),cl&&cl!=='all'?(g().byCls||{})[cl]||{}:{}),own=cl=>cl&&cl!=='all'&&(g().byCls||{})[cl]&&BK.some(k=>k in g().byCls[cl]);
+  const OPT={board:[['off','مغلقة (لا يراها الطلاب)'],['top3','أفضل ٣ فقط'],['top5','أفضل ٥'],['top10','أفضل ١٠'],['all','كل طلاب الفصل']],by:[['pct','نسبة الدرجة (الأعدل بين الفصول)'],['pts','مجموع النقاط'],['stars','عدد النجوم']],nm:[['first','الاسم الأول'],['initial','الاسم الأول + حرف العائلة'],['full','الاسم الكامل']]};
+  const sel=(id,o,v)=>`<select id="${id}" class="inp dh-sel">${o.map(([k,t])=>`<option value="${k}"${v===k?' selected':''}>${t}</option>`).join('')}</select>`;
+  const dt=ms=>{try{return new Date(ms).toLocaleDateString('ar-EG',{day:'numeric',month:'long'})}catch(e){return''}};
+  this.modal(`<h3>${em('trophy')} إدارة لوحة الشرف</h3><p class="dh-sub">لوحة تنافس يراها الطالب في ساحة الألعاب وفي الشاشة الرئيسية: منصة تتويج، وترتيب بقية الفصل، وموقعه هو دائمًا. تُحسب تلقائيًا من النتائج التي ترسلها أجهزة الطلاب.</p>
+   <div class="dh-set"><b>الفصل</b><select id="hbSc" class="inp dh-sel" aria-label="الفصل"><option value="all">كل الفصول (الإعداد العام)</option>${S.classes.map(c=>`<option value="${esc(c)}"${scope===c?' selected':''}>${esc(c)}</option>`).join('')}</select><small id="hbSn"></small></div>
+   <div id="hbSet"></div><div id="hbSe"></div><div id="hbRk"><p class="dh-sub">جارٍ تحميل الترتيب…</p></div>
+   <p class="dh-msg" id="hbM" role="status"></p><div class="row"><button class="btn ghost sm" id="hbX" type="button">إغلاق</button></div>`,m=>{
+   const msg=t=>{$('#hbM',m).textContent=t},post=async(cfg,ok)=>{msg('جارٍ الحفظ…');const r=await Online.api('config',{cfg},S.key);if(!m.isConnected)return false;if(!r.ok){msg(this.err(r));return false}S.cfg=r.cfg;msg(ok||'حُفظ ✓ ويصل إلى الطلاب خلال دقيقة تقريبًا.');return true};
+   const adm=async o=>{const r=await Online.api('admin',o,S.key);if(!m.isConnected)return null;if(!r.ok){msg(this.err(r));return null}if(r.cfg)S.cfg=r.cfg;return r};
+   const paintSet=()=>{const e=ef(scope),on=e.board&&e.board!=='off';
+    $('#hbSn',m).textContent=scope==='all'?(Object.keys(g().byCls||{}).filter(own).length?'فصول لها إعداد خاص للوحة: '+Object.keys(g().byCls).filter(own).join('، ')+' (تبقى كما هي).':'الإعداد العام يسري على كل الفصول.'):(own(scope)?'لهذا الفصل إعداد خاص يتقدّم على الإعداد العام.':'هذا الفصل يتبع الإعداد العام. أي تغيير هنا يجعله خاصًا به.');
+    $('#hbSet',m).innerHTML=`<div class="dh-set"><b>${on?'اللوحة ظاهرة للطلاب':'اللوحة مخفية عن الطلاب'}</b>
+     <label for="hbBd">ما يراه الطالب</label>${sel('hbBd',OPT.board,e.board||'off')}
+     <label for="hbBy">طريقة الترتيب (خارج المواسم)</label>${sel('hbBy',OPT.by,e.boardBy||'pct')}
+     <label for="hbNm">كيف تظهر الأسماء للطلاب</label>${sel('hbNm',OPT.nm,e.boardNames||'first')}
+     <div class="dh-cr"><label for="hbTi">عنوان اللوحة</label><input class="inp" id="hbTi" maxlength="40" placeholder="قاعة الأبطال" value="${esc(e.boardTitle||'')}"></div>
+     <div class="dh-cr"><label for="hbMo">شعار يحفّز الطلاب</label><input class="inp" id="hbMo" maxlength="100" placeholder="مثال: من جدّ وجد، والقمة تنتظرك!" value="${esc(e.boardMotto||'')}"></div>
+     <small>الطالب يرى ترتيب فصله فقط، ويرى مركزه دائمًا حتى لو لم يكن بين الظاهرين. الترتيب بالنسبة هو الأعدل إن اختلفت الدروس المتاحة بين الفصول.</small>
+     <div class="row"><button class="btn go sm" id="hbSv" type="button">حفظ إعدادات اللوحة</button>${scope!=='all'&&own(scope)?'<button class="btn ghost sm" id="hbRs" type="button">العودة إلى الإعداد العام</button>':''}</div></div>`;
+    $('#hbSv',m).onclick=async()=>{if(await post({scope,board:$('#hbBd',m).value,boardBy:$('#hbBy',m).value,boardNames:$('#hbNm',m).value,boardTitle:$('#hbTi',m).value,boardMotto:$('#hbMo',m).value})){paintSet();paintRk()}};
+    const rs=$('#hbRs',m);if(rs)rs.onclick=async()=>{if(await post({scope,boardReset:true},'عاد الفصل إلى الإعداد العام ✓')){paintSet();paintRk()}}};
+   const paintSe=()=>{const s=g().boardSeason,h=g().boardHall||[];
+    $('#hbSe',m).innerHTML=`<div class="dh-set"><b>${em('fire')} المواسم</b><small>الموسم سباق قصير (أسبوع أو شهر) يبدأ فيه الجميع من الصفر، فيتنافس المتفوّق والمجتهد على حدّ سواء. عند انتهائه يُحفظ الثلاثة الأوائل في «قاعة الأمجاد» ويراها الطلاب.</small>
+     ${s?`<p class="dh-sub"><b>الموسم الجاري: ${esc(s.t)}</b> · بدأ ${esc(dt(s.from))}. الترتيب الآن بالنقاط المكتسبة منذ بدايته.</p>`:'<p class="dh-sub">لا يوجد موسم جارٍ؛ الترتيب بالمجموع الكلي.</p>'}
+     <div class="dh-cr"><label for="hbSt">اسم ${s?'الموسم الجديد':'الموسم'}</label><input class="inp" id="hbSt" maxlength="40" placeholder="مثال: موسم الأسبوع الأول"></div>
+     <div class="row"><button class="btn go sm" id="hbSs" type="button">${s?'أنهِ الحالي وابدأ موسمًا جديدًا':'ابدأ موسمًا جديدًا'}</button>${s?'<button class="btn red sm" id="hbSe2" type="button">أنهِ الموسم واحفظ الفائزين</button>':''}</div>
+     ${h.length?`<p class="dh-sub"><b>قاعة الأمجاد</b> (${AR(h.length)})</p>${h.map(x=>`<div class="dh-card"><h4>${esc(x.t)} <small>· ${esc(dt(x.from))} – ${esc(dt(x.to))}</small> <button class="btn ghost sm" type="button" data-hd="${esc(x.id)}">حذف</button></h4>${Object.keys(x.top||{}).map(c=>`<p class="dh-sub"><b>${esc(c)}:</b> ${x.top[c].map((r,i)=>['🥇','🥈','🥉'][i]+' '+esc(r.n)+' ('+AR(r.sp)+')').join(' · ')}</p>`).join('')||'<p class="dh-sub">لم يكسب أحد نقاطًا في هذا الموسم.</p>'}</div>`).join('')}<div class="row"><button class="btn ghost sm" id="hbHc" type="button">امسح قاعة الأمجاد</button></div>`:''}</div>`;
+    const re=async()=>{await loadRows();paintSe();paintRk()};
+    $('#hbSs',m).onclick=async()=>{const t=$('#hbSt',m).value.trim();if(s&&!await adm({op:'season',on:false}))return;msg('جارٍ بدء الموسم…');if(await adm({op:'season',on:true,t})){msg('بدأ الموسم ✓ ويصل إلى الطلاب خلال دقيقة تقريبًا.');re()}};
+    const e2=$('#hbSe2',m);if(e2)e2.onclick=async()=>{if(await adm({op:'season',on:false})){msg('انتهى الموسم وحُفظ الفائزون في قاعة الأمجاد ✓');re()}};
+    $$('[data-hd]',m).forEach(b=>b.onclick=async()=>{if(await adm({op:'hallclear',id:b.dataset.hd}))paintSe()});
+    const hc=$('#hbHc',m);if(hc)hc.onclick=async()=>{if(await adm({op:'hallclear'}))paintSe()}};
+   const rank=cl=>{const e=ef(cl),hide=new Set(g().boardHide||[]),season=!!g().boardSeason&&pv!=='all',by=e.boardBy||'pct';
+    return rows.filter(r=>r.cls===cl&&(r.pts>0||r.n>0)).map(r=>{const sp=Math.max(0,r.pts-(+bs[r.k]||0));return{r,sp,hid:hide.has(r.k),v:season?sp:by==='pts'?r.pts:by==='stars'?r.stars:Math.round(r.pts*1000/r.max)/10}})
+     .sort((a,b)=>b.v-a.v||b.r.pts/b.r.max-a.r.pts/a.r.max||b.r.stars-a.r.stars||a.r.name.localeCompare(b.r.name,'ar')).map(x=>Object.assign(x,{season,by}))};
+   const vs=x=>x.season?'+'+AR(x.sp)+' نقطة':x.by==='pts'?AR(x.r.pts)+' نقطة':x.by==='stars'?AR(x.r.stars)+' ★':AR(Math.round(x.v*10)/10)+'٪';
+   const paintRk=()=>{const cls=scope==='all'?S.classes:[scope],M=['🥇','🥈','🥉'];
+    const blocks=cls.map(c=>{const L=rank(c),vis=L.filter(x=>!x.hid);return`<div class="dh-card"><h4>${esc(c)} <small>· ${AR(L.length)} ${L.length===1?'طالب':'طلاب'} في الترتيب</small></h4>${L.length?`<div class="dh-sc"><table class="dh-tab"><tr><th>#</th><th>الطالب</th><th>القيمة</th><th>إخفاء</th></tr>${L.slice(0,25).map(x=>`<tr${x.hid?' style="opacity:.55"':''}><td>${x.hid?'—':M[vis.indexOf(x)]||AR(vis.indexOf(x)+1)}</td><td>${esc(x.r.name)}</td><td>${vs(x)}</td><td><input type="checkbox" data-bh="${esc(x.r.k)}"${x.hid?' checked':''} aria-label="إخفاء ${esc(x.r.name)} من اللوحة"></td></tr>`).join('')}</table></div>${L.length>25?`<p class="dh-sub">يظهر أعلى ${AR(25)} فقط هنا.</p>`:''}`:'<p class="dh-sub">لا نتائج بعد.</p>'}</div>`}).join('');
+    $('#hbRk',m).innerHTML=`<div class="dh-set"><b>الترتيب الحالي ${loaded?'':'(جارٍ التحميل)'}</b>${g().boardSeason?`<div class="dh-cr"><label for="hbPv">عرض</label><select id="hbPv" class="inp dh-sel"><option value="auto"${pv==='auto'?' selected':''}>الموسم الجاري</option><option value="all"${pv==='all'?' selected':''}>الإجمالي</option></select></div>`:''}<small>هذا ما يراه الطلاب. علّم «إخفاء» لمن لا تريد ظهور اسمه في اللوحة (يبقى يرى تقدّمه في بقية اللعبة).</small>${blocks}
+     <div class="row"><button class="btn gold sm" id="hbCh" type="button">${em('megaphone')} هنّئ المتصدّرين</button><button class="btn sky sm" id="hbAw" type="button">${em('trophy')} امنح الثلاثة الأوائل وسام «متصدّر»</button></div></div>`;
+    $$('[data-bh]',m).forEach(b=>b.onchange=async()=>{const set=new Set(g().boardHide||[]);b.checked?set.add(b.dataset.bh):set.delete(b.dataset.bh);if(await post({boardHide:[...set]},b.checked?'أُخفي الاسم من اللوحة ✓':'عاد الاسم إلى اللوحة ✓'))paintRk();else b.checked=!b.checked});
+    const pvs=$('#hbPv',m);if(pvs)pvs.onchange=()=>{pv=pvs.value;paintRk()};
+    const tops=()=>cls.map(c=>({c,t:rank(c).filter(x=>!x.hid).slice(0,3)})).filter(x=>x.t.length);
+    $('#hbCh',m).onclick=async()=>{const T=tops();if(!T.length){msg('لا يوجد متصدّرون بعد.');return}let ok=0;for(const x of T){const names=x.t.map(y=>String(y.r.name).split(' ')[0]);if(await post({scope:x.c,cheer:('مبروك للمتصدّرين: '+names.join('، ')+'! من يلحق بهم؟').slice(0,100)},'أُرسلت التهنئة ✓ وتظهر للطلاب خلال دقيقة.'))ok++}if(ok)msg('أُرسلت التهنئة إلى '+AR(ok)+' فصل ✓')};
+    $('#hbAw',m).onclick=async()=>{const T=tops();if(!T.length){msg('لا يوجد متصدّرون بعد.');return}const aids=[].concat(...T.map(x=>x.t.map(y=>y.r.k)));const r=await adm({op:'award',aids,t:'متصدّر لوحة الشرف',ic:'trophy',n:(g().boardSeason?g().boardSeason.t:'لوحة الشرف')});if(r)msg('مُنح الوسام لـ '+AR(r.n)+' طالبًا ✓')}};
+   const loadRows=async()=>{loaded=false;const j=await Online.api('board?cls='+encodeURIComponent(scope==='all'?'all':scope),undefined,S.key);if(!m.isConnected)return;if(!j.ok){msg(this.err(j));return}
+    rows=(j.students||[]).map(s=>{try{return this.mkRow(s)}catch(e){return null}}).filter(r=>r&&!r.empty);bs=j.bs||{};loaded=true};
+   $('#hbX',m).onclick=()=>this.modal('');
+   $('#hbSc',m).onchange=async e=>{scope=e.target.value;paintSet();await loadRows();paintRk()};
+   paintSet();paintSe();loadRows().then(paintRk)})},
 
  /* ---------- the lesson's content: questions, texts, game difficulty, challenge bonuses (kept in the database, applied to every student) ---------- */
  content(tab){const S=this.S;tab=tab||this.ctab||'q';this.ctab=tab;const C=Content.get();
@@ -6640,19 +6864,6 @@ const Ctl={
   /* a one-time cheer from the teacher */
   try{const last=+localStorage.getItem('mf_cheer')||0;if(c.cheer&&c.cheerAt>last&&Date.now()-c.cheerAt<20*60000&&!t){localStorage.setItem('mf_cheer',String(c.cheerAt));toast(em('megaphone')+' '+c.cheer);try{sfx('win');FX.confetti(40)}catch(e){}}else if(c.cheerAt>last&&!(Date.now()-c.cheerAt<20*60000))localStorage.setItem('mf_cheer',String(c.cheerAt))}catch(e){}}};
 /* the parent's link: one student's report, read-only */
-/* the class ranking for students (only when the teacher turned it on) */
-const Honor={
- paintBtn(){const b=$('#rkBtn'),c=Ctl.cfg||{};if(b)b.hidden=!(Online.acct()&&c.board&&c.board!=='off')},
- async open(){const a=Online.acct();if(!a){Gate.open('first');return}
-  const d=$('#dlg');d.hidden=false;const close=()=>{d.hidden=true;d.innerHTML=''};
-  d.innerHTML=`<div class="dlg-card zoom-in" role="dialog" aria-modal="true" aria-labelledby="rkT"><h2 id="rkT">${em('1st_place_medal')} لوحة شرف فصلي</h2><p class="sub" id="rkS">جارٍ التحميل…</p><div class="rk-l" id="rkL"></div><div class="row dlg-row"><button class="btn ghost" type="button" id="rkX">إغلاق</button></div></div>`;
-  $('#rkX',d).onclick=close;d.onkeydown=e=>{if(e.key==='Escape')close()};
-  const r=await Online.api('rank',{aid:a.aid,sk:a.sk});
-  if(!r.ok){$('#rkS',d).textContent=r.error==='bad_session'?Online.why.session:Online.err(r);return}
-  if(r.off){$('#rkS',d).textContent='أغلق المعلم لوحة الترتيب الآن.';Honor.paintBtn();return}
-  const M=['🥇','🥈','🥉'];
-  $('#rkS',d).textContent=r.pos?`ترتيبك ${AR(r.pos)} من ${AR(r.total)} في ${r.cls}`:`${r.cls}: أرسلتَ بعدُ نتيجتك؟ أكمل بعض الأجزاء لتظهر في الترتيب.`;
-  $('#rkL',d).innerHTML=r.list.length?r.list.map(x=>`<div class="rk-r${x.me?' me':''}"><b>${x.gap?'…':''}${M[x.i-1]||AR(x.i)}</b><span>${esc(x.n)}${x.me?' (أنت)':''}</span><em>${AR(x.p)} <small>(${AR(pc(x.p,x.m))}٪)</small></em></div>`).join(''):'<p class="sub">لا توجد نتائج بعد.</p>'}};
 const Viewer={
  async open(t){Dash.inject();Dash.close=function(){};const d=Dash.root();d.hidden=false;document.body.classList.add('dash-on');
   const top=`<div class="dh-top"><b>${em('student')} تقرير الطالب · مغامرة النحو والإعراب</b></div>`;
@@ -6670,6 +6881,73 @@ const Viewer={
   $('#dhP',d).onclick=e=>Dash.pdf(build,'تقرير '+j.name,'تقرير_'+Dash.fn(j.name)+'_مغامرة_المفعول_به.pdf',e.currentTarget,msg);
   $('#dhPr',d).onclick=()=>Dash.print(build,msg)}};
 Online.init();
+
+/* ---- the class honour hall (students): podium, ranked list, my position, seasons, hall of fame. Teacher turns it on per class from «لوحة الشرف». ---- */
+const Honor={
+ d:{},mode:'season',busy:0,
+ on(){const c=Ctl.cfg||{};return !!(Online.acct()&&c.board&&c.board!=='off')},
+ hasSeason(){const c=Ctl.cfg||{};return !!c.bseason},
+ key(){return this.hasSeason()?this.mode:'all'},
+ unit(r){return r.mode==='season'||r.by==='pts'?'نقطة':r.by==='stars'?'نجمة':'٪'},
+ fmt(n){return AR(String(Math.round(n*10)/10).replace('.','٫'))},
+ val(r,x){return r.mode==='season'?'+'+this.fmt(x.sp)+' نقطة':r.by==='pts'?this.fmt(x.p)+' نقطة':r.by==='stars'?this.fmt(x.s)+' ★':this.fmt(x.pct)+'٪'},
+ hue(n){let h=0;for(const ch of String(n))h=(h*31+ch.charCodeAt(0))%360;return h},
+ av(n,c){return`<i class="hn-av${c?' '+c:''}" style="--h:${this.hue(n)}" aria-hidden="true">${esc(String(n).trim().charAt(0)||'؟')}</i>`},
+ lv(x){try{const r=RANKS[Rank.at(x.p,x.m)];return IMG[r.ic]?`<img class="em hn-lv" src="${IMG[r.ic]}" alt="" title="${esc(r.n)}">`:''}catch(e){return''}},
+ aw(x){return x.ic&&IMG[x.ic]?`<img class="em hn-aw" src="${IMG[x.ic]}" alt="" title="${esc(x.at||'')}">`:''},
+ async load(force){const a=Online.acct();if(!a||!this.on())return null;const k=this.key(),o=this.d[k];
+  if(!force&&o&&Date.now()-o.at<60000)return o.r;
+  const r=await Online.api('rank',{aid:a.aid,sk:a.sk,mode:k==='all'?'all':'season'});if(!r||!r.ok)return o?o.r:r;this.d[k]={at:Date.now(),r};return r},
+ /* the header button shows the current position */
+ paintBtn(){const b=$('#rkBtn');if(!b)return;const on=this.on();b.hidden=!on;if(!on){this.paintMini();return}
+  const r=(this.d[this.key()]||{}).r;const s=$('span',b);if(s)s.textContent=r&&r.pos?'المركز '+AR(r.pos):'الترتيب';
+  if(!this.busy&&(!this.d[this.key()]||Date.now()-this.d[this.key()].at>120000)&&!document.hidden){this.busy=1;this.peek().finally(()=>{this.busy=0})}},
+ /* a quiet look every couple of minutes: celebrate when the student climbed */
+ async peek(){const r=await this.load(true);if(!r||!r.ok||r.off)return;this.paintBtn();this.paintMini();
+  const k='mf_hp_'+r.cls+'_'+(r.mode==='season'?(r.season&&r.season.id):'all');let prev=0;try{prev=+localStorage.getItem(k)||0}catch(e){}
+  if(r.pos){try{localStorage.setItem(k,String(r.pos))}catch(e){}
+   if(prev&&r.pos<prev&&!$('#hnHall')){toast(em('1st_place_medal')+' تقدّمتَ إلى المركز '+AR(r.pos)+' في لوحة الشرف!');try{sfx('win');if(r.pos<=3)FX.confetti(36)}catch(e){}}}},
+ /* the small card on the home screen and the games hub */
+ paintMini(){const hs=document.querySelectorAll('.hn-mini');if(!hs.length)return;
+  if(!this.on()){hs.forEach(h=>{h.innerHTML=''});return}
+  const r=(this.d[this.key()]||{}).r;
+  hs.forEach(h=>{if(!r||!r.ok||r.off){h.innerHTML=`<button class="hn-card" type="button"><span class="hn-ct">${em('trophy')} لوحة شرف الفصل</span><span class="hn-cs">اضغط لترى ترتيبك بين زملائك</span></button>`;h.firstChild.onclick=()=>Honor.open();return}
+   const t3=r.list.filter(x=>x.i<=3).slice(0,3),M=['🥇','🥈','🥉'];
+   h.innerHTML=`<button class="hn-card" type="button" aria-label="افتح لوحة الشرف"><span class="hn-ct">${em('trophy')} ${esc(r.title||'قاعة الأبطال')}${r.mode==='season'&&r.season?` <em>${esc(r.season.t)}</em>`:''}</span>
+    <span class="hn-cp">${t3.map(x=>`<span class="hn-cm${x.me?' me':''}"><b>${M[x.i-1]}</b>${this.av(x.n)}<span>${esc(x.n)}</span><small>${this.val(r,x)}</small></span>`).join('')||'<span class="hn-cs">كن أول من يظهر في اللوحة!</span>'}</span>
+    <span class="hn-cs">${r.hidden?'اسمك غير ظاهر في اللوحة':r.pos?`ترتيبك <b>${AR(r.pos)}</b> من ${AR(r.total)} · ${r.pos===1?'أنت في القمة!':r.near?`يفصلك ${this.fmt(r.near.gap)} ${this.unit(r)==='٪'?'٪':this.unit(r)} عن ${esc(r.near.n)}`:''}`:'أكمل بعض الأجزاء لتظهر في الترتيب'}</span></button>`;
+   h.firstChild.onclick=()=>Honor.open()})},
+ close(){const o=$('#hnHall');if(o){o.remove()}document.body.classList.remove('hn-on');[...document.body.children].forEach(e=>{try{if(e.dataset.hnInert){e.inert=false;delete e.dataset.hnInert}}catch(x){}});try{this.ret&&this.ret.focus()}catch(e){}},
+ async open(){const a=Online.acct();if(!a){Gate.open('first');return}
+  this.ret=document.activeElement;this.close();
+  const o=document.createElement('div');o.id='hnHall';o.className='hn';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-labelledby','hnT');
+  o.innerHTML=`<div class="hn-box"><button class="hn-x" type="button" aria-label="إغلاق">✕</button><div class="hn-body" id="hnB"><p class="hn-wait">جارٍ تحميل لوحة الشرف…</p></div></div>`;
+  [...document.body.children].forEach(e=>{if(e.id!=='dlg'&&!/^(SCRIPT|STYLE)$/.test(e.tagName)&&!e.inert){try{e.inert=true;e.dataset.hnInert='1'}catch(x){}}});
+  document.body.appendChild(o);document.body.classList.add('hn-on');
+  o.onkeydown=e=>{if(e.key==='Escape')Honor.close()};$('.hn-x',o).onclick=()=>Honor.close();o.onclick=e=>{if(e.target===o)Honor.close()};setTimeout(()=>{try{$('.hn-x',o).focus()}catch(e){}},60);
+  await this.draw(true)},
+ async draw(first){const o=$('#hnHall');if(!o)return;const B=$('#hnB',o);const r=await this.load(true);if(!$('#hnHall'))return;
+  if(!r||!r.ok){B.innerHTML=`<p class="hn-wait">${esc(r&&r.error==='bad_session'?Online.why.session:Online.err(r||{}))}</p>`;return}
+  if(r.off){B.innerHTML='<p class="hn-wait">أغلق المعلم لوحة الشرف الآن.</p>';this.paintBtn();return}
+  this.paintBtn();this.paintMini();
+  const top3=r.list.filter(x=>x.i<=3),rest=r.list.filter(x=>x.i>3),max=Math.max(1,...r.list.map(x=>x.v)),M=['🥇','🥈','🥉'],u=this.unit(r);
+  /* movement since the last visit */
+  const mk='mf_hv_'+r.cls+'_'+r.mode;let prev=0;try{prev=+localStorage.getItem(mk)||0}catch(e){}if(r.pos){try{localStorage.setItem(mk,String(r.pos))}catch(e){}}
+  const mv=r.pos&&prev?(r.pos<prev?`<span class="hn-up">▲ تقدّمتَ ${AR(prev-r.pos)} ${prev-r.pos>2?'مراكز':prev-r.pos===2?'مركزين':'مركزًا'}</span>`:r.pos>prev?`<span class="hn-dn">▼ تراجعتَ ${AR(r.pos-prev)}</span>`:''):'';
+  const pod=[1,0,2].map(i=>top3[i]).filter(Boolean);   // 2nd – 1st – 3rd
+  const msg=r.hidden?'اسمك غير ظاهر في لوحة الشرف الآن.':!r.pos?'أكمل بعض الأجزاء لتظهر في الترتيب.':r.pos===1?'أنت في القمة! حافظ على صدارتك.':r.near?`يفصلك <b>${this.fmt(r.near.gap)}${u==='٪'?'٪':' '+u}</b> عن «${esc(r.near.n)}» صاحب المركز ${AR(r.near.i)}.`:'';
+  B.innerHTML=`<header class="hn-hd"><span class="hn-cr">${em('trophy','xl')}</span><h2 id="hnT">${esc(r.title||'قاعة الأبطال')}</h2><p class="hn-sub">${esc(r.cls)} · ${AR(r.total)} ${r.total===1?'طالب':'طلاب'}${r.avg?` · متوسط الفصل ${this.fmt(r.avg)}٪`:''}</p>
+    ${(Ctl.cfg||{}).bseason?`<div class="hn-tg" role="group" aria-label="نوع الترتيب"><button type="button" data-m="season" aria-pressed="${r.mode==='season'}">${em('fire')} ${esc((Ctl.cfg.bseason.t)||'الموسم')}</button><button type="button" data-m="all" aria-pressed="${r.mode!=='season'}">${em('milky_way')} الإجمالي</button></div>`:''}
+    ${r.motto?`<p class="hn-motto">${esc(r.motto)}</p>`:''}</header>
+   ${top3.length?`<div class="hn-pod n${pod.length}">${pod.map(x=>`<div class="hn-p k${x.i}${x.me?' me':''}" style="--d:${x.i===1?3:x.i===2?1:2}">${x.i===1?`<span class="hn-crown">${em('crown')}</span>`:''}${this.av(x.n,'big')}<b class="hn-pn">${esc(x.n)}${x.me?' (أنت)':''}</b><span class="hn-pv">${this.val(r,x)}</span><span class="hn-pi">${this.lv(x)}${this.aw(x)}</span><div class="hn-st"><em>${M[x.i-1]}</em></div></div>`).join('')}</div>`:`<p class="hn-wait">لا توجد نتائج بعد. كن أول من يظهر في اللوحة!</p>`}
+   ${rest.length?`<ol class="hn-l" start="4">${rest.map(x=>`<li class="hn-r${x.me?' me':''}${x.i>r.top&&x.me?' far':''}"><b class="hn-n">${AR(x.i)}</b>${this.av(x.n)}<span class="hn-nm">${esc(x.n)}${x.me?' <em>أنت</em>':''}${this.aw(x)}</span>${this.lv(x)}<span class="hn-bar" aria-hidden="true"><i style="width:${Math.max(4,Math.round(x.v/max*100))}%"></i></span><b class="hn-v">${this.val(r,x)}</b></li>`).join('')}</ol>`:''}
+   ${r.hall&&r.hall.length?`<section class="hn-hall"><h3>${em('crown')} قاعة الأمجاد</h3>${r.hall.map(h=>`<div class="hn-hs"><b>${esc(h.t)}</b><span>${h.top.map((x,i)=>`${M[i]} ${esc(x.n)} <small>${AR(x.sp)}</small>`).join(' · ')}</span></div>`).join('')}</section>`:''}
+   <footer class="hn-ft"><div class="hn-me"><span class="hn-pos">${r.pos&&!r.hidden?AR(r.pos):'—'}</span><span class="hn-mt"><b>ترتيبك ${mv}</b><span>${msg}</span></span><button class="btn go sm" type="button" id="hnGo">${r.pos===1?'ابقَ في القمة ←':'ارتقِ بالترتيب ←'}</button></div></footer>`;
+  $$('.hn-tg button',B).forEach(b=>b.onclick=()=>{Honor.mode=b.dataset.m;Honor.d={};B.innerHTML='<p class="hn-wait">…</p>';Honor.draw()});
+  const go0=$('#hnGo',B);if(go0)go0.onclick=()=>{Honor.close();try{const i=TABS.findIndex(t=>t.id==='games');if(i>=0)go(i,0)}catch(e){}};
+  if(first&&r.pos&&r.pos<=3){try{sfx('win');FX.confetti(r.pos===1?70:40)}catch(e){}}}};
+/* the home and games-hub cards appear wherever a placeholder .hn-mini is rendered */
+try{let q=0;new MutationObserver(()=>{if(q)return;q=1;requestAnimationFrame(()=>{q=0;if(document.querySelector('.hn-mini:empty'))Honor.paintMini()})}).observe(document.body,{childList:true,subtree:true})}catch(e){}
 
 /* ===== the lesson's content, kept in the database: questions, texts, game difficulty, challenge bonuses + the teacher's awards ===== */
 const Content={
