@@ -1951,6 +1951,9 @@ body.cls .opt{min-height:4.6rem}
  #dash .hb:not(.has-sel) .hb-det{display:none}
  #dash .hb-back{display:inline-block}
 }
+#dash .hb-st{display:grid;gap:4px;padding:8px 10px;border-radius:12px;background:#ffffff0a;border:1px solid var(--line)}
+#dash .hb-sh{display:flex;justify-content:space-between;align-items:center;gap:8px}#dash .hb-sh b{display:inline-grid;place-items:center;min-width:1.7em;height:1.7em;border-radius:50%;background:#a78bfa44}
+#dash .hb-st label{font-size:.85rem;color:var(--muted)}#dash .hb-st .bk-ta{width:100%}
 </style></head><body><div class="sky" aria-hidden="true"><div class="stars"></div><div class="stars b"></div><img class="float-pl a" data-em="p2" alt=""><img class="float-pl b" data-em="p3" alt=""><i class="comet"></i></div>
 <header class="top"><div class="top-in">
  <div class="brand"><img data-em="logo" alt=""><div><h1>مغامرة النحو والإعراب</h1><small>رحلة بين الكواكب مع الأستاذ إسلام قنديل</small></div></div>
@@ -7111,9 +7114,9 @@ Object.assign(Dash,{
  hubItems(){const C=Content.get(),all=Content.qAll(),h=this.hubCfg(),nm=C.nm||{},reg=Content.reg(),gd=C.gd||{},gm=C.gm||{};
   const gl=GAMES.map(g=>Object.assign({x:false},g)).concat(EXTRA.map(g=>Object.assign({x:true},g)));
   const st=id=>h.hide.has(id)?'hide':h.lock.has(id)?'lock':'open';
-  const les=TABS.filter(t=>t.id!=='start').map(t=>{const tp=LESSON_TP[t.id]||'',qs=tp?all.filter(q=>q.tp===tp):[],lq=LQ.filter(x=>x.tab===t.id),keys=['tab.'+t.id+'.title','page.'+t.id+'.t','page.'+t.id+'.f'].concat(tp?['topic.'+tp+'.n']:[]),
+  const les=TABS.filter(t=>t.id!=='start').map(t=>{const tp=LESSON_TP[t.id]||'',qs=tp?all.filter(q=>q.tp===tp):[],lq=LQ.filter(x=>x.tab===t.id),keys=['tab.'+t.id+'.title','page.'+t.id+'.t','page.'+t.id+'.f','desc.'+t.id+'.d'].concat(tp?['topic.'+tp+'.n']:[]).concat(t.steps.flatMap((s,i)=>{const k=t.id+'_'+SK(t.id,i);return['step.'+k+'.t','step.'+k+'.tip']})),txN=Object.keys(C.tx||{}).filter(f=>(C.tc||{})[f]===t.id).length,
     ng=Object.keys(GAME_LES).filter(g=>GAME_LES[g].includes(t.id)),G=groupOf(t.id);
-   return{key:'t:'+t.id,id:t.id,t,tp,G,qs,qh:qs.filter(q=>q.hid).length,qc:qs.filter(q=>q.custom).length,qe:qs.filter(q=>q.edited).length,lq,lpts:lq.reduce((a,x)=>a+x.pts,0),drill:DRILLS.some(d=>d.id===t.id),games:ng,st:st(t.id),nmN:keys.filter(k=>nm[k]).length,keys}});
+   return{key:'t:'+t.id,id:t.id,t,tp,G,qs,qh:qs.filter(q=>q.hid).length,qc:qs.filter(q=>q.custom).length,qe:qs.filter(q=>q.edited).length,lq,lpts:lq.reduce((a,x)=>a+x.pts,0),drill:DRILLS.some(d=>d.id===t.id),games:ng,st:st(t.id),nmN:keys.filter(k=>nm[k]).length+txN,txN,keys}});
   const games=gl.map(g=>{const ls=GAME_LES[g.id]||[],bad=ls.filter(l=>h.hide.has(l)||h.lock.has(l));return{key:'g:'+g.id,id:g.id,g,ls,off:h.goff.has(g.id),auto:bad.length>0,bad,nmN:['game.'+g.id+'.t','game.'+g.id+'.d'].filter(k=>nm[k]).length,
    dk:{hop:'hop',mil:'hop',robot:'boss'}[g.id]||''}});
   return{les,games,all,C,h,reg,gd,gm,st}},
@@ -7141,21 +7144,24 @@ Object.assign(Dash,{
   this.hubBind(M,I,sel)},
 
  /* ---- nothing chosen: where things stand ---- */
- hubHome(I){const{les,games,all,C,h}=I,tile=(v,l,c)=>`<div class="dh-tile" style="--tc:${c}"><b>${v}</b><small>${l}</small></div>`,tx=Object.keys(C.tx||{}).length,nm=Object.keys(C.nm||{}).length;
+ hubHome(I){const{les,games,all,C,h,reg}=I,tile=(v,l,c)=>`<div class="dh-tile" style="--tc:${c}"><b>${v}</b><small>${l}</small></div>`,tx=Object.keys(C.tx||{}).length,nm=Object.keys(C.nm||{}).length;
   const warn=[];les.filter(x=>x.st!=='open').forEach(x=>warn.push(`${x.st==='lock'?'مغلق':'مخفي'}: «${esc(x.t.title)}» ${x.st==='lock'?'(يراه الطالب «قيد البناء»)':'(لا يراه الطالب)'}`));
   games.filter(g=>g.off).forEach(g=>warn.push(`لعبة مغلقة: «${esc(g.g.t)}»`));games.filter(g=>g.auto&&!g.off).forEach(g=>warn.push(`لعبة مخفية بسبب درسها: «${esc(g.g.t)}» ← ${g.bad.map(l=>esc((TABS.find(t=>t.id===l)||{}).title||l)).join('، ')}`));
   return`<div class="hb-home"><h3>${em('books')} نظرة شاملة على المحتوى</h3><p class="dh-sub">اختر درسًا أو لعبة من القائمة لتجد كل ما يخصّه في مكان واحد: حالته، أسئلته، أسماءه ونصوصه، وصعوبة اللعبة ومحتواها.${h.sc!=='all'?` <b>النطاق الآن: ${esc(h.sc)}</b>${h.own?'':' (يتبع إعدادات كل الفصول؛ أي تغيير سينشئ إعدادات خاصة بهذا الفصل).'}`:''}</p>
    <div class="dh-tiles">${tile(AR(les.filter(x=>x.st==='open').length)+'/'+AR(les.length),'دروس وأقسام مفتوحة','#22c55e')}${tile(AR(games.filter(g=>!g.off&&!g.auto).length)+'/'+AR(games.length),'ألعاب متاحة','#7dd3fc')}${tile(AR(all.length),'سؤالًا في بنك الأسئلة','#a78bfa')}${tile(AR(all.filter(q=>q.hid).length),'سؤالًا مخفيًا','#fb7185')}${tile(AR((C.qn||[]).length),'سؤالًا أضفتَه','#fbbf24')}${tile(AR(tx+nm),'نصًّا واسمًا معدَّلًا','#2dd4bf')}</div>
    <div class="dh-set"><b>تنبيهات</b>${warn.length?`<ul class="hb-warn">${warn.map(w=>`<li>${w}</li>`).join('')}</ul>`:'<small>كل الدروس والألعاب مفتوحة.</small>'}</div>
+   <div class="dh-set"><b>أسماء مجموعات الدروس ووصفها</b><small>تظهر على خريطة الانطلاق وفي أزرار المجموعات. تُحفظ عند الخروج من الخانة.</small>${GROUPS.map(g=>`<details class="dh-card dh-adm"><summary>${esc(g.t)}</summary>${this.hubNames([['group.'+g.id+'.t','اسم المجموعة'],['group.'+g.id+'.d','وصف المجموعة']],reg,C)}</details>`).join('')}</div>
+   <div class="dh-set"><b>النصوص المعدَّلة على الشاشة (${AR(tx)})</b>${tx?`<div class="dh-sc dh-ql"><table class="dh-tab"><tr><th>الكوكب</th><th>الأصل</th><th>الجديد</th><th></th></tr>${Object.keys(C.tx).map(f=>{const o=les.find(y=>y.id===(C.tc||{})[f]);return`<tr><td><small>${o?esc(o.t.title):'—'}</small></td><td><small>${esc(f.slice(0,60))}</small></td><td>${esc(C.tx[f].slice(0,70))}</td><td class="dh-ac"><button type="button" class="btn ghost sm" data-txr="${esc(f)}">أعد الأصل</button></td></tr>`}).join('')}</table></div>`:'<small>لم تعدّل أي نص على الشاشة بعد.</small>'}<div class="row"><button class="btn sky sm" id="hbTxAll" type="button">${em('pencil')} حرّر نصوص الموقع على الشاشة</button></div></div>
    <div class="dh-set"><b>أدوات سريعة</b><div class="row"><button class="btn gold sm" data-hq="ctl" type="button">${em('bullseye')} التحكم باللعبة (الإعدادات العامة)</button><button class="btn sky sm" data-hq="tx" type="button">${em('pencil')} تحرير النصوص على الشاشة</button><button class="btn ghost sm" data-hq="q" type="button">كل الأسئلة</button><button class="btn ghost sm" data-hq="gm" type="button">الصعوبة والتحديات</button></div></div></div>`},
 
  hubSeg(cur,list,attr){return`<div class="hb-seg" role="group" aria-label="الحالة">${list.map(([k,t,c])=>`<button type="button" ${attr}="${k}" class="hb-sg-${c}${cur===k?' on':''}" aria-pressed="${cur===k}">${t}</button>`).join('')}</div>`},
  hubTabs(cur,list){return`<nav class="dh-tabs hb-tabs" role="tablist" aria-label="أقسام">${list.map(([k,t])=>`<button type="button" role="tab" data-hsec="${k}" aria-selected="${cur===k}" class="${cur===k?'on':''}">${t}</button>`).join('')}</nav>`},
- hubNames(keys,reg,C){const nm=C.nm||{};return keys.map(([k,l])=>{const e=reg.find(x=>x.k===k);if(!e)return'';return`<div class="dh-nmr"><label for="nm_${esc(k)}">${l}<small>${nm[k]?' · معدَّل':''}</small></label><input id="nm_${esc(k)}" class="inp" data-nm="${esc(k)}" maxlength="200" placeholder="${esc(Content.base.nm[k])}" value="${esc(nm[k]||'')}"></div>`}).join('')},
+ hubBase(k){let v=Content.base.nm[k];if(typeof v==='function'){try{v=v()}catch(e){v=''}}return v==null?'':v},
+ hubNames(keys,reg,C){const nm=C.nm||{};return keys.map(([k,l])=>{const e=reg.find(x=>x.k===k);if(!e)return'';return`<div class="dh-nmr"><label for="nm_${esc(k)}">${l}<small>${nm[k]?' · معدَّل':''}</small></label><input id="nm_${esc(k)}" class="inp" data-nm="${esc(k)}" maxlength="200" placeholder="${esc(this.hubBase(k))}" value="${esc(nm[k]||'')}"></div>`}).join('')},
 
  /* ---- a lesson ---- */
  hubLesson(x,I){const S=this.S,H=S.hub,{C,reg,all,games}=I,t=x.t,EF={open:'يراه الطالب ويعمل عليه كاملًا.',lock:'يظهر للطالب بتأثير «قيد البناء» ورسالة أنك تجهّزه ولا يُفتح، وتُستبعد مؤقتًا درجاته وتدريباته وألعابه وأسئلته.',hide:'يختفي من كل الصفحات، وتُستبعد معه درجاته وتدريباته وألعابه وأسئلته حتى تُظهره.'};
-  const secs=[['ov','نظرة عامة'],...(x.tp?[['q','الأسئلة ('+AR(x.qs.length)+')']]:[]),['nm','الأسماء والعناوين'],['tx','النصوص']],cur=secs.some(s=>s[0]===H.sec)?H.sec:'ov';H.sec=cur;
+  const secs=[['ov','نظرة عامة'],...(x.tp?[['q','الأسئلة ('+AR(x.qs.length)+')']]:[]),['st','الخطوات والنصوص'],['nm','الأسماء والعناوين']],cur=secs.some(s=>s[0]===H.sec)?H.sec:'ov';H.sec=cur;
   let body='';
   if(cur==='ov'){const byLv=[1,2,3].map(l=>x.qs.filter(q=>q.lv===l).length),gs=x.games.map(g=>games.find(y=>y.id===g)).filter(Boolean);
    body=`<div class="dh-tiles">${[[AR(t.steps.length),'خطوة في الدرس','#a78bfa'],[AR(x.lq.length)+' ('+AR(x.lpts)+' نقطة)','عنصر مُقيَّم داخل الكوكب','#22c55e'],[x.drill?AR(300)+' نقطة':'—','تدريب الدرس (٣ مستويات)','#fbbf24'],[x.tp?AR(x.qs.length):'—','سؤالًا في بنك الأسئلة','#7dd3fc']].map(([v,l,c])=>`<div class="dh-tile" style="--tc:${c}"><b>${v}</b><small>${l}</small></div>`).join('')}</div>
@@ -7166,10 +7172,16 @@ Object.assign(Dash,{
     <p class="dh-sub">${AR(rows.length)} سؤال · تُستخدم في تدريب هذا الكوكب والألعاب والمسابقات.${x.tp==='o'?' (تشمل أسئلة «المفعول به» و«علامات النصب».)':''}</p>
     <div class="dh-sc dh-ql"><table class="dh-tab"><tr><th>السؤال</th><th>النوع</th><th>المستوى</th><th></th></tr>${rows.map(q=>`<tr class="${q.hid?'dh-hid':''}"><td>${esc(String(q.q||'').slice(0,90))}${q.t==='tap'||q.t==='order'?` <small>${esc((q.w||[]).join(' '))}</small>`:''}${q.custom?' <small class="dh-new">جديد</small>':q.edited?' <small class="dh-new">معدَّل</small>':''}</td><td>${TT[q.t]||q.t}</td><td>${LV_NAME[q.lv]||''}</td><td class="dh-ac"><button type="button" class="btn ghost sm" data-qe="${q.id}">تعديل</button><button type="button" class="btn ghost sm" data-qh="${q.id}" data-on="${q.hid?0:1}">${q.hid?'أظهِر':'أخفِ'}</button></td></tr>`).join('')||'<tr><td colspan="4">لا أسئلة في بنك هذا الدرس بعد؛ أسئلته داخل خطواته. يمكنك إضافة أسئلة جديدة.</td></tr>'}</table></div>
     <div class="row"><button class="btn go sm" id="hbQa" type="button">+ أضف سؤالًا لهذا الدرس</button></div>`}
-  else if(cur==='nm'){const keys=[['tab.'+x.id+'.title','اسم الكوكب'],['page.'+x.id+'.t','لقب صفحة الكتاب'],['page.'+x.id+'.f','الفائدة داخل صفحة الكتاب']].concat(x.tp?[['topic.'+x.tp+'.n','اسم الموضوع في التقارير']]:[]);
+  else if(cur==='nm'){const keys=[['tab.'+x.id+'.title','اسم الكوكب'],['desc.'+x.id+'.d','وصف الكوكب في خريطة الانطلاق'],['page.'+x.id+'.t','لقب صفحة الكتاب'],['page.'+x.id+'.f','الفائدة داخل صفحة الكتاب']].concat(x.tp?[['topic.'+x.tp+'.n','اسم الموضوع في التقارير']]:[]);
    body=`<p class="dh-sub">اترك الخانة كما هي للأصل، أو امسحها لإعادة الأصل. تُحفظ عند الخروج من الخانة.</p><div class="dh-set">${this.hubNames(keys,reg,C)}</div>`}
-  else body=`<div class="dh-set"><b>تحرير نصوص هذا الكوكب على الشاشة</b><small>يفتح الكوكب نفسه، ثم تضغط على أي نص (شرح، عنوان، سؤال، رسالة) وتكتب صياغتك الجديدة؛ يُستبدل النص أينما ظهر.</small><div class="row"><button class="btn gold sm" id="hbTx" type="button">${em('pencil')} افتح «${esc(t.title)}» للتحرير</button></div></div>
-    <div class="dh-set"><b>النصوص المعدَّلة حتى الآن (${AR(Object.keys(C.tx||{}).length)})</b><small>تظهر كلها وتُعاد من قسم «النصوص» في «حسب نوع البيانات».</small><div class="row"><button class="btn ghost sm" data-hq="tx" type="button">إدارة النصوص المعدَّلة</button></div></div>`;
+  else{const nm=C.nm||{},eds=Object.keys(C.tx||{}).filter(f=>(C.tc||{})[f]===x.id);
+   body=`<div class="dh-set"><b>تحرير نصوص هذا الكوكب على الشاشة</b><small>يفتح الكوكب نفسه، ثم تضغط على أي نص (شرح، مثال، سؤال، رسالة) وتكتب صياغتك؛ يُستبدل النص أينما ظهر ويُحفظ في قاعدة البيانات، وعند الانتهاء ترجع إلى هذه الصفحة.</small><div class="row"><button class="btn gold sm" id="hbTx" type="button">${em('pencil')} افتح «${esc(t.title)}» للتحرير</button></div></div>
+    <div class="dh-set"><b>خطوات الدرس (${AR(t.steps.length)})</b><small>غيّر عنوان كل خطوة ونصيحة القائد فيها هنا، أو افتح الخطوة لتحرير نصوصها على الشاشة. تُحفظ عند الخروج من الخانة.</small>
+     ${t.steps.map((s,i)=>{const k=t.id+'_'+SK(t.id,i),kt='step.'+k+'.t',kp='step.'+k+'.tip',hasTip=reg.some(e=>e.k===kp);
+      return`<div class="hb-st"><div class="hb-sh"><b>${AR(i+1)}</b><button type="button" class="btn ghost sm" data-hstep="${i}" aria-label="افتح الخطوة ${AR(i+1)} للتحرير على الشاشة">افتح الخطوة ←</button></div>
+       <label for="nm_${esc(kt)}">العنوان<small>${nm[kt]?' · معدَّل':''}</small></label><input id="nm_${esc(kt)}" class="inp" data-nm="${esc(kt)}" maxlength="200" placeholder="${esc(this.hubBase(kt))}" value="${esc(nm[kt]||'')}">
+       ${hasTip?`<label for="nm_${esc(kp)}">نصيحة القائد<small>${nm[kp]?' · معدَّل':''}</small></label><textarea id="nm_${esc(kp)}" class="bk-ta" rows="2" data-nm="${esc(kp)}" maxlength="400" placeholder="${esc(this.hubBase(kp))}">${esc(nm[kp]||'')}</textarea>`:''}</div>`}).join('')}</div>
+    <div class="dh-set"><b>نصوص عدّلتَها على الشاشة في هذا الكوكب (${AR(eds.length)})</b>${eds.length?`<div class="dh-sc dh-ql"><table class="dh-tab"><tr><th>الأصل</th><th>الجديد</th><th></th></tr>${eds.map(f=>`<tr><td><small>${esc(f.slice(0,70))}</small></td><td>${esc(C.tx[f].slice(0,90))}</td><td class="dh-ac"><button type="button" class="btn ghost sm" data-txr="${esc(f)}">أعد الأصل</button></td></tr>`).join('')}</table></div>`:'<small>لم تعدّل نصوصًا من هذا الكوكب بعد.</small>'}</div>`}
   return`<div class="hb-dh"><button class="btn ghost sm hb-back" type="button" data-hs="">← القائمة</button><img src="${IMG[t.pl]||''}" alt=""><div><h3>${esc(t.title)}</h3><small>${x.G.end?'':'المجموعة '+groupNo(x.G)+': '}${esc(x.G.t)}</small></div></div>
    <div class="dh-set"><b>حالة الدرس${I.h.sc!=='all'?' في '+esc(I.h.sc):''}</b>${this.hubSeg(x.st,[['open','مفتوح','o'],['lock','مغلق (قيد البناء)','l'],['hide','مخفي','h']],'data-hst')}<small>${EF[x.st]}</small></div>
    ${this.hubTabs(cur,secs)}<div class="hb-body">${body}</div>`},
@@ -7200,7 +7212,10 @@ Object.assign(Dash,{
    if(b.dataset.qh){if(await this.hubC({op:'qhide',id:+b.dataset.qh,on:b.dataset.on==='1'}))toast('حُفظ ✓');return}
    if(b.dataset.qe){this.qBack=()=>{this.qBack=null;this.modal()};this.qEdit(+b.dataset.qe);return}
    if(b.id==='hbQa'&&sel){this.qBack=()=>{this.qBack=null;this.modal()};this.qEdit(0,{t:'mcq',tp:sel.tp||'s',lv:1,q:'',o:['','',''],a:0,e:'',h:''});return}
-   if(b.id==='hbTx'&&sel){const i=TABS.findIndex(t=>t.id===sel.id);this.close();try{go(i,0,true)}catch(x){}TxEdit.start(S.key);return}
+   if(b.id==='hbTx'&&sel){const i=TABS.findIndex(t=>t.id===sel.id);S.hubBack=true;this.close();try{go(i,0,true)}catch(x){}TxEdit.start(S.key);return}
+   if(b.dataset.hstep!==undefined&&sel){const i=TABS.findIndex(t=>t.id===sel.id);S.hubBack=true;this.close();try{go(i,+b.dataset.hstep,true)}catch(x){}TxEdit.start(S.key);return}
+   if(b.dataset.txr!==undefined){if(await this.hubC({op:'tx',from:b.dataset.txr,to:''}))toast('أُعيد النص الأصلي ✓');return}
+   if(b.id==='hbTxAll'){S.hubBack=true;this.close();try{go(0,0,true)}catch(x){}TxEdit.start(S.key);return}
    if(b.id==='hbGc'){this.qBack=null;this.content('gd',b.dataset.g);return}
    if(b.id==='hbGr'){if(await this.hubC({op:'gd',game:b.dataset.g,data:[]})){this.gdD=null;toast('أُعيد المحتوى الأصلي ✓')}return}};
   M.onchange=async e=>{const t=e.target;
@@ -7634,8 +7649,14 @@ const Content={
   RANKS.forEach((r,i)=>L.push({g:'الرتب',k:'rank.'+i+'.n',l:'اسم الرتبة',o:r.n,set:v=>{r.n=v}}));
   GAMES.forEach(g=>{L.push({g:'الألعاب',k:'game.'+g.id+'.t',l:'اسم اللعبة',o:g.t,set:v=>{g.t=v}});L.push({g:'الألعاب',k:'game.'+g.id+'.d',l:'وصف اللعبة',o:g.d,set:v=>{g.d=v}})});
   EXTRA.forEach(g=>{L.push({g:'الألعاب',k:'game.'+g.id+'.t',l:'اسم اللعبة الإضافية',o:g.t,set:v=>{g.t=v}});L.push({g:'الألعاب',k:'game.'+g.id+'.d',l:'وصف اللعبة الإضافية',o:g.d,set:v=>{g.d=v}})});
+  /* the lesson's own content: every step's title and tip, the planets' map descriptions, the groups' names */
+  TABS.forEach(t=>t.steps.forEach((s,i)=>{const k=t.id+'_'+SK(t.id,i);
+   L.push({g:'خطوات الدروس',k:'step.'+k+'.t',l:t.title+' — عنوان الخطوة '+(i+1),o:s.t,set:v=>{s.t=v}});
+   if(s.tip!==undefined)L.push({g:'نصائح الخطوات',k:'step.'+k+'.tip',l:t.title+' — نصيحة الخطوة '+(i+1),o:s.tip,set:v=>{s.tip=v}})}));
+  Object.keys(PLDESC).forEach(id=>L.push({g:'وصف الكواكب',k:'desc.'+id+'.d',l:'وصف الكوكب في الخريطة',o:PLDESC[id],set:v=>{PLDESC[id]=v}}));
+  GROUPS.forEach(g=>{L.push({g:'مجموعات الدروس',k:'group.'+g.id+'.t',l:'اسم المجموعة',o:g.t,set:v=>{g.t=v}});L.push({g:'مجموعات الدروس',k:'group.'+g.id+'.d',l:'وصف المجموعة',o:g.d,set:v=>{g.d=v}})});
   return L},
- get(){return this.data||{v:0,qo:{},qh:[],qn:[],tx:{},gm:{},ch:{}}},
+ get(){return this.data||{v:0,qo:{},qh:[],qn:[],tx:{},tc:{},gm:{},ch:{}}},
  ch(k,d){const v=this.get().ch||{};return typeof v[k]==='number'?v[k]:d},
  init(){this.snap0();let c=null;try{c=JSON.parse(localStorage.getItem('mf_content')||'null')}catch(e){}if(c&&typeof c==='object')this.set(c,true)},
  /* the settings carry a version; when it differs from what this device holds, fetch the content once */
@@ -7679,10 +7700,10 @@ const TxEdit={on:false,pick:true,key:'',
   document.body.classList.add('tx-edit','tx-pick');
   const bar=document.createElement('div');bar.id='txBar';bar.innerHTML=`<span>وضع تحرير النصوص: <b id="txMode">اضغط على أي نص لتعديله</b></span><button class="btn gold sm" id="txTg" type="button">تصفّح الدرس</button><button class="btn ghost sm" id="txN" type="button">${AR(Object.keys(Tx.map).length)} تعديل</button><button class="btn red sm" id="txX" type="button">إنهاء</button>`;document.body.appendChild(bar);
   $('#txTg').onclick=()=>{this.pick=!this.pick;document.body.classList.toggle('tx-pick',this.pick);$('#txTg').textContent=this.pick?'تصفّح الدرس':'عودة للتحرير';$('#txMode').textContent=this.pick?'اضغط على أي نص لتعديله':'تصفّح بحرّية (التحرير متوقف)'};
-  $('#txX').onclick=()=>this.stop();$('#txN').onclick=()=>{this.stop();Dash.content('tx')};
+  $('#txX').onclick=()=>this.stop();$('#txN').onclick=()=>{Dash.S.hubBack=true;this.stop()};
   this.h=e=>{if(!this.on||!this.pick)return;if(e.target.closest('#txBar,#txEd'))return;const n=this.at(e);e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();if(n)this.edit(n)};
   document.addEventListener('click',this.h,true);['pointerdown','mousedown','touchstart'].forEach(t=>document.addEventListener(t,this.blk=this.blk||(e=>{if(this.on&&this.pick&&!e.target.closest('#txBar,#txEd'))e.stopPropagation()}),true))},
- stop(){this.on=false;document.body.classList.remove('tx-edit','tx-pick');document.removeEventListener('click',this.h,true);const b=$('#txBar');if(b)b.remove();const e=$('#txEd');if(e)e.remove();Dash.open(this.key,true)},
+ stop(){this.on=false;document.body.classList.remove('tx-edit','tx-pick');document.removeEventListener('click',this.h,true);const b=$('#txBar');if(b)b.remove();const e=$('#txEd');if(e)e.remove();Dash.open(this.key,true).then(r=>{const D=Dash.S;if(r&&r.ok&&D.hubBack){D.hubBack=false;D.hub=D.hub||{sel:null,q:'',f:'all',scope:'all',sec:'ov',qf:{lv:'',h:false,q:''}};Dash.show('hub')}})},
  /* the text node under the finger/mouse */
  at(e){let n=null;try{if(document.caretPositionFromPoint){const p=document.caretPositionFromPoint(e.clientX,e.clientY);n=p&&p.offsetNode}else if(document.caretRangeFromPoint){const r=document.caretRangeFromPoint(e.clientX,e.clientY);n=r&&r.startContainer}}catch(x){}
   if(!n||n.nodeType!==3||Tx.skip(n)||Tx.key(n.__o===undefined?n.nodeValue:n.__o).length<2){const el=e.target,w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT);let t;n=null;while((t=w.nextNode())){if(!Tx.skip(t)&&Tx.key(t.__o===undefined?t.nodeValue:t.__o).length>=2){n=t;break}}}
@@ -7690,7 +7711,7 @@ const TxEdit={on:false,pick:true,key:'',
  edit(n){const orig=Tx.key(n.__o===undefined?n.nodeValue:n.__o),cur=Tx.map[orig]||orig;let m=$('#txEd');if(m)m.remove();m=document.createElement('div');m.id='txEd';
   m.innerHTML=`<div class="box" role="dialog" aria-modal="true" aria-labelledby="txT"><b id="txT">تعديل النص</b><small>النص الأصلي: ${esc(orig)}</small><textarea id="txV" maxlength="400" aria-label="النص الجديد">${esc(cur)}</textarea>
    <small>يُستبدل هذا النص أينما ظهر في الدرس، ويصل إلى الطلاب خلال نصف دقيقة. لا يغيّر الإجابات الصحيحة، بل صياغة الكلام فقط.</small><div class="row"><button class="btn go sm" id="txS" type="button">حفظ</button>${Tx.map[orig]?'<button class="btn ghost sm" id="txR" type="button">إعادة النص الأصلي</button>':''}<button class="btn ghost sm" id="txC" type="button">إلغاء</button></div><small id="txM" role="status"></small></div>`;document.body.appendChild(m);
-  const send=async to=>{$('#txM').textContent='جارٍ الحفظ…';const r=await Online.api('content',{op:'tx',from:orig,to},this.key);if(!r.ok){$('#txM').textContent='تعذّر الحفظ؛ حاول مرة أخرى.';return}Content.set(r.content);$('#txN').textContent=AR(Object.keys(Tx.map).length)+' تعديل';m.remove()};
+  const send=async to=>{$('#txM').textContent='جارٍ الحفظ…';const r=await Online.api('content',{op:'tx',from:orig,to,tab:((TABS[S.tab]||{}).id)||''},this.key);if(!r.ok){$('#txM').textContent='تعذّر الحفظ؛ حاول مرة أخرى.';return}Content.set(r.content);$('#txN').textContent=AR(Object.keys(Tx.map).length)+' تعديل';m.remove()};
   $('#txS').onclick=()=>send($('#txV').value);if($('#txR'))$('#txR').onclick=()=>send('');$('#txC').onclick=()=>m.remove();setTimeout(()=>$('#txV').focus(),50)}};
 /* ---- the teacher's awards: shown to the student as a banner and in his cabinet ---- */
 const Awards={list:[],

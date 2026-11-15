@@ -6,7 +6,7 @@ const { redis, send, deny, body, cfg, saveCfg } = require('./_lib');
    POST (teacher): one operation at a time — q (edit a question), qhide, qadd, qdel, qreset, tx (a text replacement), gm, ch, reset. */
 const MAX = 300000, TP = /^[a-z]{1,2}$/;
 const S = (x, n) => String(x == null ? '' : x).replace(/\s+/g, ' ').trim().slice(0, n);
-const EMPTY = () => ({ v: 0, nid: 1000, qo: {}, qh: [], qn: [], tx: {}, gm: {}, ch: {}, nm: {}, gd: {} });
+const EMPTY = () => ({ v: 0, nid: 1000, qo: {}, qh: [], qn: [], tx: {}, tc: {}, gm: {}, ch: {}, nm: {}, gd: {} });
 async function load() { let o = null; try { const r = await redis(['GET', 'mf:content']); if (r) o = JSON.parse(r); } catch (e) { if (e.code === 'no_db') throw e; } return Object.assign(EMPTY(), o || {}); }
 async function save(c) {
   c.v = Date.now(); const s = JSON.stringify(c); if (s.length > MAX) return null;
@@ -48,12 +48,13 @@ module.exports = async (req, res) => {
     else if (op === 'qdel') { c.qn = c.qn.filter(x => x.id !== id); }
     else if (op === 'tx') {
       const from = S(b.from, 400), to = S(b.to, 400); if (from.length < 2) return send(res, 400, { error: 'bad' });
-      if (!to || to === from) delete c.tx[from]; else { if (Object.keys(c.tx).length >= 400 && !(from in c.tx)) return send(res, 400, { error: 'too_many' }); c.tx[from] = to; }
+      c.tc = c.tc || {}; const tab = String(b.tab || '').slice(0, 24);
+      if (!to || to === from) { delete c.tx[from]; delete c.tc[from]; } else { if (Object.keys(c.tx).length >= 400 && !(from in c.tx)) return send(res, 400, { error: 'too_many' }); c.tx[from] = to; if (/^[a-z]+$/.test(tab)) c.tc[from] = tab; }
     }
     else if (op === 'gm') { const g = {}; ['hop', 'boss', 'final'].forEach(k => { const v = String((b.gm || {})[k] || 'auto'); g[k] = ['auto', '1', '2', '3'].includes(v) ? v : 'auto'; }); c.gm = g; }
     else if (op === 'ch') { const h = b.ch || {}; c.ch = { dailyBonus: Math.max(0, Math.min(30, Math.floor(+h.dailyBonus) || 0)), dailyPerfect: Math.max(0, Math.min(30, Math.floor(+h.dailyPerfect) || 0)) }; if (h.dailyBonus === undefined) delete c.ch.dailyBonus; if (h.dailyPerfect === undefined) delete c.ch.dailyPerfect; }
     else if (op === 'nm') {   // a name / title replacement: key like tab.sentence.title
-      const k = S(b.k, 60), v = S(b.v, 200); if (!/^[a-z]+\.[A-Za-z0-9_]+\.[a-z]+$/.test(k)) return send(res, 400, { error: 'bad' });
+      const k = S(b.k, 60), v = S(b.v, 400); if (!/^[a-z]+\.[A-Za-z0-9_]+\.[a-z]+$/.test(k)) return send(res, 400, { error: 'bad' });
       if (!v) delete c.nm[k]; else c.nm[k] = v;
     }
     else if (op === 'gd') {   // data of a game: det = detective cases, mw = meteor rounds' words (null/[] puts the original back)
@@ -75,7 +76,7 @@ module.exports = async (req, res) => {
         if (!Array.isArray(b.data) || !b.data.length) delete c.gd.bd; else if (L.length < 2) return send(res, 400, { error: 'few' }); else c.gd.bd = L;
       } else return send(res, 400, { error: 'bad' });
     }
-    else if (op === 'reset') { const w = String(b.what || ''); const e = EMPTY(); if (w === 'all') { c.qo = e.qo; c.qh = e.qh; c.qn = e.qn; c.tx = e.tx; c.gm = e.gm; c.ch = e.ch; c.nm = e.nm; c.gd = e.gd; } else if (['qo', 'qh', 'qn', 'tx', 'gm', 'ch', 'nm', 'gd'].includes(w)) c[w] = e[w]; }
+    else if (op === 'reset') { const w = String(b.what || ''); const e = EMPTY(); if (w === 'all') { c.qo = e.qo; c.qh = e.qh; c.qn = e.qn; c.tx = e.tx; c.tc = e.tc; c.gm = e.gm; c.ch = e.ch; c.nm = e.nm; c.gd = e.gd; } else if (['qo', 'qh', 'qn', 'tx', 'gm', 'ch', 'nm', 'gd'].includes(w)) { c[w] = e[w]; if (w === 'tx') c.tc = e.tc; } }
     else return send(res, 400, { error: 'bad_op' });
     if (!(await save(c))) return send(res, 400, { error: 'too_big' });
     return send(res, 200, { ok: true, content: c });
