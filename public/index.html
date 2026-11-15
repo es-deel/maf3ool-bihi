@@ -1885,6 +1885,36 @@ body.cls .opt{min-height:4.6rem}
 #dash .dh-top.ns{position:static}
 #dash .dh-wrap.cfv,#dash .dh-wrap.sfv{grid-template-columns:minmax(0,1fr)}#dash .dh-wrap>*,#dash .cf-pane,#dash .sf-pane{min-width:0;max-width:100%}
 #dash .dh-stale{color:#fbbf24;font-weight:700}
+
+/* ---- a planet the teacher closed: it is being built (stripes of scaffolding, a scan line, a hammer) ---- */
+.orr-pl.bld img{filter:grayscale(.85) brightness(.7) contrast(1.12) hue-rotate(var(--h,0deg));
+ -webkit-mask-image:linear-gradient(to top,#000 38%,rgba(0,0,0,.2) 42%);mask-image:linear-gradient(to top,#000 38%,rgba(0,0,0,.2) 42%);
+ -webkit-mask-size:100% 260%;mask-size:100% 260%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;animation:orrBuild 4.6s ease-in-out infinite}
+@keyframes orrBuild{0%{-webkit-mask-position:0 0;mask-position:0 0}72%,90%{-webkit-mask-position:0 100%;mask-position:0 100%}100%{-webkit-mask-position:0 0;mask-position:0 0}}
+.orr-bd{position:absolute;inset:-12%;border-radius:50%;border:2px dashed #fbbf24;opacity:.85;pointer-events:none;animation:spin 16s linear infinite}
+.orr-bs{position:absolute;inset:0;border-radius:50%;overflow:hidden;pointer-events:none;background:repeating-linear-gradient(135deg,transparent 0 7px,rgba(251,191,36,.26) 7px 9px)}
+.orr-bs::before{content:"";position:absolute;left:-6%;right:-6%;height:3px;top:100%;background:#fde68a;box-shadow:0 0 9px 2px #fbbf24;animation:orrScan 4.6s ease-in-out infinite}
+@keyframes orrScan{0%{top:100%;opacity:1}72%{top:0;opacity:1}90%,100%{top:0;opacity:0}}
+.orr-bh{position:absolute;top:-7px;inset-inline-end:-7px;width:1.7em;height:1.7em;display:grid;place-items:center;border-radius:50%;background:#2a1a00;border:1.5px solid #fbbf24;transform-origin:70% 80%;animation:orrHam 1.1s ease-in-out infinite}
+.orr-bh .em{width:1.05em;height:1.05em}
+@keyframes orrHam{0%,100%{transform:rotate(-22deg)}50%{transform:rotate(14deg)}}
+.orr-pl.bld .orr-n{background:#2a1a00;border-color:#fbbf24;color:#fde68a}
+.orr-pl.bld .orr-lb{color:#fde68a}
+.orr-pl.bld.gdim{opacity:.4}
+.oleg-c.bld{border-style:dashed;border-color:#fbbf24;color:#fde68a}.oleg-c.bld small{font-size:.72em;opacity:.9}
+.og.bld .og-n{color:#fde68a}.og.bld .og-bar u{background:repeating-linear-gradient(135deg,#fbbf24 0 6px,#2a1a00 6px 12px)}
+.orr-cnt .oc-bld,#ocnt .oc-bld{display:block;color:#fde68a}
+#oinfo .bld-i{filter:grayscale(.85) brightness(.75)}
+.bld-msg{margin:10px 0 12px;padding:12px 14px;border-radius:14px;border:1.5px dashed #fbbf24;background:linear-gradient(135deg,#2a1a0044,#fbbf2412);display:grid;gap:6px}
+.bld-msg b{color:#fde68a;font-size:1.02rem}.bld-msg p{margin:0;color:#e8e3ff;line-height:1.7;font-size:.92rem}
+.bld-bar{display:block;height:9px;border-radius:9px;background:#ffffff1c;overflow:hidden}
+.bld-bar u{display:block;height:100%;width:40%;border-radius:9px;background:repeating-linear-gradient(135deg,#fbbf24 0 8px,#b45309 8px 16px);background-size:22px 22px;animation:bldBar 1.2s linear infinite,bldGrow 4.6s ease-in-out infinite}
+@keyframes bldBar{to{background-position:22px 0}}
+@keyframes bldGrow{0%{width:12%}72%,90%{width:88%}100%{width:12%}}
+@media (prefers-reduced-motion:reduce){.orr-pl.bld img{animation:none;-webkit-mask-position:0 62%;mask-position:0 62%}.orr-bd,.orr-bs::before,.orr-bh,.bld-bar u{animation:none}.orr-bs::before{top:38%}}
+.og-n small.og-b{display:block;color:#fde68a;font-size:.8em;font-weight:700;margin-top:1px}
+.orr-pl .orr-bh{width:calc(var(--ps)*.36);height:calc(var(--ps)*.36);min-width:16px;min-height:16px;top:-4px;inset-inline-end:-4px;font-size:0}
+.orr-pl .orr-bh .em{width:62%;height:62%}
 </style></head><body><div class="sky" aria-hidden="true"><div class="stars"></div><div class="stars b"></div><img class="float-pl a" data-em="p2" alt=""><img class="float-pl b" data-em="p3" alt=""><i class="comet"></i></div>
 <header class="top"><div class="top-in">
  <div class="brand"><img data-em="logo" alt=""><div><h1>مغامرة النحو والإعراب</h1><small>رحلة بين الكواكب مع الأستاذ إسلام قنديل</small></div></div>
@@ -2447,11 +2477,11 @@ const GAME_LES={det:['object'],flee:['object'],fix:['object'],build:['object'],k
 const Hid={
  lesson(id){return typeof Ctl!=='undefined'&&!!Ctl.hidden&&Ctl.hidden(id)},
  off(id){return this.lesson(id)||(typeof Ctl!=='undefined'&&!!Ctl.locked&&Ctl.locked(id))},   // hidden OR closed by the teacher: a planet the student cannot work on is left out of his score, his planet count and his report (it counts again when it reopens)
- any(l){return Array.isArray(l)?l.some(i=>this.lesson(i)):this.lesson(l)},      // a map / board / game built on one lesson or on several (hidden as soon as one of them is)
+ any(l){return Array.isArray(l)?l.some(i=>this.off(i)):this.off(l)},      // a map / board / game built on one lesson or on several (hidden as soon as one of them is)
  tabs(){return TABS.filter(t=>!this.off(t.id))},
  tp(tp){const ids=Object.keys(LESSON_TP).filter(k=>LESSON_TP[k]===tp);return ids.length>0&&ids.every(i=>this.off(i))},
- game(id){return(GAME_LES[id]||[]).some(l=>this.lesson(l))},
- drills(){return typeof DRILLS==='undefined'?[]:DRILLS.filter(d=>!this.lesson(d.id))},
+ game(id){return(GAME_LES[id]||[]).some(l=>this.off(l))},
+ drills(){return typeof DRILLS==='undefined'?[]:DRILLS.filter(d=>!this.off(d.id))},
  games(){return GAMES.filter(g=>!this.game(g.id))},
  extra(){return typeof EXTRA==='undefined'?[]:EXTRA.filter(g=>!this.game(g.id))}};
 const Score={
@@ -2712,10 +2742,11 @@ function orrery(host){
  const SUN=TABS.findIndex(t=>t.id==='start'),timers=[],ghosts=new Set(),lit=store.get('lit',{});
  const ZL=[60,75,90,100,115,130,150,175],pf=Object.assign({z:100,hide:false},store.get('orr',{}));if(!ZL.includes(pf.z))pf.z=100;
  const done=t=>!!S.done[t.id],PL=TABS.map((t,i)=>({t,i})).filter(x=>x.i!==SUN&&!Hid.lesson(x.t.id)),SB={t:TABS[SUN],i:SUN,sun:true},ALL=[SB,...PL],byI=i=>ALL.find(x=>x.i===i);
- const allDone=PL.every(p=>done(p.t)),NX=PL.find(p=>!done(p.t)),PER=[30,46,64,86];
- PL.forEach(p=>{p.dk=!allDone&&done(p.t)&&!!lit[p.t.id]});                       // finished and already celebrated before: it waits on the shelf
+ PL.forEach(p=>{p.lk=typeof Ctl!=='undefined'&&!!Ctl.locked&&Ctl.locked(p.t.id)});     // closed by the teacher: it stays in its group but is shown «under construction»
+ const OP=PL.filter(p=>!p.lk),allDone=OP.length>0&&OP.every(p=>done(p.t)),NX=OP.find(p=>!done(p.t)),PER=[30,46,64,86],nBld=PL.length-OP.length;
+ PL.forEach(p=>{p.dk=!allDone&&!p.lk&&done(p.t)&&!!lit[p.t.id]});                       // finished and already celebrated before: it waits on the shelf
  const ico=t=>IMG[t.id==='start'?'sun':t.pl],tone=t=>`--c:${t.color};--h:${PLHUE[t.id]||0}deg;--gc:${groupOf(t.id).c}`,orbit=()=>PL.filter(p=>!p.dk);
- const P0=store.get('pos'),PT=P0&&TABS.find(t=>t.id===P0.t),cont=PT&&PT.id!=='start'&&!Hid.lesson(PT.id)&&!done(PT)?{T:PT,s:Math.max(0,Math.min(+P0.s||0,PT.steps.length-1))}:null;
+ const P0=store.get('pos'),PT=P0&&TABS.find(t=>t.id===P0.t),cont=PT&&PT.id!=='start'&&!Hid.off(PT.id)&&!done(PT)?{T:PT,s:Math.max(0,Math.min(+P0.s||0,PT.steps.length-1))}:null;
  host.innerHTML=`<div class="orr">
   ${cont?`<div class="orr-cont rise">${em('rocket','lg')}<span class="oc-t">تابع من حيث توقفتَ<b>${esc(cont.T.title)}</b><small>${esc(cont.T.steps[cont.s].t)}</small></span><button class="btn go sm" type="button" data-act="ocn">تابع ←</button></div>`:''}
   <div class="hn-mini"></div>
@@ -2727,13 +2758,13 @@ function orrery(host){
    <div class="orr-cam" id="ocam">
     ${PER.map((_,r)=>`<i class="orr-ring" data-r="${r}"></i>`).join('')}
     <button class="orr-sun ${done(SB.t)?'lit':''}" type="button" data-act="op" data-oi="${SUN}" aria-label="${esc(TABS[SUN].title)}"><i class="orr-halo" style="--c:#ffd43b"></i><img src="${IMG.sun}" alt=""><span class="orr-lb">${esc(TABS[SUN].title)}</span></button>
-    ${PL.map((p,k)=>`<button class="orr-pl${done(p.t)&&(lit[p.t.id]||allDone)?' lit':''}${p.dk?' dk':''}${NX&&NX.i===p.i?' nx':''}" type="button" data-act="op" data-oi="${p.i}" style="${tone(p.t)}" aria-label="${esc(p.t.title)}"><i class="orr-halo"></i><img src="${IMG[p.t.pl]}" alt=""><em class="orr-n">${AR(k+1)}</em><b class="orr-ck">✓</b><span class="orr-lb">${esc(p.t.title)}</span></button>`).join('')}
+    ${PL.map((p,k)=>`<button class="orr-pl${!p.lk&&done(p.t)&&(lit[p.t.id]||allDone)?' lit':''}${p.dk?' dk':''}${NX&&NX.i===p.i?' nx':''}${p.lk?' bld':''}" type="button" data-act="op" data-oi="${p.i}" style="${tone(p.t)}" aria-label="${esc(p.t.title)}${p.lk?' — قيد البناء، يجهّزه المعلم':''}"><i class="orr-halo"></i><img src="${IMG[p.t.pl]}" alt="">${p.lk?`<i class="orr-bd"></i><i class="orr-bs"></i><b class="orr-bh">${em('hammer')}</b>`:''}<em class="orr-n">${AR(k+1)}</em><b class="orr-ck">✓</b><span class="orr-lb">${esc(p.t.title)}${p.lk?' · قيد البناء':''}</span></button>`).join('')}
    </div>
    <button class="orr-back" id="oback" type="button" data-act="oc" hidden>تصغير ↩</button>
    <div class="orr-info" id="oinfo" data-act="oi" hidden></div>
   </div>
   <p class="orr-tip" id="otip"></p>
-  <div class="orr-leg" id="oleg">${PL.map((p,k)=>`${k===0||groupOf(PL[k-1].t.id)!==groupOf(p.t.id)?`<span class="oleg-g" style="--gc:${groupOf(p.t.id).c}">${groupOf(p.t.id).end?'':'المجموعة '+groupNo(groupOf(p.t.id))+': '}${esc(groupOf(p.t.id).t)}</span>`:''}<button class="oleg-c${NX&&NX.i===p.i?' nx':''}" type="button" data-act="op" data-oi="${p.i}" style="--gc:${groupOf(p.t.id).c}"${p.dk?' hidden':''}><b>${AR(k+1)}</b>${esc(p.t.title)}</button>`).join('')}</div>
+  <div class="orr-leg" id="oleg">${PL.map((p,k)=>`${k===0||groupOf(PL[k-1].t.id)!==groupOf(p.t.id)?`<span class="oleg-g" style="--gc:${groupOf(p.t.id).c}">${groupOf(p.t.id).end?'':'المجموعة '+groupNo(groupOf(p.t.id))+': '}${esc(groupOf(p.t.id).t)}</span>`:''}<button class="oleg-c${NX&&NX.i===p.i?' nx':''}${p.lk?' bld':''}" type="button" data-act="op" data-oi="${p.i}" style="--gc:${groupOf(p.t.id).c}"${p.dk?' hidden':''}><b>${AR(k+1)}</b>${esc(p.t.title)}${p.lk?` <small>${em('hammer','sm')} قيد البناء</small>`:''}</button>`).join('')}</div>
   <section class="orr-dock" id="odock" aria-labelledby="odT">
    <h3 id="odT">الكواكب المنتهية <b id="odn"></b></h3>
    <div class="dk-row">${PL.map(p=>`<button class="dk-c" type="button" data-act="op" data-oi="${p.i}" style="${tone(p.t)}"${p.dk?'':' hidden'}><img src="${IMG[p.t.pl]}" alt=""><span>${esc(p.t.title)}</span><i>✓</i></button>`).join('')}</div>
@@ -2755,18 +2786,18 @@ function orrery(host){
 
  /* ---- the four groups: progress of each, and the chosen one lights its planets while the others dim ---- */
  let sg=null;
- const paintGrp=()=>{GROUPS.forEach(g=>{const b=$(`.og[data-g=${g.id}]`,host);if(!b)return;const ps=PL.filter(p=>g.tabs.includes(p.t.id)),n=ps.filter(p=>done(p.t)).length;b.classList.toggle('on',sg===g.id);b.classList.toggle('fin',!!ps.length&&n===ps.length);b.setAttribute('aria-pressed',String(sg===g.id));
-   $('.og-n',b).textContent=ps.length?`${AR(n)} من ${AR(ps.length)}`:'قيد الإعداد';$('.og-bar u',b).style.width=(ps.length?Math.round(n*100/ps.length):0)+'%'});
+ const paintGrp=()=>{GROUPS.forEach(g=>{const b=$(`.og[data-g=${g.id}]`,host);if(!b)return;const all=PL.filter(p=>g.tabs.includes(p.t.id)),ps=all.filter(p=>!p.lk),n=ps.filter(p=>done(p.t)).length,bl=!!all.length&&!ps.length;b.classList.toggle('on',sg===g.id);b.classList.toggle('fin',!!ps.length&&n===ps.length);b.classList.toggle('bld',bl);b.setAttribute('aria-pressed',String(sg===g.id));
+   $('.og-n',b).innerHTML=ps.length?`<span>${AR(n)} من ${AR(ps.length)}</span>${all.length>ps.length?`<small class="og-b">${em('hammer','sm')} ${AR(all.length-ps.length)} قيد البناء</small>`:''}`:bl?`<span>${em('hammer','sm')} قيد البناء</span>`:'<span>قيد الإعداد</span>';$('.og-bar u',b).style.width=(ps.length?Math.round(n*100/ps.length):0)+'%'});
   PL.forEach(p=>{const d=sg&&groupOf(p.t.id).id!==sg;p.el.classList.toggle('gdim',!!d);if(p.lg)p.lg.classList.toggle('gdim',!!d)})};
  /* ---- the bar above, the tip inside, the shelf below ---- */
  const paintBar=()=>{
-  const fin=PL.filter(p=>done(p.t)).length,rem=PL.length-fin,dk=PL.filter(p=>p.dk).length,zi=ZL.indexOf(pf.z);
-  $('#ocnt',host).innerHTML=rem?`<b>بقي ${NUM(rem,N_PL)} لتزورها</b><small>أنجزتَ ${AR(fin)} من ${AR(PL.length)}</small>`:`<b>أنجزتَ كل الكواكب!</b><small>${AR(PL.length)} من ${AR(PL.length)}</small>`;
+  const fin=OP.filter(p=>done(p.t)).length,rem=OP.length-fin,dk=PL.filter(p=>p.dk).length,zi=ZL.indexOf(pf.z);
+  $('#ocnt',host).innerHTML=(rem?`<b>بقي ${NUM(rem,N_PL)} لتزورها</b><small>أنجزتَ ${AR(fin)} من ${AR(OP.length)}</small>`:OP.length?`<b>أنجزتَ كل الكواكب${nBld?' المفتوحة':''}!</b><small>${AR(OP.length)} من ${AR(OP.length)}</small>`:`<b>الكواكب قيد البناء</b><small>يجهّزها معلمك الآن</small>`)+(nBld&&OP.length?`<small class="oc-bld">${em('hammer','sm')} ${AR(nBld)} ${nBld>2?'كواكب':nBld===2?'كوكبان':'كوكب'} يبنيها المعلم</small>`:'');
   $('#ozl',host).textContent=AR(pf.z)+'٪';$('#ozm',host).disabled=zi<=0;$('#ozp',host).disabled=zi>=ZL.length-1;
   const tg=$('#otg',host);tg.hidden=allDone||!fin;tg.setAttribute('aria-pressed',String(pf.hide));tg.textContent=pf.hide?`إظهار المكتملة (${AR(fin)})`:'إخفاء المكتملة';
   dock.hidden=(pf.hide&&!allDone)||(!allDone&&!fin);$('#odn',host).textContent=dk?AR(dk):'';
   const e=$('#odE',host);
-  e.innerHTML=allDone?`<span>${em('trophy','lg')} أنجزتَ كل الكواكب. ما أجمل ما فعلتَ!</span><span class="row"><button class="btn gold sm" type="button" data-act="ogo" data-t="certificate">شهادتي</button><button class="btn sky sm" type="button" data-act="ogo" data-t="report">تقريري</button></span>`:'';
+  e.innerHTML=allDone?`<span>${em('trophy','lg')} أنجزتَ كل الكواكب${nBld?' المفتوحة':''}. ما أجمل ما فعلتَ!${nBld?' وبقية الكواكب يجهّزها معلمك.':''}</span><span class="row"><button class="btn gold sm" type="button" data-act="ogo" data-t="certificate">شهادتي</button><button class="btn sky sm" type="button" data-act="ogo" data-t="report">تقريري</button></span>`:'';
   e.hidden=!allDone;
   PL.forEach(p=>{p.lg.hidden=p.dk});
   paintGrp();
@@ -2775,6 +2806,9 @@ function orrery(host){
  /* ---- the summary of the chosen planet ---- */
  const info=()=>{
   const b=sel==null?null:byI(sel);if(!b){box.hidden=true;return}
+  if(b.lk){const T=b.t;box.innerHTML=`<header><img src="${ico(T)}" alt="" class="bld-i"><span class="oi-t"><b>${esc(T.title)}</b><small>${em('hammer','sm')} قيد البناء</small></span><button class="oc-x" type="button" data-act="oc" aria-label="إغلاق الملخص">×</button></header>
+   <div class="bld-msg" role="status"><b>${em('hammer')} المعلم يجهّز هذا الكوكب ويبنيه الآن</b><p>سيُفتح لك بمجرد أن ينتهي من تجهيزه، وستجد فيه الدرس وتدريباته. أكمل الكواكب الأخرى في الأثناء، وسيظهر هنا تلقائيًا.</p><i class="bld-bar"><u></u></i></div>
+   ${NX?`<button class="btn gold sm" type="button" data-act="obn">انتقل إلى «${esc(NX.t.title)}» ←</button>`:''}`;box.hidden=false;box.scrollTop=0;return}
   const T=b.t,o=stat(T),fin=done(T),lab=T.id==='start'?'دليل الرحلة ←':fin?'راجع الكوكب ←':o.d>0?'أكمل من حيث توقفتَ ←':'ابدأ الكوكب ←';
   box.innerHTML=`<header><img src="${ico(T)}" alt=""><span class="oi-t"><b>${esc(T.title)}</b><small>${PLDESC[T.id]||''}</small></span><button class="oc-x" type="button" data-act="oc" aria-label="إغلاق الملخص">×</button></header>
    <div class="oc-pills"><span class="oi-pill ${fin?'ok':''}">${fin?'✓ مُنجَز':`${fa(o.d,o.items.length)} ${o.unit}`}</span>${o.q?`<span class="oi-pill">${fa(o.q[0],o.q[1])} ${o.q[2]}</span>`:''}${o.pts?`<span class="oi-pill">${fa(o.pts[0],o.pts[1])} نقطة</span>`:''}</div>
@@ -2830,17 +2864,18 @@ function orrery(host){
   const fin=()=>{if(!ghosts.has(g))return;ghosts.delete(g);g.remove();land(x)};
   try{g.animate([{transform:'translate(0,0) scale(1)'},{transform:`translate(${dx*.45}px,${dy*.2-26}px) scale(${Math.max(k,.9)*1.15})`,offset:.45},{transform:`translate(${dx}px,${dy}px) scale(${k})`}],{duration:1100,easing:'cubic-bezier(.45,.05,.3,1)',fill:'forwards'}).onfinish=fin}catch(e){fin()}
   timers.push(setTimeout(fin,1800))};
- let q=0;ALL.forEach(x=>{if(done(x.t)&&!lit[x.t.id]){timers.push(setTimeout(()=>{x.el.classList.add('lit','ign');lit[x.t.id]=1;store.set('lit',lit);sfx('ok');
+ let q=0;ALL.forEach(x=>{if(!x.lk&&done(x.t)&&!lit[x.t.id]){timers.push(setTimeout(()=>{x.el.classList.add('lit','ign');lit[x.t.id]=1;store.set('lit',lit);sfx('ok');
    const b=x.el.getBoundingClientRect();FX.burst(b.left+b.width/2,b.top+b.height/2,{n:10});timers.push(setTimeout(()=>x.el.classList.remove('ign'),1800));
    if(!x.sun)timers.push(setTimeout(()=>fly(x),1700));paintBar();if(sel===x.i)info()},700+q*2300));q++}});
 
  /* ---- clicks ---- */
  const stepTo=(x,n)=>{const o=stat(x.t);if(x.t.id==='start'){go(SUN,n);sfx('pop')}else jumpTo(o.items[n].j)};
  act(host,{
-  op:b=>{const i=+b.dataset.oi;if(sel===i){const x=byI(i);openTo(x.t,stat(x.t))}else{select(i);sfx('pop')}},
-  og:()=>{if(sel!=null){const x=byI(sel);openTo(x.t,stat(x.t))}},
+  op:b=>{const i=+b.dataset.oi;if(sel===i){const x=byI(i);if(x.lk){toast(em('hammer')+' المعلم يجهّز «'+x.t.title+'» ويبنيه الآن؛ سيُفتح قريبًا.');sfx('bad')}else openTo(x.t,stat(x.t))}else{select(i);sfx('pop')}},
+  og:()=>{if(sel!=null){const x=byI(sel);if(!x.lk)openTo(x.t,stat(x.t))}},
+  obn:()=>{if(NX)openTo(NX.t,stat(NX.t))},
   ogp:b=>{const g=GROUPS.find(x=>x.id===b.dataset.g);if(!g)return;if(!g.tabs.length){toast('هذه المجموعة قيد الإعداد وستُضاف دروسها قريبًا');return}
-   sg=sg===g.id?null:g.id;paintGrp();if(sg){const ps=PL.filter(p=>g.tabs.includes(p.t.id)),f=ps.find(p=>!done(p.t))||ps[0];if(f&&!f.dk)select(f.i);else select(null)}else select(null);sfx('pop')},
+   sg=sg===g.id?null:g.id;paintGrp();if(sg){const ps=PL.filter(p=>g.tabs.includes(p.t.id)),f=ps.find(p=>!p.lk&&!done(p.t))||ps.find(p=>!p.lk)||ps[0];if(f&&!f.dk)select(f.i);else select(null)}else select(null);sfx('pop')},
   os:b=>{if(sel!=null)stepTo(byI(sel),+b.dataset.n)},
   oc:()=>{if(sel!=null)select(null)},oi:()=>{},
   oz:b=>{const zi=Math.max(0,Math.min(ZL.length-1,ZL.indexOf(pf.z)+(+b.dataset.d)));pf.z=ZL[zi];store.set('orr',pf);paintBar();sfx('pop');onR()},
@@ -4150,7 +4185,7 @@ const Drill={
     return`<section class="dcard rise" style="--d:${i%6};--sc:${T.color}" aria-label="تدريب ${esc(T.title)}"><header><img src="${IMG[T.pl]}" alt=""><h3>${esc(T.title)}</h3><span class="dtot" title="نجوم هذا التدريب">${AR(n)}/${AR(9)} ${em('star','sm')}</span></header>
      <div class="dlvs">${[1,2,3].map(lv=>{const b=this.best(d.id,lv);return`<button class="dlv l${lv}" type="button" data-act="dgo" data-id="${d.id}" data-lv="${lv}" aria-label="${esc(T.title)}: المستوى ${LV_NAME[lv]}، أفضل نتيجة ${AR(b)} من ${AR(5)}"><b>${LV_NAME[lv]}</b><span class="sstars">${starsRow(this.stars(b))}</span><small>${AR(b)} من ${AR(5)}</small></button>`}).join('')}</div></section>`}).join('')}</div>`;
   act(sc,{mode:b=>{if(b.dataset.m==='s')o.back();},dgo:b=>this.run(sc,b.dataset.id,+b.dataset.lv,o)})},
- run(sc,id,lv,o){if(Hid.lesson(id)){this.hub(sc,o);return}const T=TABS.find(t=>t.id===id),D=DRILLS.find(d=>d.id===id);let set=Drill_pool(id,lv).slice(0,5);
+ run(sc,id,lv,o){if(Hid.off(id)){this.hub(sc,o);return}const T=TABS.find(t=>t.id===id),D=DRILLS.find(d=>d.id===id);let set=Drill_pool(id,lv).slice(0,5);
   if(set.length<5)set=set.concat(shuffle(byLv(lv).filter(q=>q.tp===D.tp)).slice(0,5-set.length));
   if(!set.length){this.hub(sc,o);return}
   const N=set.length;let k=0,score=0,wrong=[];
@@ -4606,7 +4641,7 @@ function toastAct(msg,label,fn,ms=7000){const t=$('#toast');t.innerHTML=`<span>$
 
 const Resume={
  sess:{nudged:{},welcomed:false,bkAsked:false},tm:0,saved:0,
- pos(){const p=store.get('pos',null);if(!p||!p.t)return null;const ti=TABS.findIndex(t=>t.id===p.t);if(ti<0||Hid.lesson(p.t))return null;
+ pos(){const p=store.get('pos',null);if(!p||!p.t)return null;const ti=TABS.findIndex(t=>t.id===p.t);if(ti<0||Hid.off(p.t))return null;
   const T=TABS[ti],s=Math.max(0,Math.min(+p.s||0,T.steps.length-1));return{t:T.id,ti,T,s,step:T.steps[s],at:+p.at||0}},
  hasProgress(){return!!(ST.n>0||Object.keys(S.done).length||Object.keys(LED).length||store.get('pos',null))},
  /* "planet · step n of m · question k of j" for the saved place */
@@ -4737,7 +4772,7 @@ const PAGES=[
  {id:'report',ic:'envelope',t:'ساعي البريد',f:'من الجذر «ق ر ر» جاءت: تقرير، وقرار، واستقرار.'}];
 const PG_BATTLE=['certificate','report'];                  // the pages of these two planets come after the last battle
 const Pg={
- list(){return PAGES.filter(p=>TABS.some(t=>t.id===p.id)&&!Hid.lesson(p.id))},
+ list(){return PAGES.filter(p=>TABS.some(t=>t.id===p.id)&&!Hid.off(p.id))},
  got(id){return!!S.done[id]},
  opened(id){return!!(store.get('gift',{})||{})[id]},
  recovered(){return this.list().filter(p=>this.got(p.id)).length},
@@ -7297,7 +7332,7 @@ const Ctl={
   .rk-l{display:grid;gap:6px;max-height:52vh;overflow:auto;margin:6px 0}.rk-r{display:grid;grid-template-columns:2.4rem 1fr auto;gap:8px;align-items:center;padding:7px 10px;border-radius:12px;background:#ffffff10;text-align:right}.rk-r.me{background:var(--gold2);color:#2a1a00;font-weight:700}.rk-r b{text-align:center;font-size:1.25rem}.rk-r em{font-style:normal;font-weight:700}
 #ctlT{position:absolute;top:14px;inset-inline-start:14px}body.ctl-paused #dlg{z-index:10000!important}body.dash-on #ctlPause{display:none}
 #ctlPause{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at 50% 30%,#2b1b7a,#0b0720);color:#fff;text-align:center}#ctlPause>div{max-width:420px;display:grid;gap:12px;justify-items:center}#ctlPause img{width:92px}#ctlPause h2{margin:0;font:400 1.7rem var(--f-display)}#ctlPause p{margin:0;font-size:1.1rem;line-height:1.8;color:#ddd6fe}
-.g-off{opacity:.45;filter:grayscale(.7);position:relative}.g-off::after{content:'🔒 مغلقة';position:absolute;top:8px;inset-inline-start:8px;padding:2px 10px;border-radius:10px;background:#0009;color:#fff;font-size:.8rem}.tabbtn.locked{opacity:.5;filter:grayscale(.6)}.tabbtn[hidden]{display:none!important}.tabbtn.locked b::after{content:' 🔒'}`,
+.g-off{opacity:.45;filter:grayscale(.7);position:relative}.g-off::after{content:'🔒 مغلقة';position:absolute;top:8px;inset-inline-start:8px;padding:2px 10px;border-radius:10px;background:#0009;color:#fff;font-size:.8rem}.tabbtn.locked{opacity:.5;filter:grayscale(.6)}.tabbtn[hidden]{display:none!important}.tabbtn.locked b::after{content:' 🚧'}`,
  /* a teacher who only uses this page as the teacher is never blocked; on a device with a student account the settings apply to the student */
  isT(){return !!Online.teacherKey()&&!Online.acct()},
  locked(id){const c=this.cfg;return !!(c&&Array.isArray(c.lock)&&c.lock.includes(id))&&!this.isT()},
@@ -7311,7 +7346,7 @@ const Ctl={
   try{const c=JSON.parse(localStorage.getItem('mf_cfg')||'null');if(c&&typeof c==='object')this.cfg=c}catch(e){}
   const g0=go;go=function(ti,si,kh){let T=TABS[ti];
    if(T&&Ctl.hidden(T.id)){const dir=ti>=S.tab?1:-1;let j=ti;while(j>=0&&j<TABS.length&&(Ctl.hidden(TABS[j].id)||Ctl.locked(TABS[j].id)))j+=dir;if(j<0||j>=TABS.length||j===S.tab)return;ti=j;si=0;T=TABS[ti]}
-   if(T&&Ctl.locked(T.id)){toast(em('locked')+' «'+T.title+'» مغلق الآن؛ سيفتحه معلمك قريبًا.');try{sfx('bad')}catch(e){}return}
+   if(T&&Ctl.locked(T.id)){toast(em('hammer')+' المعلم يجهّز كوكب «'+T.title+'» ويبنيه الآن؛ سيُفتح لك قريبًا.');try{sfx('bad')}catch(e){}return}
    const r=g0.apply(this,[ti,si,kh]);Ctl.paintLocks();return r};
   const s0=sfx;sfx=function(){if(Ctl.cfg&&Ctl.cfg.sound===false&&!Ctl.isT())return;return s0.apply(this,arguments)};
   const cf=FX.confetti;FX.confetti=function(){if(Ctl.cfg&&Ctl.cfg.fx===false&&!Ctl.isT())return;return cf.apply(this,arguments)};
@@ -7322,7 +7357,7 @@ const Ctl={
   const qr=Q.render;Q.render=function(h,q,o){if(Ctl.cfg&&Ctl.cfg.hints===false)o=Object.assign({},o||{},{noHint:true});return qr.call(this,h,q,o)};
   setTimeout(()=>this.paint(),50)},
  apply(c){if(!c||typeof c!=='object')return;const old=this.cfg;this.cfg=c;try{Content.check(c.ct)}catch(e){}try{localStorage.setItem('mf_cfg',JSON.stringify(c))}catch(e){}RepCfg.rep=c.rep||{};this.logo(c);this.paint(old);if(old&&(JSON.stringify(old.sc||{})!==JSON.stringify(c.sc||{})||JSON.stringify(old.hide||[])!==JSON.stringify(c.hide||[])||JSON.stringify(old.lock||[])!==JSON.stringify(c.lock||[]))){try{paintScore();progress()}catch(e){}try{if(Online.acct()){Online.lastSig='';clearTimeout(Online.tl);Online.tl=setTimeout(()=>Online.sync({force:true,quiet:true}),400)}}catch(e){}
-  if(JSON.stringify(old.hide||[])!==JSON.stringify(c.hide||[])){try{const T=TABS[S.tab];if(T&&T.id==='start'&&S.step===0)go(S.tab,0,true)}catch(e){}}}
+  if(JSON.stringify(old.hide||[])!==JSON.stringify(c.hide||[])||JSON.stringify(old.lock||[])!==JSON.stringify(c.lock||[])){try{const T=TABS[S.tab];if(T&&T.id==='start'&&S.step===0)go(S.tab,0,true)}catch(e){}}}
   /* tell the server this device now holds the new settings (the teacher's dashboard counts how many students received them) */
   if((!old||old.v!==c.v)&&Online.acct()){clearTimeout(this.ak);this.ak=setTimeout(()=>{const a=Online.acct();if(a)Online.api('sync',{aid:a.aid,sk:a.sk,cv:c.v,w:Online.where()})},400)}},
  /* the report logo is stored apart (it is large): fetched once per version and kept on the device */
