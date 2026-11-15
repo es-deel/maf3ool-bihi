@@ -1884,6 +1884,7 @@ body.cls .opt{min-height:4.6rem}
 #dash .dh-wrap.nb{padding-bottom:8px}#dash .dh-wrap.nt{padding-top:14px}
 #dash .dh-top.ns{position:static}
 #dash .dh-wrap.cfv,#dash .dh-wrap.sfv{grid-template-columns:minmax(0,1fr)}#dash .dh-wrap>*,#dash .cf-pane,#dash .sf-pane{min-width:0;max-width:100%}
+#dash .dh-stale{color:#fbbf24;font-weight:700}
 </style></head><body><div class="sky" aria-hidden="true"><div class="stars"></div><div class="stars b"></div><img class="float-pl a" data-em="p2" alt=""><img class="float-pl b" data-em="p3" alt=""><i class="comet"></i></div>
 <header class="top"><div class="top-in">
  <div class="brand"><img data-em="logo" alt=""><div><h1>مغامرة النحو والإعراب</h1><small>رحلة بين الكواكب مع الأستاذ إسلام قنديل</small></div></div>
@@ -2445,16 +2446,17 @@ const LESSON_TP={kalam:'k',nom:'m',numbers:'n',rafa:'r',sentence:'s',subject:'f'
 const GAME_LES={det:['object'],flee:['object'],fix:['object'],build:['object'],kind:['kalam'],mub:['nom'],gate:['rafa'],zar:['zarf','ajl']};      // game -> lessons it cannot be played without (the other games draw from every visible question)
 const Hid={
  lesson(id){return typeof Ctl!=='undefined'&&!!Ctl.hidden&&Ctl.hidden(id)},
+ off(id){return this.lesson(id)||(typeof Ctl!=='undefined'&&!!Ctl.locked&&Ctl.locked(id))},   // hidden OR closed by the teacher: a planet the student cannot work on is left out of his score, his planet count and his report (it counts again when it reopens)
  any(l){return Array.isArray(l)?l.some(i=>this.lesson(i)):this.lesson(l)},      // a map / board / game built on one lesson or on several (hidden as soon as one of them is)
- tabs(){return TABS.filter(t=>!this.lesson(t.id))},
- tp(tp){const ids=Object.keys(LESSON_TP).filter(k=>LESSON_TP[k]===tp);return ids.length>0&&ids.every(i=>this.lesson(i))},
+ tabs(){return TABS.filter(t=>!this.off(t.id))},
+ tp(tp){const ids=Object.keys(LESSON_TP).filter(k=>LESSON_TP[k]===tp);return ids.length>0&&ids.every(i=>this.off(i))},
  game(id){return(GAME_LES[id]||[]).some(l=>this.lesson(l))},
  drills(){return typeof DRILLS==='undefined'?[]:DRILLS.filter(d=>!this.lesson(d.id))},
  games(){return GAMES.filter(g=>!this.game(g.id))},
  extra(){return typeof EXTRA==='undefined'?[]:EXTRA.filter(g=>!this.game(g.id))}};
 const Score={
- lesson(){return LQ.reduce((s,it)=>s+(Hid.lesson(it.tab)?0:LED[it.key]||0),0)},
- lessonMax(){return LQ.reduce((s,it)=>s+(Hid.lesson(it.tab)?0:it.pts),0)},
+ lesson(){return LQ.reduce((s,it)=>s+(Hid.off(it.tab)?0:LED[it.key]||0),0)},
+ lessonMax(){return LQ.reduce((s,it)=>s+(Hid.off(it.tab)?0:it.pts),0)},
  drills(){if(!this.xon()||typeof DRILLS==='undefined')return 0;return Hid.drills().reduce((s,d)=>s+(DQB[d.id]||[]).reduce((t,c,i)=>t+(c||0)*10*(i+1),0),0)},   // like the extra games: kept out of the score (and turned into bonus) if the teacher turns the extras off
  drillsMax(){return this.xon()&&typeof DRILLS!=='undefined'?Hid.drills().length*300:0},
  practice(){return PB.reduce((s,c,i)=>s+(c||0)*10*(i+1),0)+this.drills()},
@@ -2700,8 +2702,10 @@ const GROUPS=[
  {id:'g1',t:'أنواع الكلمة',d:'الاسم والفعل والحرف',c:'#38bdf8',tabs:['kalam']},
  {id:'g2',t:'الجملة الاسمية',d:'المبتدأ والخبر، وإعرابهما وعلامات رفعهما',c:'#4ade80',tabs:['nom','numbers','rafa']},
  {id:'g3',t:'الجملة الفعلية والفاعل',d:'أركان الجملة الفعلية، وإعراب الفاعل وعلامات رفعه',c:'#a78bfa',tabs:['sentence','subject']},
- {id:'g4',t:'المفعول به وأخواته',d:'المفعول به وعلامات نصبه ومقارنته بالفاعل، ثم المفعول لأجله وظرفا الزمان والمكان',c:'#2dd4bf',tabs:['object','signs','compare','parse','ajl','zarf','maps']},
- {id:'gz',t:'التدريب والختام',d:'تدريبات وألعاب وشهادة وتقرير',c:'#ffd43b',tabs:['practice','games','certificate','report'],end:true}];
+ {id:'g4',t:'المفعول به',d:'المفعول به وعلامات نصبه ومقارنته بالفاعل وإعرابه',c:'#2dd4bf',tabs:['object','signs','compare','parse']},
+ {id:'g5',t:'المفعول لأجله',d:'تعريفه وحكمه ومقارنته بالمفعول به',c:'#fb923c',tabs:['ajl']},
+ {id:'g6',t:'ظرفا الزمان والمكان',d:'تعريفهما وحكمهما ومقارنتهما بالجار والمجرور',c:'#f472b6',tabs:['zarf']},
+ {id:'gz',t:'التدريب والختام',d:'خرائط وتدريبات وألعاب وشهادة وتقرير',c:'#ffd43b',tabs:['maps','practice','games','certificate','report'],end:true}];
 const groupOf=id=>GROUPS.find(g=>g.tabs.includes(id))||GROUPS[GROUPS.length-1],gShown=g=>!g.tabs.length||g.tabs.some(id=>!Hid.lesson(id)),groupNo=g=>g.end?'':AR(GROUPS.filter(gShown).indexOf(g)+1);   // a group whose planets are all hidden disappears, and the numbers close up
 const PLHUE={kalam:200,nom:300,rafa:60,ajl:30,zarf:170,maps:140,practice:110,report:220,games:80}; /* the same picture on two planets gets another tint */
 function orrery(host){
@@ -4181,7 +4185,7 @@ const StarBox={
  build(src){const R=[],SEC=[],M=Score.max()||1,sh=v=>v*STARS_MAX/M,led=src?src.led||{}:LED,pb=src?src.pb||[0,0,0]:PB,gb=src?src.gb||{}:GB,dq=src?src.dq||{}:DQB,boss=src?((src.fb||{}).won?30:0):Score.boss(),best=(id,lv)=>((dq[id]||[])[lv-1])||0;
   const add=(k,n,ic,rows,note)=>{const v=rows.reduce((s,r)=>s+r.v,0),max=rows.reduce((s,r)=>s+r.max,0);rows.forEach(r=>{r.k=k;r.i=R.length;R.push(r)});SEC.push({k,n,ic,rows,v,max,note})};
   /* 1 · the questions inside the lesson planets */
-  {const by={};LQ.forEach(it=>{if(Hid.lesson(it.tab))return;(by[it.tab]=by[it.tab]||[]).push(it)});
+  {const by={};LQ.forEach(it=>{if(Hid.off(it.tab))return;(by[it.tab]=by[it.tab]||[]).push(it)});
    add('lesson','أسئلة الدروس (داخل الكواكب)','books',TABS.filter(t=>by[t.id]).map(t=>{const L=by[t.id],v=L.reduce((s,it)=>s+(led[it.key]||0),0),max=L.reduce((s,it)=>s+it.pts,0),miss=L.filter(it=>(led[it.key]||0)<it.pts),first=miss.length?Math.min(...miss.map(it=>it.step)):0;
     return{id:t.id,n:t.title,v,max,det:`${AR(L.length-miss.length)} من ${AR(L.length)} سؤالًا كاملة`,go:{tab:t.id,step:first}}}),'كل سؤال تُجيب عنه صحيحًا لأول مرة يمنحك ١٠ نقاط × مستواه (سهل ١، متوسط ٢، صعب ٣).')}
   /* 2 · the challenge stages */
@@ -4254,7 +4258,7 @@ const qn=k=>k===1?'سؤال واحد':k===2?'سؤالين':k<=10?AR(k)+' أسئ�
 const Incomplete={
  list(){
   const planets=[];let count=0,nQ=0;
-  TABS.forEach((t,ti)=>{if(t.id==='report'||Hid.lesson(t.id))return;const items=[];
+  TABS.forEach((t,ti)=>{if(t.id==='report'||Hid.off(t.id))return;const items=[];
    if(t.id==='practice'){STAGES.forEach((s,i)=>{if((PB[i]||0)<3){count++;items.push({t:`${s.n}: ${s.d}`,note:(PB[i]||0)?'لم تُجتَز بعد (تحتاج ٣ إجابات صحيحة)':'لم تُلعَب بعد',s:0,h:'stage',i})}})}
    else if(t.id==='games'){GAMES.forEach((g,i)=>{if(!Hid.game(g.id)&&!(GB[g.id]>0)){count++;items.push({t:g.t,note:'لم تفز بها بعد',s:0,h:'game',i})}})}
    else t.steps.forEach((st,si)=>{
@@ -4266,7 +4270,7 @@ const Incomplete={
    if(items.length)planets.push({id:t.id,title:t.title,pl:t.pl,ti,items})});
   return{planets,count,nQ,sig:planets.map(p=>p.id+':'+p.items.map(i=>(i.h?i.h+i.i:i.s)+(i.q?'q'+i.q.join(''):'')).join(',')).join('|')}},
  /* lesson items answered / all lesson items */
- answered(){return LQ.filter(x=>!Hid.lesson(x.tab)&&Ledger.has(x.key)).length}};
+ answered(){return LQ.filter(x=>!Hid.off(x.tab)&&Ledger.has(x.key)).length}};
 
 /* everything the report says comes from this one snapshot */
 function REP(){
@@ -6033,7 +6037,7 @@ const Dash={
  fmtPhone(phone){const p=String(phone||'').replace(/\D/g,'');if(!p)return'—';const i=this.intl(p);if(i.startsWith('20')&&/^01/.test(p))return`<bdi dir="ltr">+20 ${i.slice(2)}</bdi> <small>مصر</small>`;if(i.startsWith('966')&&/^05/.test(p))return`<bdi dir="ltr">+966 ${i.slice(3)}</bdi> <small>السعودية</small>`;return`<bdi dir="ltr">${esc(p)}</bdi>`},
  waLink(phone,text){return'https://wa.me/'+this.intl(phone)+(text?'?text='+encodeURIComponent(text):'')},
  /* a small window inside the dashboard (manage classes) */
- modal(html,setup){const d=$('#dash'),o=$('.dh-modal',d);if(o)o.remove();if(!html)return;
+ modal(html,setup){const d=$('#dash');if(!d)return;const o=$('.dh-modal',d);if(o)o.remove();if(!html)return;
   const m=document.createElement('div');m.className='dh-modal';m.innerHTML=`<div class="dh-md" role="dialog" aria-modal="true">${html}</div>`;d.appendChild(m);m.onclick=e=>{if(e.target===m)this.modal()};if(setup)setup(m)},
  classView(d){const S=this.S,A=S.cl;
   const multi=S.scope==='all',sec=S.sec||'over',now=this.now();
@@ -6113,7 +6117,7 @@ const Dash={
   [...sel].forEach(k=>{if(!A.by.some(r=>r.k===k))sel.delete(k)});
   const OPT=[['pos','الترتيب العام'],['cls','الفصل'],['name','الاسم'],['pts','الدرجة'],['acc','دقة الإجابات'],['done','الكواكب المنجزة'],['last','آخر نشاط'],['inc','الأجزاء الناقصة']];
   const th=(k,t)=>`<th><button type="button" data-s="${k}" class="${S.sort===k?'on':''}">${t}${S.sort===k?(S.asc?' ▲':' ▼'):''}</button></th>`;
-  const tr=(r,cp)=>{const on=r.seen&&now-r.seen<90000;return`<tr class="${sel.has(r.k)?'sel':''}"><td><input type="checkbox" data-pick="${esc(r.k)}" aria-label="تحديد ${esc(r.name)}"${sel.has(r.k)?' checked':''}></td><td>${r.empty?'—':AR(cp||r.pos)}</td><td><button type="button" class="nm" data-o="${esc(r.k)}">${on?'<i class="dh-dot on"></i> ':''}${esc(r.name)}</button><small>${em(RANKS[r.rk].ic)} ${RANKS[r.rk].n}${r.empty?' · سجّل ولم يبدأ':r.det?'':' · بلا تفاصيل'} · ${this.fmtPhone(r.phone)}</small></td>${multi&&!grp?`<td>${esc(r.cls)}</td>`:''}
+  const tr=(r,cp)=>{const on=r.seen&&now-r.seen<90000;return`<tr class="${sel.has(r.k)?'sel':''}"><td><input type="checkbox" data-pick="${esc(r.k)}" aria-label="تحديد ${esc(r.name)}"${sel.has(r.k)?' checked':''}></td><td>${r.empty?'—':AR(cp||r.pos)}</td><td><button type="button" class="nm" data-o="${esc(r.k)}">${on?'<i class="dh-dot on"></i> ':''}${esc(r.name)}</button><small>${em(RANKS[r.rk].ic)} ${RANKS[r.rk].n}${r.empty?' · سجّل ولم يبدأ':r.det?'':' · بلا تفاصيل'} · ${this.fmtPhone(r.phone)}${r.cv<((this.S.cfg&&this.S.cfg.v)||0)?' · <b class="dh-stale" title="لم يفتح اللعبة بعد آخر تغيير في الإعدادات؛ نتيجته المعروضة قديمة وتتحدّث فور فتحه لها">⏳ بانتظار التحديث</b>':''}</small></td>${multi&&!grp?`<td>${esc(r.cls)}</td>`:''}
    <td><b>${AR(r.pts)}</b> <small>(${AR(r.spct)}٪)</small><i class="dh-mini"><u style="width:${Math.max(3,r.spct)}%"></u></i></td><td>${r.n?AR(r.acc)+'٪':'—'}</td><td>${AR(r.done)}/${AR(r.total)}</td><td>${r.empty?'—':r.inc?AR(r.inc):'✓'}</td><td>${on?'الآن':r.last?ago(r.last):'—'}</td>
    <td class="dh-ac"><button type="button" class="btn sky sm" data-o="${esc(r.k)}">التقرير</button><button type="button" class="btn ghost sm" data-ed="${esc(r.k)}">تعديل</button></td></tr>`};
   const cols=multi&&!grp?10:9;let body='';
@@ -6190,7 +6194,7 @@ const Dash={
    m.addEventListener('change',e=>{if(e.target.matches&&e.target.matches('[data-tb]'))paintLs()});paintLs();
    $('#dhSco',m).onchange=e=>this.ctl(e.target.value);
    $('#dhRf',m).onclick=async()=>{await this.load();this.ctl(scope)};
-   const post=async cfg=>{msg('جارٍ الحفظ…');const r=await Online.api('config',{cfg},S.key);if(!r.ok){msg(this.err(r));if(r.error==='login'){this.close();Online.teacherForget();Online.teacherAsk(Online.why.login)}return false}S.cfg=r.cfg;return true};
+   const post=async cfg=>{msg('جارٍ الحفظ…');const r=await Online.api('config',{cfg},S.key);if(!r.ok){msg(this.err(r));if(r.error==='login'){this.close();Online.teacherForget();Online.teacherAsk(Online.why.login)}return false}S.cfg=r.cfg;this.afterCfg();return true};
    const fields=extra=>Object.assign({scope,notice:$('#dhNt',m).value,pause:$('#dhPs',m).checked,pauseMsg:$('#dhPm',m).value,lock:sels().filter(b=>b.value==='lock').map(b=>b.dataset.tb),hide:sels().filter(b=>b.value==='hide').map(b=>b.dataset.tb),gamesOff:$$('[data-gm]',m).filter(b=>!b.checked).map(b=>b.dataset.gm)},cl?{}:{reg:$('#dhRg',m).checked,sc:{x:$('#dhSx',m).checked},hints:$('#dhHn',m).checked,sound:$('#dhSn',m).checked,fx:$('#dhFx',m).checked,win:{on:$('#dhWn',m).checked,from:$('#dhWf',m).value||'08:00',to:$('#dhWt',m).value||'14:00'}},extra||{});
    const ov=$('#dhOv',m);
    $('#dhGs',m).onclick=async()=>{if(cl&&ov&&!ov.checked){if(has&&await post({scope,reset:true}))msg('عاد الفصل إلى إعدادات «كل الفصول» ✓');else if(!has)msg('فعّل «إعدادات خاصة بهذا الفصل» أولًا.');return}
@@ -6740,6 +6744,8 @@ const Ch={
 };
 
 Object.assign(Dash,{
+ /* after the teacher changes the lessons (close / hide / reopen) the students' devices pick the change up on their next check-in (within ~30 s if open) and send their data again: refresh the board right away and once more after that */
+ afterCfg(){const run=()=>{const S=this.S;if(!S.key||$('#dash').hidden)return;this.load().then(()=>{const d=this.root();if(S.view==='class')this.classView(d);else if(S.view==='cfile')this.classFile(d)})};[1500,36000].forEach(ms=>setTimeout(run,ms))},
  /* ---------- helpers ---------- */
  /* the analysis of ONE class (on copies of its rows, so the positions of the screen's own rows are not touched) */
  caOf(cls){const S=this.S;S.ca=S.ca||{};if(!S.ca[cls]){const rows=S.rows.filter(r=>r.cls===cls).map(r=>Object.assign({},r));S.ca[cls]={rows,A:this.analyse(rows)}}return S.ca[cls]},
@@ -7097,7 +7103,7 @@ const Online={
  /* ---------- the last step of the report: it is sent automatically ---------- */
  finalStep(sc){const R0=REP(),stat=(t,c='')=>{const e=$('#rpS',sc);if(e){e.textContent=t;e.className='rpt-stat '+c}};let busy=false;
   const box=()=>{const b=$('#olBox',sc);if(!b)return;const a=this.acct();
-   b.innerHTML=!a?`${em('envelope')} <b>سجّل بياناتك أولًا</b> ليصل تقريرك إلى معلمك.`:this.stat.ok?`${em('check_mark_button')} <b>وصل تقريرك إلى الأستاذ إسلام ✓</b> <span>آخر إرسال ${ago(this.stat.at)}. وسيصله كل تحديث تلقائيًا.</span>`:this.stat.ok===false?`⚠ <b>تعذّر الإرسال الآن</b> <span>تأكد من الاتصال بالإنترنت ثم اضغط «أرسل التقرير الآن».</span>`:'جارٍ إرسال تقريرك إلى معلمك…'};
+   b.innerHTML=!a?(Ctl.isT()?`${em('man_teacher')} <b>وضع المعلم</b> <span>التقرير للمعاينة والحفظ فقط؛ لا يُرسل إلى أحد.</span>`:`${em('envelope')} <b>سجّل بياناتك أولًا</b> ليصل تقريرك إلى معلمك.`):this.stat.ok?`${em('check_mark_button')} <b>وصل تقريرك إلى الأستاذ إسلام ✓</b> <span>آخر إرسال ${ago(this.stat.at)}. وسيصله كل تحديث تلقائيًا.</span>`:this.stat.ok===false?`⚠ <b>تعذّر الإرسال الآن</b> <span>تأكد من الاتصال بالإنترنت ثم اضغط «أرسل التقرير الآن».</span>`:'جارٍ إرسال تقريرك إلى معلمك…'};
   sc.innerHTML=`<p class="lead rise">تقريرك جاهز يا <b>${esc(R0.name)}</b>! يصل إلى معلمك تلقائيًا، ويمكنك حفظ نسخة PDF لنفسك.</p>
    <div class="rpt-send ol-sent" id="olBox" role="status"></div>
    ${R0.inc.count?incBanner(R0):''}
@@ -7126,7 +7132,13 @@ const Online={
   catch(e){/* never leave the teacher on a silent page: show the sign-in form with the reason */this.teacherForget();try{Dash.close()}catch(x){}await this.teacherAsk('تعذّر فتح اللوحة؛ سجّل الدخول من جديد.')}
   finally{this.tBusy=false}},
  teacherForget(){try{localStorage.removeItem(this.TK);sessionStorage.removeItem(this.TK)}catch(e){}},
- async teacherLogout(){const k=this.teacherKey()||Dash.S.key;try{await this.api('auth',{op:'logout'},k)}catch(e){}this.teacherForget();Dash.close();Dash.modal();toast('سُجّل خروج المعلم'); Ctl.paint()},
+ /* a teacher signed in on a device that has no student account plays under the teacher's own name: no student registration is asked, nothing is sent to the board, and the settings never lock the teacher out */
+ teacherName(){if(!this.teacherKey()||this.acct())return false;let u='';try{u=localStorage.getItem('mf_tu')||''}catch(e){}
+  if(!NAME()){try{localStorage.setItem('mf_tmn','1')}catch(e){}Prof.setName('المعلم'+(u?' '+u:''))}return true},
+ async teacherLogout(){const k=this.teacherKey()||Dash.S.key;try{await this.api('auth',{op:'logout'},k)}catch(e){}this.teacherForget();Dash.close();Dash.modal();
+  let tm=false;try{tm=localStorage.getItem('mf_tmn')==='1';localStorage.removeItem('mf_tmn');localStorage.removeItem('mf_tu')}catch(e){}
+  if(tm){try{store.wipe()}catch(e){}location.reload();return}   // the teacher's play-through is cleared; the student sign-in comes back
+  toast('سُجّل خروج المعلم'); Ctl.paint()},
  /* sign in with user name + password (kept in the database); the first time, the account is created with the server's setup key */
  async teacherAsk(msg0,mode){
   const d=$('#dlg'),close=()=>{d.hidden=true;d.innerHTML=''};d.hidden=false;
@@ -7144,12 +7156,12 @@ const Online={
    <button class="btn ghost sm" type="button" id="olSw">${setup?'لدي حساب بالفعل':'أول مرة؟ أو نسيتُ كلمة المرور'}</button></div>`;
   const msg=(t,c='bad')=>{const m=$('#olTM',d);m.textContent=t;m.className='dlg-err bk-msg on '+c};
   $('#olTX',d).onclick=close;d.onkeydown=e=>{if(e.key==='Escape')close()};$('#olSw',d).onclick=()=>this.teacherAsk('',setup?'login':'setup');
-  const go=async()=>{const user=$('#olU',d).value.trim(),pass=$('#olP',d).value;if(!user||!pass){msg('اكتب اسم المستخدم وكلمة المرور.');return}
+  const submit=async()=>{const user=$('#olU',d).value.trim(),pass=$('#olP',d).value;if(!user||!pass){msg('اكتب اسم المستخدم وكلمة المرور.');return}
    msg('جارٍ التحقق…','ok');const body=setup?{op:'setup',user,pass,key:$('#olK',d).value}:{op:'login',user,pass},a=await this.api('auth',body);
    if(!a.ok){msg(this.err(a));return}
    this.teacherForget();try{($('#olRM',d).checked?localStorage:sessionStorage).setItem(this.TK,a.tok)}catch(e){}
-   const r=await Dash.open(a.tok,true);if(!r.ok){msg(this.err(r));return}Dash.S.user=a.user;close();Ctl.paint()};
-  $('#olTG',d).onclick=go;d.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();go()}});setTimeout(()=>{try{$('#olU',d).focus()}catch(e){}},60)},
+   const r=await Dash.open(a.tok,true);if(!r.ok){msg(this.err(r));return}Dash.S.user=a.user;close();try{localStorage.setItem('mf_tu',a.user)}catch(e){}if(this.teacherName()){try{Prof.paintName();go(S.tab,S.step,true)}catch(e){}}Ctl.paint()};
+  $('#olTG',d).onclick=submit;d.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.tagName==='INPUT'){e.preventDefault();submit()}});setTimeout(()=>{try{$('#olU',d).focus()}catch(e){}},60)},
  header(){const g=$('.tools .grp');if(!g||$('#tchBtn'))return;
   g.insertAdjacentHTML('beforebegin',`<button class="chip-btn tch-btn" id="tchBtn" type="button" aria-label="لوحة المعلم" title="لوحة المعلم: تقارير الطلاب وتحليل الفصل">${em('man_teacher')}<span>المعلم</span></button>`);
   g.insertAdjacentHTML('beforebegin',`<button class="chip-btn tch-btn" id="rkBtn" type="button" hidden aria-label="لوحة شرف الفصل" title="لوحة شرف الفصل">${em('1st_place_medal')}<span>الترتيب</span></button>`);
@@ -7160,11 +7172,13 @@ const Online={
  init(){
   const st=document.createElement('style');st.textContent=Gate.CSS+Ctl.CSS+RESP_CSS;document.head.appendChild(st);
   this.fromOld();
+  try{if(localStorage.getItem('mf_tmn')==='1'&&!this.teacherKey()){localStorage.removeItem('mf_tmn');store.wipe();location.reload();return}}catch(e){}   // the teacher signed out (or the session ended): clear the teacher's own play-through
+  this.teacherName();
   const rv=new URLSearchParams(location.search).get('r');
   if(rv){this.viewer=1;Prof.ask=function(){};Backup.open=function(){};Resume.saveState=function(){return{ok:true,need:false,b:null}};setTimeout(()=>Viewer.open(rv),0);return}
   Ctl.init();
   Prof.ask=function(mode){if(mode==='edit'&&Online.acct())Gate.account();else Gate.open(mode)};
-  Backup.open=function(){if(Online.acct())Gate.account();else Gate.open('first')};
+  Backup.open=function(){if(Online.acct())Gate.account();else if(Ctl.isT())toast(em('man_teacher')+' أنت في وضع المعلم: لا يُحفظ تقدّم ولا يُرسل تقرير. سجّل الخروج من لوحة المعلم لتسجّل طالبًا.');else Gate.open('first')};
   Resume.saveState=function(){return{ok:true,need:false,b:null}};
   {const rt=TABS.find(t=>t.id==='report');if(rt&&rt.steps.length){const last=rt.steps[rt.steps.length-1];
    Object.assign(last,{t:'تقريرك وصل إلى معلمك',tip:()=>`أحسنتَ يا ${NAME()||'بطل'}! تقريرك يصل إلى معلمك تلقائيًا، ويمكنك حفظ نسخة PDF لنفسك.`,render:sc=>Online.finalStep(sc)})}}
@@ -7203,7 +7217,8 @@ const Gate={
 @media(max-width:520px){.tch-btn span{display:none}}`,
  async classList(){if(this.classes)return this.classes;const r=await Online.api('config');if(r.ok&&r.classes&&r.classes.length){this.classes=r.classes;return this.classes}return null},
  open(mode,note){
-  if(Online.tBusy||document.body.classList.contains('dash-on')||$('#olU'))return;   // the teacher is signing in / working: never cover that
+  if(Online.tBusy||document.body.classList.contains('dash-on')||$('#olU'))return;
+  if(Ctl.isT()){Online.teacherName();return}   // the teacher's own session: never ask for a student account   // the teacher is signing in / working: never cover that
   const d=$('#dlg'),link=mode==='link',cur=NAME(),old=mode==='old';d.hidden=false;
   d.innerHTML=`<div class="dlg-card zoom-in gt" role="dialog" aria-modal="true" aria-labelledby="gtT"><img class="dlg-m" src="${IMG.boyA}" alt="">
    <h2 id="gtT">${link?'سجّل بياناتك لتُحفظ نتائجك':'أهلًا بك في مغامرة النحو والإعراب!'}</h2>
@@ -7306,7 +7321,7 @@ const Ctl={
   setInterval(()=>Ctl.paint(),20000);
   const qr=Q.render;Q.render=function(h,q,o){if(Ctl.cfg&&Ctl.cfg.hints===false)o=Object.assign({},o||{},{noHint:true});return qr.call(this,h,q,o)};
   setTimeout(()=>this.paint(),50)},
- apply(c){if(!c||typeof c!=='object')return;const old=this.cfg;this.cfg=c;try{Content.check(c.ct)}catch(e){}try{localStorage.setItem('mf_cfg',JSON.stringify(c))}catch(e){}RepCfg.rep=c.rep||{};this.logo(c);this.paint(old);if(old&&(JSON.stringify(old.sc||{})!==JSON.stringify(c.sc||{})||JSON.stringify(old.hide||[])!==JSON.stringify(c.hide||[]))){try{paintScore();progress()}catch(e){}
+ apply(c){if(!c||typeof c!=='object')return;const old=this.cfg;this.cfg=c;try{Content.check(c.ct)}catch(e){}try{localStorage.setItem('mf_cfg',JSON.stringify(c))}catch(e){}RepCfg.rep=c.rep||{};this.logo(c);this.paint(old);if(old&&(JSON.stringify(old.sc||{})!==JSON.stringify(c.sc||{})||JSON.stringify(old.hide||[])!==JSON.stringify(c.hide||[])||JSON.stringify(old.lock||[])!==JSON.stringify(c.lock||[]))){try{paintScore();progress()}catch(e){}try{if(Online.acct()){Online.lastSig='';clearTimeout(Online.tl);Online.tl=setTimeout(()=>Online.sync({force:true,quiet:true}),400)}}catch(e){}
   if(JSON.stringify(old.hide||[])!==JSON.stringify(c.hide||[])){try{const T=TABS[S.tab];if(T&&T.id==='start'&&S.step===0)go(S.tab,0,true)}catch(e){}}}
   /* tell the server this device now holds the new settings (the teacher's dashboard counts how many students received them) */
   if((!old||old.v!==c.v)&&Online.acct()){clearTimeout(this.ak);this.ak=setTimeout(()=>{const a=Online.acct();if(a)Online.api('sync',{aid:a.aid,sk:a.sk,cv:c.v,w:Online.where()})},400)}},
@@ -7387,7 +7402,7 @@ const Honor={
     <span class="hn-cs">${r.hidden?'اسمك غير ظاهر في اللوحة':r.pos?`ترتيبك <b>${AR(r.pos)}</b> من ${AR(r.total)} · ${r.pos===1?'أنت في القمة!':r.near?`يفصلك ${this.fmt(r.near.gap)} ${this.unit(r)==='٪'?'٪':this.unit(r)} عن ${esc(r.near.n)}`:''}`:'أكمل بعض الأجزاء لتظهر في الترتيب'}</span></button>`;
    h.firstChild.onclick=()=>Honor.open()})},
  close(){const o=$('#hnHall');if(o){o.remove()}document.body.classList.remove('hn-on');[...document.body.children].forEach(e=>{try{if(e.dataset.hnInert){e.inert=false;delete e.dataset.hnInert}}catch(x){}});try{this.ret&&this.ret.focus()}catch(e){}},
- async open(){const a=Online.acct();if(!a){Gate.open('first');return}
+ async open(){const a=Online.acct();if(!a){if(Ctl.isT())toast('لوحة الشرف تظهر للطلاب؛ تابعها وأدِرها من لوحة المعلم.');else Gate.open('first');return}
   this.ret=document.activeElement;this.close();
   const o=document.createElement('div');o.id='hnHall';o.className='hn';o.setAttribute('role','dialog');o.setAttribute('aria-modal','true');o.setAttribute('aria-labelledby','hnT');
   o.innerHTML=`<div class="hn-box"><button class="hn-x" type="button" aria-label="إغلاق">✕</button><div class="hn-body" id="hnB"><p class="hn-wait">جارٍ تحميل لوحة الشرف…</p></div></div>`;
