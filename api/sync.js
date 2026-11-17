@@ -1,5 +1,5 @@
 'use strict';
-const { redis, pipeline, send, body, parseCode, nameKey, cfg, eff, same } = require('./_lib');
+const { redis, pipeline, send, body, parseCode, nameKey, cfg, eff, same, parseCR, newCR } = require('./_lib');
 const MAX_SNAP = 250000, MAX_DETAIL = 40000;
 /* the student's page calls this: a heartbeat (who is writing now), and the progress snapshot + result code + detailed report when something changed */
 module.exports = async (req, res) => {
@@ -7,7 +7,7 @@ module.exports = async (req, res) => {
   const b = await body(req), aid = String(b.aid || '').slice(0, 200);
   if (!aid) return send(res, 400, { error: 'bad_account' });
   try {
-    const [name, cls, phone, ts0, sk, aw, rv0, snap0, bkt0, rst0, ce0] = await redis(['HMGET', 'mf:acc:' + aid, 'name', 'cls', 'phone', 'ts', 'sk', 'aw', 'rv', 'snap', 'bkt', 'rst', 'ce']);
+    const [name, cls, phone, ts0, sk, aw, rv0, snap0, bkt0, rst0, ce0, cr0] = await redis(['HMGET', 'mf:acc:' + aid, 'name', 'cls', 'phone', 'ts', 'sk', 'aw', 'rv', 'snap', 'bkt', 'rst', 'ce', 'cr']);
     if (!name) return send(res, 404, { error: 'no_account' });
     if (!sk || !same(b.sk || '', sk)) return send(res, 401, { error: 'bad_session' });
     const now = Date.now(), w = String(b.w || '').slice(0, 40), cmds = [['HSET', 'mf:seen:' + cls, aid, JSON.stringify({ t: now, w, cv: Math.floor(+b.cv || 0) })]];
@@ -34,6 +34,10 @@ module.exports = async (req, res) => {
         status = status === 'old' ? status : 'saved';
       }
     }
+    /* the certificate: a student who made his certificate on his device registers it here once (the teacher then owns it: edits, withdraws, restores). The page gets the record back whenever its version differs. */
+    let cr = parseCR(cr0);
+    if (!cr && b.cr && typeof b.cr === 'object') { cr = newCR(b.cr, 's'); set.push('cr', JSON.stringify(cr)); extra.cr = cr; }
+    else if ((cr ? cr.v : 0) !== Math.floor(+b.crv || 0)) extra.cr = cr;
     if (set.length) cmds.push(['HSET', 'mf:acc:' + aid].concat(set));
     await pipeline(cmds);
     let awards = []; try { awards = aw ? JSON.parse(aw) : []; } catch (e) { awards = []; }

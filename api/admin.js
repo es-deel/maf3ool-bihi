@@ -1,6 +1,6 @@
 'use strict';
 const crypto = require('crypto');
-const { redis, pipeline, send, deny, body, classes, h2o, hashPw, cfg, saveCfg, normPhone, normName, aidOf, classRows, rankRows, seasonBase } = require('./_lib');
+const { redis, pipeline, send, deny, body, classes, h2o, hashPw, cfg, saveCfg, normPhone, normName, aidOf, classRows, rankRows, seasonBase, parseCR, newCR, cleanCRs, cleanCRd } = require('./_lib');
 const err = e => ({ code: e.code === 'no_db' ? 503 : 500, o: { error: e.code === 'no_db' ? 'no_db' : 'server' } });
 
 /* delete one student and everything stored about him */
@@ -138,6 +138,27 @@ module.exports = async (req, res) => {
       const list = (Array.isArray(b.aids) ? b.aids : [aid]).map(x => String(x || '').slice(0, 200)).filter(Boolean).slice(0, 250); let k = 0;
       for (const a of list) { if (!(await redis(['HGET', 'mf:acc:' + a, 'name']))) continue; await redis(['HSET', 'mf:acc:' + a, 'ce', b.v === false || op === 'certno' ? '' : '1']); k++; }
       return send(res, 200, { ok: true, n: k });
+    }
+    /* a student's certificate (the teacher owns it): give one {aid, nm, dt, s, d}, or change / withdraw / restore {aid, nm?, dt?, s?, d?, reset?, st?:'ok'|'revoked'}. Every change raises v, so the student's page picks it up by itself. */
+    if (op === 'certgive' || op === 'certset') {
+      const [name, raw] = await redis(['HMGET', 'mf:acc:' + aid, 'name', 'cr']); if (!name) return send(res, 404, { error: 'no_account' });
+      let cr = parseCR(raw);
+      if (op === 'certgive') {
+        if (cr && cr.st === 'ok') return send(res, 200, { ok: true, cr, kept: 1 });
+        const n2 = newCR({ nm: b.nm || name, dt: b.dt, s: b.s, d: b.d }, 't');
+        if (cr) { n2.id = cr.id; n2.v = cr.v + 1; }
+        cr = n2;
+      } else {
+        if (!cr) return send(res, 404, { error: 'no_cert' });
+        if ('nm' in b) { const v = String(b.nm || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40); if (v.length >= 2) cr.nm = v; }
+        if ('dt' in b) cr.dt = String(b.dt || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40);
+        if (b.s && typeof b.s === 'object') cr.s = cleanCRs(Object.assign({}, cr.s, b.s));
+        if (b.reset) cr.d = {}; if (b.d && typeof b.d === 'object') cr.d = Object.assign({}, cr.d, cleanCRd(b.d));
+        if (b.st === 'ok' || b.st === 'revoked') cr.st = b.st;
+        cr.v = (cr.v || 1) + 1; cr.up = Date.now();
+      }
+      await redis(['HSET', 'mf:acc:' + aid, 'cr', JSON.stringify(cr)]);
+      return send(res, 200, { ok: true, cr });
     }
     if (op === 'wkstat') {   // progress of the weekly class goal: total, participants, top contributors
       const c = await cfg(true), w = c.wk;

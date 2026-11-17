@@ -128,6 +128,27 @@ function cleanCert(b, old) {
   if (b.d && typeof b.d === 'object') { const d = Object.assign({}, r.d), x = b.d; [['title', 30], ['lead', 50], ['body', 220], ['honor', 40], ['teacher', 40], ['role', 40], ['school', 60]].forEach(([k, l]) => { if (k in x) d[k] = tx(x[k], l); }); if (CERT_TH.includes(x.theme)) d.theme = x.theme; ['stats', 'badges', 'bonus', 'logo'].forEach(k => { if (k in x) d[k] = !!x[k]; }); r.d = d; }
   return r;
 }
+/* a student's certificate record (field «cr» of his account): who/what is printed, the figures at the time it was earned, the teacher's changes to the design (d) and its state (ok | revoked).
+   v rises with every change, so a student's page knows when to fetch the new one. */
+function cleanCRs(s) {
+  const n = v => Math.max(0, Math.min(1e6, Math.floor(+v) || 0)), o = {}; s = s && typeof s === 'object' ? s : {};
+  ['pts', 'max', 'stars', 'smax', 'bonus', 'bstars'].forEach(k => { o[k] = n(s[k]); });
+  o.rank = tx(s.rank, 30);
+  o.badges = (Array.isArray(s.badges) ? s.badges : []).map(x => String(x || '').replace(/[^a-z0-9_]/g, '').slice(0, 40)).filter(Boolean).slice(0, 10);
+  return o;
+}
+function cleanCRd(x) {
+  const d = {}; if (!x || typeof x !== 'object') return d;
+  [['title', 30], ['lead', 50], ['body', 220], ['honor', 40], ['teacher', 40], ['role', 40], ['school', 60]].forEach(([k, l]) => { if (k in x) d[k] = tx(x[k], l); });
+  if (CERT_TH.includes(x.theme)) d.theme = x.theme;
+  ['stats', 'badges', 'bonus', 'logo'].forEach(k => { if (k in x) d[k] = !!x[k]; });
+  return d;
+}
+function parseCR(raw) { try { const o = JSON.parse(raw || 'null'); return o && typeof o === 'object' && o.id ? o : null; } catch (e) { return null; } }
+function newCR(src, by) {
+  const now = Date.now(); src = src || {};
+  return { id: crypto.randomBytes(4).toString('hex'), v: 1, at: now, up: now, st: 'ok', by, nm: tx(src.nm, 40), dt: tx(src.dt, 40), s: cleanCRs(src.s), d: cleanCRd(src.d) };
+}
 const REP_SEC = ['compare', 'topics', 'heat', 'wrong', 'plan', 'notes', 'recs', 'students', 'insights'];
 /* the look of the reports (teacher + student): school line, titles, footer, parent note, colour, which sections are printed */
 function cleanRep(b, old) {
@@ -169,4 +190,4 @@ async function saveCfg(c) { await redis(['SET', 'mf:cfg', JSON.stringify(c)]); c
 async function limited(key, max) { const n = await redis(['INCR', key]); await redis(['EXPIRE', key, '600']); return n > max; }
 const qs = (req, k) => (req.query && req.query[k]) || new URL(req.url, 'http://x').searchParams.get(k);
 const ip = req => String(req.headers['x-forwarded-for'] || '').split(',')[0].trim().slice(0, 45) || 'x';
-module.exports = { parseCode, nameKey, normCls, redis, pipeline, h2o, normPhone, intlPhone, normName, classes, aidOf, DEFAULT_CLASSES, dbConf, body, send, deny, qs, hashPw, checkPw, userKey, same, newToken, cfg, cleanCfg, saveCfg, eff, limited, ip, TOKEN_TTL, classRows, rankRows, boardName, seasonBase, BOARD_TOP };
+module.exports = { cleanCRs, cleanCRd, parseCR, newCR, parseCode, nameKey, normCls, redis, pipeline, h2o, normPhone, intlPhone, normName, classes, aidOf, DEFAULT_CLASSES, dbConf, body, send, deny, qs, hashPw, checkPw, userKey, same, newToken, cfg, cleanCfg, saveCfg, eff, limited, ip, TOKEN_TTL, classRows, rankRows, boardName, seasonBase, BOARD_TOP };
