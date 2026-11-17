@@ -6936,14 +6936,14 @@ Object.assign(Dash,{
 
  /* ================= THE STUDENT FILE ================= */
  async sfLoad(r){const S=this.S;S.sf=S.sf||{};if(S.sf[r.k])return S.sf[r.k];
-  const [det,j2]=r.empty?[null,{ok:false}]:await Promise.all([this.detail(r),this.fullData(r,true)]);
+  const [det,j2]=r.empty?[null,await this.fullData(r,true).then(f=>({ok:false,crok:!!(f&&f.ok),cr:f&&f.ok?f.cr:null})).catch(()=>({ok:false}))]:await Promise.all([this.detail(r),this.fullData(r,true)]);
   const ca=this.caOf(r.cls),R=this.R(r,det),nt=this.notes(r,R,ca.A);
   const cr=ca.rows.find(x=>x.k===r.k),rr=Object.assign({},r,{pos:cr&&!r.empty?cr.pos:r.pos});
   return S.sf[r.k]={det,j2,R,nt,ca,build:()=>this.studentPages(rr,R,ca.A,nt)}},
  async studentView(d){const S=this.S,A=S.cl,r=A.by.find(x=>x.k===S.cur);if(!r){this.show('class');return}
   const from=S.from==='cfile'?'cfile':'class',ca=this.caOf(r.cls),list=this.sorted(from==='cfile'?ca.A.by:undefined),i=list.findIndex(x=>x.k===r.k),prev=list[i-1],next=list[i+1],
    on=r.seen&&this.now()-r.seen<90000,cr=ca.rows.find(x=>x.k===r.k),pos=cr&&!r.empty?cr.pos:0,N=ca.A.N,SF=S.sft||'ov';
-  const TABS_=r.empty?[['ov','نظرة عامة'],['mg','الإدارة']]:[['ov','نظرة عامة'],['sc','الدرجات والنجوم'],['sk','المهارات والأخطاء'],['ls','الدروس'],['ac','النشاط والإنجازات'],['ce','الشهادة'],['rp','التقرير'],['mg','الإدارة']];
+  const TABS_=r.empty?[['ov','نظرة عامة'],['ce','الشهادة'],['mg','الإدارة']]:[['ov','نظرة عامة'],['sc','الدرجات والنجوم'],['sk','المهارات والأخطاء'],['ls','الدروس'],['ac','النشاط والإنجازات'],['ce','الشهادة'],['rp','التقرير'],['mg','الإدارة']];
   const cur=TABS_.some(t=>t[0]===SF)?SF:'ov';S.sft=cur;
   d.innerHTML=`<div class="dh-top ns"><b>${em('student')} ${esc(r.name)}</b><span><button class="btn ghost sm" id="dhBk" type="button">← ${from==='cfile'?'ملف الفصل':'كل الفصل'}</button><button class="btn ghost sm" id="dhX" type="button">إغلاق</button></span></div>
    <div class="dh-wrap sfv nb">
@@ -6976,8 +6976,8 @@ Object.assign(Dash,{
   if(tab==='ce')this.sfCeBind(box,r,X);
   if(tab==='mg')this.sfMgBind(d,r,from)},
  /* --- the student's certificate: see it, change its texts and design, withdraw it, bring it back, give one. The student's page picks every change up by itself. --- */
- sfCe(r,X){const j2=X.j2||{},cr=j2.ok?j2.cr:null,cf=Cert.cfg(),d=Object.assign({},cf.d,(cr&&cr.d)||{});
-  if(!j2.ok)return`<section class="dh-card"><h3>${em('trophy')} الشهادة</h3><p class="dh-sub">تعذّر تحميل بيانات الطالب الآن.</p></section>`;
+ sfCe(r,X){const j2=X.j2||{},cr=j2.ok||j2.crok?j2.cr:null,cf=Cert.cfg(),d=Object.assign({},cf.d,(cr&&cr.d)||{});
+  if(!j2.ok&&!j2.crok)return`<section class="dh-card"><h3>${em('trophy')} الشهادة</h3><p class="dh-sub">تعذّر تحميل بيانات الطالب الآن.</p></section>`;
   const st=!cr?['none','لم يحصل على شهادة بعد']:cr.st==='revoked'?['bad','الشهادة مسحوبة']:['','حصل على الشهادة'];
   const ds=cr?this.cdate(cr.at):'',up=cr&&cr.up>cr.at+1000?` · آخر تعديل ${this.cdate(cr.up)}`:'';
   const head=`<section class="dh-card"><h3>${em('trophy')} الشهادة</h3><p><span class="cf-st ${st[0]}">${st[1]}</span>${cr?` <span class="dh-sub">${cr.by==='t'?'منحها المعلم':'أنشأها الطالب'} · ${ds}${up}</span>`:''}</p>`;
@@ -6992,8 +6992,8 @@ Object.assign(Dash,{
     <div class="dh-set"><b>اللون</b><div class="dh-sw-row">${Object.keys(CERT_THEMES).map(k=>`<label class="dh-col" title="${CERT_THEMES[k].n}"><input type="radio" name="sfceTh" value="${k}"${d.theme===k?' checked':''}><i style="background:linear-gradient(135deg,${CERT_THEMES[k].bg[0]},${CERT_THEMES[k].bg[1]});border:3px solid ${CERT_THEMES[k].line}"></i><span>${CERT_THEMES[k].n}</span></label>`).join('')}</div></div>
     <div class="dh-set"><b>ما يُطبع عليها</b><div class="dh-lk">${[['logo','شعار الدرس'],['stats','الدرجة والنجوم'],['badges','الرتبة والأوسمة'],['bonus','نقاط البونص']].map(([k,l])=>`<label class="dh-sw"><input type="checkbox" data-sce="${k}"${d[k]?' checked':''}> ${l}</label>`).join('')}</div></div></section>`},
  cdate(t){return new Date(t||Date.now()).toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'})},
- sfCeBind(box,r,X){const S=this.S,j2=X.j2||{},cr=j2.ok?j2.cr:null,msg=t=>{const m=$('#sfceM',box);if(m)m.textContent=t},api=async(o,ok)=>{msg('جارٍ الحفظ…');const x=await Online.api('admin',Object.assign({aid:r.aid},o),S.key);
-   if(!x.ok){msg(this.err(x));return null}if(S.full&&S.full[r.k])S.full[r.k].cr=x.cr;X.j2=S.full[r.k]||Object.assign({},X.j2,{cr:x.cr});if(S.sf&&S.sf[r.k])S.sf[r.k].j2=X.j2;toast(ok);this.sfPane($('#dash'),r,X,S.from==='cfile'?'cfile':'class');return x};
+ sfCeBind(box,r,X){const S=this.S,j2=X.j2||{},cr=j2.ok||j2.crok?j2.cr:null,msg=t=>{const m=$('#sfceM',box);if(m)m.textContent=t},api=async(o,ok)=>{msg('جارٍ الحفظ…');const x=await Online.api('admin',Object.assign({aid:r.aid},o),S.key);
+   if(!x.ok){msg(this.err(x));return null}if(S.full&&S.full[r.k])S.full[r.k].cr=x.cr;X.j2=Object.assign({},X.j2,{cr:x.cr});if(S.sf&&S.sf[r.k])S.sf[r.k].j2=X.j2;toast(ok);this.sfPane($('#dash'),r,X,S.from==='cfile'?'cfile':'class');return x};
   if(!cr){const g=$('#sfceG',box);if(g)g.onclick=()=>api({op:'certgive',nm:r.name,s:{pts:r.pts,max:r.max,stars:r.stars,smax:r.smax,bonus:r.bp||0,bstars:r.bs||0,rank:RANKS[r.rk]?RANKS[r.rk].n:'',badges:[]}},'مُنحت الشهادة ✓ وتصل الطالب تلقائيًا');return}
   const cf=Cert.cfg(),v=id=>($('#'+id,box)||{}).value||'',read=()=>{const d={title:v('sfceT'),lead:v('sfceL'),body:v('sfceB'),honor:v('sfceH'),school:v('sfceS'),teacher:v('sfceTc'),role:v('sfceR'),theme:(($$('[name=sfceTh]',box).find(x=>x.checked))||{}).value||'gold'};$$('[data-sce]',box).forEach(b=>d[b.dataset.sce]=b.checked);
    const diff={};Object.keys(d).forEach(k=>{if(d[k]!==cf.d[k])diff[k]=d[k]});return{nm:v('sfceN'),dt:v('sfceD'),d:diff}};
