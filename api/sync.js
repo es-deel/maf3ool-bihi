@@ -1,5 +1,5 @@
 'use strict';
-const { redis, pipeline, send, body, parseCode, nameKey, cfg, eff, same, parseCR, newCR } = require('./_lib');
+const { redis, pipeline, send, body, parseCode, nameKey, cfg, eff, same, parseCR, newCR, parseCX } = require('./_lib');
 const MAX_SNAP = 250000, MAX_DETAIL = 40000;
 /* the student's page calls this: a heartbeat (who is writing now), and the progress snapshot + result code + detailed report when something changed */
 module.exports = async (req, res) => {
@@ -7,7 +7,7 @@ module.exports = async (req, res) => {
   const b = await body(req), aid = String(b.aid || '').slice(0, 200);
   if (!aid) return send(res, 400, { error: 'bad_account' });
   try {
-    const [name, cls, phone, ts0, sk, aw, rv0, snap0, bkt0, rst0, ce0, cr0] = await redis(['HMGET', 'mf:acc:' + aid, 'name', 'cls', 'phone', 'ts', 'sk', 'aw', 'rv', 'snap', 'bkt', 'rst', 'ce', 'cr']);
+    const [name, cls, phone, ts0, sk, aw, rv0, snap0, bkt0, rst0, ce0, cr0, cx0, cxv0] = await redis(['HMGET', 'mf:acc:' + aid, 'name', 'cls', 'phone', 'ts', 'sk', 'aw', 'rv', 'snap', 'bkt', 'rst', 'ce', 'cr', 'cx', 'cxv']);
     if (!name) return send(res, 404, { error: 'no_account' });
     if (!sk || !same(b.sk || '', sk)) return send(res, 401, { error: 'bad_session' });
     const now = Date.now(), w = String(b.w || '').slice(0, 40), cmds = [['HSET', 'mf:seen:' + cls, aid, JSON.stringify({ t: now, w, cv: Math.floor(+b.cv || 0) })]];
@@ -30,7 +30,7 @@ module.exports = async (req, res) => {
         let det = '';
         if (b.detail && typeof b.detail === 'object' && !Array.isArray(b.detail)) { try { det = JSON.stringify({ c: b.code, d: b.detail }); } catch (e) { det = ''; } if (det.length > MAX_DETAIL) det = ''; }
         set.push('code', b.code); if (det) set.push('det', det);
-        cmds.push(['HSET', 'mf:cls:' + cls, aid, JSON.stringify({ n: name, p: phone, c: b.code, d: det ? 1 : (b.keepDet ? 1 : 0) })]);
+        cmds.push(['HSET', 'mf:cls:' + cls, aid, JSON.stringify({ n: name, p: phone, c: b.code, d: det ? 1 : (b.keepDet ? 1 : 0), pv: 2 })]);
         status = status === 'old' ? status : 'saved';
       }
     }
@@ -38,6 +38,7 @@ module.exports = async (req, res) => {
     let cr = parseCR(cr0);
     if (!cr && b.cr && typeof b.cr === 'object') { cr = newCR(b.cr, 's'); set.push('cr', JSON.stringify(cr)); extra.cr = cr; }
     else if ((cr ? cr.v : 0) !== Math.floor(+b.crv || 0)) extra.cr = cr;
+    if ((+cxv0 || 0) !== Math.floor(+b.cxv || 0)) extra.cx = { v: +cxv0 || 0, list: parseCX(cx0) };   // the extra certificates the teacher gave: sent whenever the student's copy is not the current version
     if (set.length) cmds.push(['HSET', 'mf:acc:' + aid].concat(set));
     await pipeline(cmds);
     let awards = []; try { awards = aw ? JSON.parse(aw) : []; } catch (e) { awards = []; }

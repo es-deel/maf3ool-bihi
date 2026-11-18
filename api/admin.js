@@ -1,6 +1,6 @@
 'use strict';
 const crypto = require('crypto');
-const { redis, pipeline, send, deny, body, classes, h2o, hashPw, cfg, saveCfg, normPhone, normName, aidOf, classRows, rankRows, seasonBase, parseCR, newCR, cleanCRs, cleanCRd } = require('./_lib');
+const { redis, pipeline, send, deny, body, classes, h2o, hashPw, cfg, saveCfg, normPhone, normName, aidOf, classRows, rankRows, seasonBase, parseCR, newCR, cleanCRs, cleanCRd, parseCX, MAX_CX } = require('./_lib');
 const err = e => ({ code: e.code === 'no_db' ? 503 : 500, o: { error: e.code === 'no_db' ? 'no_db' : 'server' } });
 
 /* delete one student and everything stored about him */
@@ -159,6 +159,38 @@ module.exports = async (req, res) => {
       }
       await redis(['HSET', 'mf:acc:' + aid, 'cr', JSON.stringify(cr)]);
       return send(res, 200, { ok: true, cr });
+    }
+    /* extra certificates: the teacher gives a student one more {aid | aids, nm?, dt, s, d} (any number up to the limit, each with its own title and design),
+       or changes / withdraws / restores / deletes one of them by id {aid, id, nm?, dt?, d?, reset?, st?} · {aid, id, del:true}. Every change raises cxv, so the student's page picks it up by itself. */
+    if (op === 'certadd' || op === 'certxset' || op === 'certxdel') {
+      const list = op === 'certadd' ? (Array.isArray(b.aids) ? b.aids : [aid]).map(x => String(x || '').slice(0, 200)).filter(Boolean).filter((x, i, a) => a.indexOf(x) === i).slice(0, 250) : [aid];
+      let k = 0, last = null, full = false;
+      for (const a of list) {
+        const [name, raw, v0] = await redis(['HMGET', 'mf:acc:' + a, 'name', 'cx', 'cxv']); if (!name) continue;
+        const xs = parseCX(raw);
+        if (op === 'certadd') {
+          if (xs.length >= MAX_CX) { full = true; continue; }
+          const n2 = newCR({ nm: b.nm || name, dt: b.dt, s: b.s, d: b.d }, 't'); if (!n2.d.title) n2.d.title = 'شهادة تقدير';
+          xs.push(n2); last = n2;
+        } else {
+          const i = xs.findIndex(x => x.id === String(b.id || '')); if (i < 0) return send(res, 404, { error: 'no_cert' });
+          if (op === 'certxdel') { xs.splice(i, 1); }
+          else {
+            const cr = xs[i];
+            if ('nm' in b) { const v = String(b.nm || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40); if (v.length >= 2) cr.nm = v; }
+            if ('dt' in b) cr.dt = String(b.dt || '').replace(/[\u0000-\u001f\u007f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40);
+            if (b.s && typeof b.s === 'object') cr.s = cleanCRs(Object.assign({}, cr.s, b.s));
+            if (b.reset) cr.d = {}; if (b.d && typeof b.d === 'object') cr.d = Object.assign({}, cr.d, cleanCRd(b.d));
+            if (b.st === 'ok' || b.st === 'revoked') cr.st = b.st;
+            cr.v = (cr.v || 1) + 1; cr.up = Date.now(); last = cr;
+          }
+        }
+        await redis(['HSET', 'mf:acc:' + a, 'cx', JSON.stringify(xs), 'cxv', String((+v0 || 0) + 1)]); k++;
+        if (a === aid) last = last || null;
+      }
+      if (op === 'certadd' && !k) return send(res, full ? 409 : 404, { error: full ? 'cx_full' : 'no_account' });
+      const fresh = (await redis(['HGET', 'mf:acc:' + aid, 'cx']));
+      return send(res, 200, { ok: true, n: k, cert: last, cx: parseCX(fresh), full: full ? 1 : 0 });
     }
     if (op === 'wkstat') {   // progress of the weekly class goal: total, participants, top contributors
       const c = await cfg(true), w = c.wk;

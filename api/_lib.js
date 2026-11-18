@@ -149,6 +149,9 @@ function newCR(src, by) {
   const now = Date.now(); src = src || {};
   return { id: crypto.randomBytes(4).toString('hex'), v: 1, at: now, up: now, st: 'ok', by, nm: tx(src.nm, 40), dt: tx(src.dt, 40), s: cleanCRs(src.s), d: cleanCRd(src.d) };
 }
+/* the extra certificates the teacher gives a student (field «cx» of his account, a list; «cxv» is its version): each is a record like the one above, with its own id */
+const MAX_CX = 20;
+function parseCX(raw) { try { const a = JSON.parse(raw || '[]'); return Array.isArray(a) ? a.filter(o => o && typeof o === 'object' && o.id).slice(0, MAX_CX) : []; } catch (e) { return []; } }
 const REP_SEC = ['compare', 'topics', 'heat', 'wrong', 'plan', 'notes', 'recs', 'students', 'insights'];
 /* the look of the reports (teacher + student): school line, titles, footer, parent note, colour, which sections are printed */
 function cleanRep(b, old) {
@@ -190,4 +193,4 @@ async function saveCfg(c) { await redis(['SET', 'mf:cfg', JSON.stringify(c)]); c
 async function limited(key, max) { const n = await redis(['INCR', key]); await redis(['EXPIRE', key, '600']); return n > max; }
 const qs = (req, k) => (req.query && req.query[k]) || new URL(req.url, 'http://x').searchParams.get(k);
 const ip = req => String(req.headers['x-forwarded-for'] || '').split(',')[0].trim().slice(0, 45) || 'x';
-module.exports = { cleanCRs, cleanCRd, parseCR, newCR, parseCode, nameKey, normCls, redis, pipeline, h2o, normPhone, intlPhone, normName, classes, aidOf, DEFAULT_CLASSES, dbConf, body, send, deny, qs, hashPw, checkPw, userKey, same, newToken, cfg, cleanCfg, saveCfg, eff, limited, ip, TOKEN_TTL, classRows, rankRows, boardName, seasonBase, BOARD_TOP };
+module.exports = { cleanCRs, cleanCRd, parseCR, newCR, parseCX, MAX_CX, parseCode, nameKey, normCls, redis, pipeline, h2o, normPhone, intlPhone, normName, classes, aidOf, DEFAULT_CLASSES, dbConf, body, send, deny, qs, hashPw, checkPw, userKey, same, newToken, cfg, cleanCfg, saveCfg, eff, limited, ip, TOKEN_TTL, classRows, rankRows, boardName, seasonBase, BOARD_TOP };

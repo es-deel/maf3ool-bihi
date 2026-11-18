@@ -1960,6 +1960,9 @@ body.cls .opt{min-height:4.6rem}
 .cr-box{display:grid;gap:.5rem;justify-items:center}
 .cr-box .cert-cv.cr-mini{max-width:30rem}
 .cr-meta{text-align:center;margin:0}
+.cr-it{display:grid;gap:.4rem;justify-items:center;width:100%;padding-bottom:1rem;margin-bottom:.4rem;border-bottom:1.5px dashed #ffffff30}.cr-it:last-of-type{border-bottom:0}
+.cr-count{text-align:center;font-weight:700;margin:0}
+.cx-it{display:grid;gap:.5rem;padding:.7rem;border-radius:14px;background:#ffffff0d;border:1.5px solid var(--line,#ffffff30);margin:.6rem 0}.cx-it h4{margin:0;display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}.cx-pre{display:flex;gap:.4rem;flex-wrap:wrap}
 .cr-none{display:grid;gap:.6rem;justify-items:center;text-align:center;padding:.8rem 1rem;border-radius:14px;background:#ffffff10;border:1.5px dashed #ffffff40}
 .cr-none.cr-bad{background:#dc262622;border-color:#f87171}
 .mn-cr .cr-box{margin-top:.3rem}
@@ -2529,6 +2532,7 @@ const GAME_LES={det:['object'],flee:['object'],fix:['object'],build:['object'],k
 const Hid={
  lesson(id){return typeof Ctl!=='undefined'&&!!Ctl.hidden&&Ctl.hidden(id)},
  off(id){return this.lesson(id)||(typeof Ctl!=='undefined'&&!!Ctl.locked&&Ctl.locked(id))},   // hidden OR closed by the teacher: a planet the student cannot work on is left out of his score, his planet count and his report (it counts again when it reopens)
+ strict(fn){let on=false;try{if(typeof Ctl!=='undefined'){Ctl.force=(Ctl.force||0)+1;on=true}}catch(e){}try{return fn()}finally{if(on)Ctl.force--}},   // run fn as the student sees the planets (the report of a closed or hidden planet disappears, on the teacher's device too)
  any(l){return Array.isArray(l)?l.some(i=>this.off(i)):this.off(l)},      // a map / board / game built on one lesson or on several (hidden as soon as one of them is)
  tabs(){return TABS.filter(t=>t.id!=='start'&&!this.off(t.id))},      // the start page (الانطلاق) is the sun of the map, not a planet: it never counts in the planet totals
  tp(tp){const ids=Object.keys(LESSON_TP).filter(k=>LESSON_TP[k]===tp);return ids.length>0&&ids.every(i=>this.off(i))},
@@ -3341,7 +3345,7 @@ TABS.push({id:'certificate',title:'الملخص والشهادة',pl:'p2',color:
     FX.confetti(90);markDone('certificate',true);progress();box.scrollIntoView({behavior:RM?'auto':'smooth',block:'center'})};
    act(sc,{mk});$('#nm').onkeydown=e=>{if(e.key==='Enter')mk()}}},
  {t:'شهاداتي',tip:'شهادتك تبقى هنا دائمًا. إذا عدّلها معلمك يظهر التعديل هنا بنفسه.',
-  render(sc){sc.innerHTML=`<div class="cert-form rise"><h3 class="cert-h">${em('trophy')} شهاداتي</h3><div id="crAll" class="cr-box"></div></div>`;CR.mount($('#crAll',sc))}},
+  render(sc){sc.innerHTML=`<div class="cert-form rise"><h3 class="cert-h">${em('trophy')} شهاداتي</h3><div id="crAll" class="cr-box"></div></div>`;CR.mountAll($('#crAll',sc))}},
 ]});
 
 /* --- tab_f.js --- */
@@ -4375,7 +4379,7 @@ const qn=k=>k===1?'سؤال واحد':k===2?'سؤالين':k<=10?AR(k)+' أسئ�
 const Incomplete={
  list(){
   const planets=[];let count=0,nQ=0;
-  TABS.forEach((t,ti)=>{if(t.id==='report'||Hid.off(t.id))return;const items=[];
+  TABS.forEach((t,ti)=>{if(t.id==='report'||t.id==='start'||Hid.off(t.id))return;const items=[];
    if(t.id==='practice'){STAGES.forEach((s,i)=>{if((PB[i]||0)<3){count++;items.push({t:`${s.n}: ${s.d}`,note:(PB[i]||0)?'لم تُجتَز بعد (تحتاج ٣ إجابات صحيحة)':'لم تُلعَب بعد',s:0,h:'stage',i})}})}
    else if(t.id==='games'){GAMES.forEach((g,i)=>{if(!Hid.game(g.id)&&!(GB[g.id]>0)){count++;items.push({t:g.t,note:'لم تفز بها بعد',s:0,h:'game',i})}})}
    else t.steps.forEach((st,si)=>{
@@ -4390,7 +4394,8 @@ const Incomplete={
  answered(){return LQ.filter(x=>!Hid.off(x.tab)&&Ledger.has(x.key)).length}};
 
 /* everything the report says comes from this one snapshot */
-function REP(){
+function REP(){return Hid.strict(REP0)}
+function REP0(){
  const n=ST.n,c=ST.c,acc=pc(c,n),g=(o,k)=>o[k]||[0,0];
  const top=TP_ORDER.filter(k=>!Hid.tp(k)).map(k=>{const[x,y]=g(ST.tp,k),a=pc(y,x);return{k,n:x,c:y,a,name:TOPIC[k].n,tab:TOPIC[k].tab,st:stOf(x,a)}});
  const lvs=[1,2,3].map(l=>{const[x,y]=g(ST.lv,l),a=pc(y,x);return{l,n:x,c:y,a,name:LV_NAME[l],st:stOf(x,a)}});
@@ -5517,7 +5522,7 @@ const Mine={
       <div class="mn-t">${em('closed_book')}<b>${fa(A.pages,A.pagesT)}</b><small>صفحات الكتاب</small></div><div class="mn-t">${em('1st_place_medal')}<b>${fa(A.nb,A.nbT)}</b><small>الأوسمة</small></div></div>
      <p class="mn-k">من أين جاءت درجتك؟ ${partsTxt(R)}. والنجوم تُحسب من هذا المجموع الكلي.</p>
      <div class="row"><button class="btn ghost sm" type="button" data-act="cab">${em('crown')} افتح خزانتي</button>${gf?`<button class="btn pink sm" type="button" data-act="rg">${GIFT(20)} ${giftTxt(gf)}</button>`:''}</div></section>
-    <section class="mn-c mn-cr"><h3>${em('trophy')} شهادتي</h3><div id="mnCr" class="cr-box"></div></section>
+    <section class="mn-c mn-cr"><h3>${em('trophy')} شهاداتي</h3><div id="mnCr" class="cr-box"></div></section>
     <section class="mn-c mn-bn"><h3>${em('sparkles')} التقييم الإضافي (البونص)</h3>
      <p>تقييم <b>منفصل</b> عن درجتك ونجومك: تكسبه عندما تُعيد الحل أو تحقّق سلسلة إجابات صحيحة متتالية.</p>
      <div class="mn-tiles"><div class="mn-t">${em('sparkles')}<b>${AR(R.bp)}</b><small>النقاط الإضافية</small></div><div class="mn-t">${em('star')}<b>${AR(R.bs)}</b><small>النجوم الإضافية</small></div></div>
@@ -5536,7 +5541,7 @@ const Mine={
    rd:()=>{close();Daily.open()},cab:()=>Cab.open(),bn:()=>Bonus.open(),rg:()=>{close();const u=Pg.unopened()[0];if(u)Pg.open(u.id)},rcert:()=>{close();goTab('certificate')},rrep:()=>{close();goTab('report')},
    cc:async()=>{toast(await copyTxt(code,$('#mnCode',d))?'نُسخ الرمز ✓':'حدّد الرمز وانسخه يدويًا')},
    bk:()=>Backup.open(),nm:()=>Prof.ask('edit'),cls:()=>{close();Cls.toggle()},brd:()=>Board.open()});
-  try{CR.ensure();CR.mount($('#mnCr',d),{mini:true})}catch(e){}
+  try{CR.ensure();CR.mountAll($('#mnCr',d),{mini:true})}catch(e){}
   d.onkeydown=e=>{if(e.key==='Escape')close()};
   setTimeout(()=>{try{$('[data-act=rc],[data-act=rf],[data-act=rcert],[data-act=x]',d).focus({preventScroll:true})}catch(e){}},60)}};
 
@@ -5973,10 +5978,40 @@ const CR={
   if(!sr){if(old&&old.sv)this.put(null);return}
   const rec=Object.assign({},sr,{aid:this.aid(),sv:1}),ch=!old||old.v!==sr.v||old.st!==sr.st;this.put(rec);
   if(ch){if(old&&old.sv){try{toast(sr.st==='revoked'?em('locked')+' سحب المعلم شهادتك':em('trophy')+' حدّث المعلم شهادتك')}catch(e){}}this.refresh()}},
+ /* ---- the extra certificates the teacher gives (any number): kept on the device as {aid, v, list, seen}, the server's copy always wins ---- */
+ KX:'mf_cx',
+ xraw(){try{return JSON.parse(localStorage.getItem(this.KX)||'null')}catch(e){return null}},
+ xget(){const r=this.xraw(),a=this.aid();return r&&r.aid===a&&Array.isArray(r.list)?r:null},
+ xv(){const r=this.xget();return r?r.v|0:0},
+ xlist(){const r=this.xget();return r?r.list:[]},
+ takeX(sx){if(!sx||!Array.isArray(sx.list))return;const old=this.xget(),seen=new Set(old&&old.seen||[]);
+  const fresh=sx.list.filter(x=>x.st==='ok'&&!seen.has(x.id));
+  try{localStorage.setItem(this.KX,JSON.stringify({aid:this.aid(),v:sx.v|0,list:sx.list,seen:sx.list.map(x=>x.id)}))}catch(e){}
+  if(fresh.length){try{toast(em('trophy')+(fresh.length===1?' منحك المعلم شهادة جديدة: «'+String(Object.assign({},Cert.cfg().d,fresh[0].d||{}).title)+'»':' منحك المعلم '+AR(fresh.length)+' شهادات جديدة'))}catch(e){}}
+  this.refresh()},
+ /* every certificate that is shown to the student: his own first, then the teacher's extra ones (a withdrawn one is not shown) */
+ items(){const a=[],m=this.get();if(m&&m.st==='ok')a.push({r:m,main:1});this.xlist().filter(x=>x.st==='ok').forEach(x=>a.push({r:x}));return a},
+ /* a box that shows ALL his certificates (the step «شهاداتي», «لوحتي») */
+ mountAll(box,o){if(!box)return;o=o||{};o.all=1;box._o=o;this.boxes.add(box);this.paint(box)},
+ async paintAll(box){const o=box._o||{},tk=box._tk=(box._tk||0)+1,L=this.items(),m=this.get();
+  if(!L.length){box._items=null;await this.paintOne(box);return}
+  const show=o.mini?L.slice(0,3):L;
+  box.innerHTML=`<p class="sub" style="text-align:center">جارٍ تجهيز ${L.length>1?'شهاداتك':'شهادتك'}…</p>`;
+  const cvs=[];for(const it of show){const cv=await Cert.draw(it.r.nm,{d:it.r.d,s:this.figs(it.r)});if(tk!==box._tk||!box.isConnected)return;cv.className='cert-cv'+(o.mini?' cr-mini':'');cv.setAttribute('role','img');cvs.push(cv)}
+  box.innerHTML='';box._items=show;box._cvs=cvs;
+  if(L.length>1||!m){const h=document.createElement('p');h.className='sub cr-count';h.textContent=`عدد شهاداتك: ${AR(L.length)}`;box.appendChild(h)}
+  if(!m&&!o.mini){const n=document.createElement('div');n.className='cr-none';n.innerHTML=`<p class="sub">${em('trophy')} يمكنك أيضًا صنع شهادتك بنفسك.</p><button class="btn gold sm" type="button" data-act="crmk">${em('trophy')} اصنع شهادتك</button>`;box.appendChild(n)}
+  show.forEach((it,i)=>{const r=it.r,ti=Object.assign({},Cert.cfg().d,r.d||{}).title,w=document.createElement('div');w.className='cr-it';
+   cvs[i].setAttribute('aria-label',`${ti} للطالب ${r.nm}`);const meta=document.createElement('p');meta.className='sub cr-meta';meta.textContent=`${ti} · ${this.date(r)}${it.main?(r.by==='t'||(r.up||0)>(r.at||0)+1000?' · عدّلها المعلم':''):' · من المعلم'}`;
+   const row=document.createElement('div');row.className='row cert-act';row.innerHTML=`<button class="btn gold sm" type="button" data-act="sv" data-i="${i}">${em('star')} احفظها صورة</button>${navigator.canShare&&!o.mini?`<button class="btn sky sm" type="button" data-act="sh" data-i="${i}">شاركها</button>`:''}`;
+   w.appendChild(cvs[i]);w.appendChild(meta);w.appendChild(row);box.appendChild(w)});
+  if(o.mini){const row=document.createElement('div');row.className='row cert-act';row.innerHTML=`<button class="btn ghost sm" type="button" data-act="crop">افتح شهاداتي${L.length>3?' ('+AR(L.length)+')':''}</button>`;box.appendChild(row)}
+  const msg=document.createElement('span');msg.className='sub';msg.id='crMsg';msg.setAttribute('role','status');box.appendChild(msg);this.wire(box)},
  /* a certificate that is shown (a box) is drawn again when the record changes */
  mount(box,o){if(!box)return;o=o||{};box._o=o;this.boxes.add(box);this.paint(box)},
  refresh(){this.boxes.forEach(b=>{if(!b.isConnected)this.boxes.delete(b);else this.paint(b)});},
- async paint(box){const o=box._o||{},r=this.get(),tk=box._tk=(box._tk||0)+1;
+ paint(box){return box&&box._o&&box._o.all?this.paintAll(box):this.paintOne(box)},
+ async paintOne(box){const o=box._o||{},r=this.get(),tk=box._tk=(box._tk||0)+1;
   if(!r){box.innerHTML=`<div class="cr-none"><p class="sub">${em('locked')} لم تحصل على شهادة بعد.</p><button class="btn gold sm" type="button" data-act="crmk">${em('trophy')} ${o.mini?'اذهب لإنشاء شهادتك':'اصنع شهادتك'}</button></div>`;this.wire(box);return}
   if(r.st==='revoked'){box.innerHTML=`<div class="cr-none cr-bad"><p>${em('locked')} <b>سحب المعلم هذه الشهادة.</b></p><p class="sub">تواصل مع معلمك إن كنت تظن أنها سُحبت بالخطأ.</p></div>`;return}
   box.innerHTML=`<p class="sub" style="text-align:center">جارٍ تجهيز شهادتك…</p>`;
@@ -5990,6 +6025,7 @@ const CR={
  wire(box){box.onclick=async e=>{const b=e.target.closest('[data-act]');if(!b||!box.contains(b))return;const k=({crmk:'mk',crop:'op',sv:'sv',sh:'sh'})[b.dataset.act];if(!k)return;const r=this.get();
   if(k==='mk'){const i=TABS.findIndex(t=>t.id==='certificate');try{const d=$('#dlg');if(d&&!d.hidden){d.hidden=true;d.innerHTML=''}}catch(_){}go(i,1)}
   else if(k==='op'){const i=TABS.findIndex(t=>t.id==='certificate');try{const d=$('#dlg');d.hidden=true;d.innerHTML=''}catch(_){}go(i,2)}
+  else if((k==='sv'||k==='sh')&&box._items&&b.dataset.i!==undefined){const it=box._items[+b.dataset.i],cv=box._cvs&&box._cvs[+b.dataset.i];if(!it||!cv)return;const res=await Cert.save(cv,it.r.nm,k==='sh'),m=$('#crMsg',box);if(m)m.textContent=res==='saved'?'حُفظت الشهادة في ملف التنزيلات ✓':res==='shared'?'✓':res==='fail'?'تعذّر الحفظ؛ اضغط مطوّلًا على الشهادة واختر «حفظ الصورة».':''}
   else if((k==='sv'||k==='sh')&&box._cv&&r){const res=await Cert.save(box._cv,r.nm,k==='sh'),m=$('#crMsg',box);if(m)m.textContent=res==='saved'?'حُفظت الشهادة في ملف التنزيلات ✓':res==='shared'?'✓':res==='fail'?'تعذّر الحفظ؛ اضغط مطوّلًا على الشهادة واختر «حفظ الصورة».':''}}}};
 
 /* --- online.js --- */
@@ -6003,9 +6039,11 @@ const Dash={
  scopeLabel(){return this.S.scope==='all'?'كل الفصول':this.S.scope},
  /* one student of the board: with a result code, or just registered (nothing sent yet) */
  mkRow(st){const x=st.code?Code.parse(st.code):null,base={k:st.aid,aid:st.aid,cls:st.cls,phone:st.phone,cv:st.cv||0,det:!!st.det,seen:st.seen||0,w:st.w||''};
-  if(!x){const T=this.planetTabs().length;
-   return Object.assign({},base,{name:st.name,empty:true,t:0,pts:0,max:Score.max(),stars:0,smax:Score.starsMax(),done:0,total:T,n:0,c:0,bd:0,dc:0,won:0,mins:0,inc:1,tp:[],bp:0,bs:0,code:'',spct:0,acc:0,rk:0,tps:TP_ORDER.map(k=>({k,n:0,c:0,a:0})),last:st.seen||0,weak:[]})}
+  if(!x){const T=this.planetTabs(st.cls).length;
+   return Object.assign({},base,{name:st.name,empty:true,t:0,pts:0,max:this.withCfg(st.cls,()=>Score.max()),stars:0,smax:Score.starsMax(),done:0,total:T,n:0,c:0,bd:0,dc:0,won:0,mins:0,inc:1,tp:[],bp:0,bs:0,code:'',spct:0,acc:0,rk:0,tps:TP_ORDER.map(k=>({k,n:0,c:0,a:0})),last:st.seen||0,weak:[]})}
   const tps=x.tp.map((t,i)=>({k:TP_ORDER[i],n:t[0],c:t[1],a:pc(t[1],t[0])}));
+  /* a code sent before the start page stopped being a planet counts it in «done» and «total»: take it out (the student's next visit sends a corrected code) */
+  if(!st.pv&&x.total>1){x.total--;if(x.done>0)x.done--}
   return Object.assign(x,base,{name:st.name||x.name,spct:pc(x.pts,x.max),acc:pc(x.c,x.n),rk:Rank.at(x.pts,x.max),tps,last:Math.max(x.t*60000,st.seen||0),
    weak:tps.filter(t=>t.n>=MINN&&t.a<65).sort((a,b)=>a.a-b.a)})},
  analyse(rows){
@@ -6016,7 +6054,7 @@ const Dash={
   const sp=by.map(r=>r.spct).sort((a,b)=>a-b),med=N?(N%2?sp[(N-1)/2]:Math.round((sp[N/2-1]+sp[N/2])/2)):0;
   const bands=[['ممتاز','٩٠٪ فأكثر',r=>r.spct>=90,'#16a34a'],['جيد جدًا','٧٥–٨٩٪',r=>r.spct>=75&&r.spct<90,'#65a30d'],['جيد','٦٠–٧٤٪',r=>r.spct>=60&&r.spct<75,'#f59e0b'],['يحتاج إلى دعم','أقل من ٦٠٪',r=>r.spct<60,'#dc2626']]
    .map(b=>({t:b[0],r:b[1],n:rows.filter(b[2]).length,c:b[3]}));
-  const topics=TP_ORDER.map((k,i)=>{let n=0,c=0,ev=0,weak=0;rows.forEach(r=>{const t=r.tps[i];n+=t.n;c+=t.c;if(t.n>=MINN){ev++;if(t.a<65)weak++}});const a=pc(c,n);return{k,i,name:TOPIC[k].n,tab:TOPIC[k].tab,n,c,a,ev,weak,st:stOf(n,a)}});
+  const cls0=[...new Set(all.map(r=>r.cls))],topics=TP_ORDER.map((k,i)=>({k,i})).filter(x=>!this.tpHid(x.k,cls0)).map(({k,i})=>{let n=0,c=0,ev=0,weak=0;rows.forEach(r=>{const t=r.tps[i];n+=t.n;c+=t.c;if(t.n>=MINN){ev++;if(t.a<65)weak++}});const a=pc(c,n);return{k,i,name:TOPIC[k].n,tab:TOPIC[k].tab,n,c,a,ev,weak,st:stOf(n,a)}});
   const ranked=topics.filter(t=>t.st!=='na').sort((a,b)=>a.a-b.a);
   const ranks=RANKS.map((r,i)=>({n:r.n,ic:r.ic,k:rows.filter(x=>x.rk===i).length})).filter(x=>x.k);
   const mins=avg(r=>r.mins),support=by.filter(r=>r.n>=8&&(r.acc<65||r.spct<35)),
@@ -6057,22 +6095,31 @@ const Dash={
   L.push('أعد تحميل اللوحة بعد أسبوع لتقارن تقدّم الفصل.');return L},
  /* ---------- one student ---------- */
  /* R: everything the student sheet needs, from the code and (when it exists) the detailed snapshot */
- planetTabs(){return TABS.filter(t=>t.id!=='report'&&t.id!=='start')},
+ allPlanets(){return TABS.filter(t=>t.id!=='report'&&t.id!=='start')},
+ /* the planets a class's students can see: a closed or hidden planet is not in their reports, so it is not in the teacher's either (it comes back the moment it is reopened) */
+ planetTabs(cls){const all=this.allPlanets();return cls?this.withCfg(cls,()=>all.filter(t=>!Hid.off(t.id))):all},
+ /* a topic is left out when every lesson of it is closed / hidden (in every class of the rows) */
+ tpHid(k,classes){const cs=classes&&classes.length?classes:(this.S.classes||[]);return cs.length>0&&cs.every(c=>this.withCfg(c,()=>Hid.tp(k)))},
  /* which planets a student finished, from the detail he sent: by id (new) or by position (older detail, which still counted the start page first) */
- plOn(d,pls){const a=(d&&d.pl)||[],o={};if(d&&d.pi)d.pi.forEach((id,i)=>o[id]=a[i]?1:0);else{const sh=a.length===pls.length+1?1:0;pls.forEach((t,i)=>o[t.id]=a[i+sh]?1:0)}return o},
- R(r,d){const pls=this.planetTabs(),g=(a,i)=>(a&&a[i])||[0,0];
-  const top=r.tps.map((t,i)=>({k:t.k,n:t.n,c:t.c,a:t.a,name:TOPIC[t.k].n,tab:TOPIC[t.k].tab,st:stOf(t.n,t.a)}));
+ plOn(d,cls){const a=(d&&d.pl)||[],o={};if(!d)return o;
+  if(d.pi){d.pi.forEach((id,i)=>o[id]=a[i]?1:0);return o}
+  /* an older detail lists the planets by position: the start page first, and without the planets this student could not see then */
+  const all=this.allPlanets(),cur=this.planetTabs(cls),L=a.length===cur.length+1?cur:all,sh=a.length===L.length+1?1:0;L.forEach((t,i)=>o[t.id]=a[i+sh]?1:0);return o},
+ R(r,d){return this.withCfg(r.cls,()=>this.R0(r,d))},
+ R0(r,d){const pls=this.planetTabs(r.cls),offIds=new Set(this.allPlanets().filter(t=>Hid.off(t.id)).map(t=>t.id)),g=(a,i)=>(a&&a[i])||[0,0];
+  const top=r.tps.filter(t=>!Hid.tp(t.k)).map(t=>({k:t.k,n:t.n,c:t.c,a:t.a,name:TOPIC[t.k].n,tab:TOPIC[t.k].tab,st:stOf(t.n,t.a)}));
   const lvs=[1,2,3].map((l,i)=>{const[x,y]=d?g(d.lvs,i):[0,0],a=pc(y,x);return{l,n:x,c:y,a,name:LV_NAME[l],st:stOf(x,a)}});
   const tys=d&&d.tys?d.tys.map(t=>{const a=pc(t[2],t[1]);return{k:t[0],n:t[1],c:t[2],a,name:TY_NAME[t[0]]||t[0],st:stOf(t[1],a)}}).filter(t=>t.n>0):[];
   const R={name:r.name,n:r.n,c:r.c,acc:r.acc,pts:r.pts,max:r.max,stars:r.stars,smax:r.smax,spct:r.spct,done:r.done,total:r.total,bp:r.bp,bs:r.bs,bc:d?d.bc||0:0,br:d?d.br||0:0,
    parts:d&&d.parts?['أسئلة الدروس','التدريبات','الألعاب'].map((n,i)=>[n,g(d.parts,i)[0],g(d.parts,i)[1]]):[],top,lvs,tys,
-   wrong:d&&d.wrong?d.wrong:[],best:d?d.best||0:0,fixed:d?d.fixed||0:0,mins:r.mins,qa:d?d.qa:null,qt:d?d.qt:null,rank:RANKS[r.rk].n,rk:r.rk,bd:d&&d.bd?d.bd:[],won:r.won,dc:r.dc,
-   planets:d&&d.pl?(on=>pls.map(t=>({id:t.id,title:t.title,ok:!!on[t.id]})))(this.plOn(d,pls)):[],
-   inc:d&&d.inc?{count:d.incN?d.incN[0]:r.inc,nQ:d.incN?d.incN[1]:0,planets:d.inc}:{count:r.inc,nQ:0,planets:[]},hasDetail:!!d};
+   wrong:d&&d.wrong?d.wrong.filter(w=>!Hid.tp(w.tp)):[],best:d?d.best||0:0,fixed:d?d.fixed||0:0,mins:r.mins,qa:d?d.qa:null,qt:d?d.qt:null,rank:RANKS[r.rk].n,rk:r.rk,bd:d&&d.bd?d.bd:[],won:r.won,dc:r.dc,
+   planets:d&&d.pl?(on=>pls.map(t=>({id:t.id,title:t.title,ok:!!on[t.id]})))(this.plOn(d,r.cls)):[],
+   inc:d&&d.inc?(L=>({count:Math.max(0,(d.incN?d.incN[0]:r.inc)-d.inc.filter(p=>!L.includes(p)).reduce((s,p)=>s+(p.n!=null?p.n:p.i.length),0)),nQ:d.incN?d.incN[1]:0,planets:L}))(d.inc.filter(p=>p.id!=='start'&&!offIds.has(p.id))):{count:r.inc,nQ:0,planets:[]},hasDetail:!!d};
+  if(d&&d.pl&&R.planets.length){R.done=R.planets.filter(p=>p.ok).length;R.total=R.planets.length;r.done=R.done;r.total=R.total}   // what the file shows is counted from the planets the student can see
   R.rate=R.n<8?RATE0:RATE.find(x=>R.spct>=x.min);return R},
  notes(r,R,cl){const S=[],W=[],A=[],first=r.name.split(' ')[0],now=Date.now(),idleD=Math.floor((now-r.last)/this.DAY);
   const ct=cl&&cl.topics||[];
-  R.top.forEach((t,i)=>{if(t.n<MINN)return;const c=ct[i]&&ct[i].n>=MINN?ct[i].a:null,vs=c==null?'':(t.a-c>=10?`، أعلى من متوسط الفصل (${AR(c)}٪)`:c-t.a>=10?`، أقل من متوسط الفصل (${AR(c)}٪)`:'');
+  R.top.forEach(t=>{if(t.n<MINN)return;const ci=ct.find(x=>x.k===t.k),c=ci&&ci.n>=MINN?ci.a:null,vs=c==null?'':(t.a-c>=10?`، أعلى من متوسط الفصل (${AR(c)}٪)`:c-t.a>=10?`، أقل من متوسط الفصل (${AR(c)}٪)`:'');
    if(t.st==='good')S.push(`«${t.name}»: ${AR(t.a)}٪ (${fa(t.c,t.n)})${vs}.`);
    else if(t.st==='weak')W.push(`«${t.name}»: ${AR(t.a)}٪ فقط (${fa(t.c,t.n)})${vs}؛ يحتاج إلى مراجعة.`);
    else W.push(`«${t.name}»: ${AR(t.a)}٪ مستوى جيد ويمكن رفعه بمزيد من التدريب${vs}.`)});
@@ -6125,7 +6172,7 @@ const Dash={
   if(RepCfg.on('compare')&&cl&&cl.N>=2)B.push(`<div class="pp-item"><span class="q">مقارنة بالفصل (${NUM(cl.N,N_ST)})</span><span class="e">درجته ${AR(r.spct)}٪ مقابل متوسط الفصل ${AR(cl.avg)}٪ (الوسيط ${AR(cl.med)}٪) · دقته ${AR(r.acc)}٪ مقابل ${AR(cl.acc)}٪ · الكواكب ${AR(r.done)} مقابل متوسط ${AR(cl.planets)}.</span></div>`);
   if(R.bp>0)B.push(`<div class="pp-bonus"><div class="pp-bn-h"><b>التقييم الإضافي (بونص)</b><span>منفصل عن الدرجة والنجوم الأساسية</span></div><div class="pp-bn-v"><b>${NUM(R.bp,N_BPT)}</b>${R.bs?` · <b>${NUM(R.bs,N_BSTAR)}</b>`:''}</div>${R.hasDetail?`<small>من سلسلة الإجابات الصحيحة: ${AR(R.bc)} · من تكرار الحل: ${AR(R.br)}</small>`:''}</div>`);
   if(R.bd.length)B.push(`<div class="pp-pls"><b>الأوسمة (${AR(R.bd.length)}):</b> ${R.bd.map(esc).join('، ')}</div>`);
-  if(RepCfg.on('topics'))B.push(`<div>${PH('الأداء حسب موضوعات الدرس','الخط الداكن = متوسط الفصل')}${R.top.map((t,i)=>{const c=cl&&cl.topics[i]&&cl.topics[i].n>=MINN?cl.topics[i].a:null;
+  if(RepCfg.on('topics'))B.push(`<div>${PH('الأداء حسب موضوعات الدرس','الخط الداكن = متوسط الفصل')}${R.top.map((t,i)=>{const ci=cl&&cl.topics.find(x=>x.k===t.k),c=ci&&ci.n>=MINN?ci.a:null;
    return this.bar(t.name,t.n?t.a:0,t.n?`${AR(t.a)}٪${c!=null?` <span class="ph-c">الفصل ${AR(c)}٪</span>`:''}<span class="pp-chip" style="background:${ST_CH[t.st]}">${ST_TXT[t.st]}</span>`:'—',ST_PP[t.st],c)}).join('')}</div>`);
   if(RepCfg.on('topics')&&R.hasDetail&&(R.lvs.some(t=>t.n)||R.tys.length))B.push(`<div class="pp-two"><div>${PH('حسب مستوى الصعوبة')}${R.lvs.map(t=>ppRow(t.name,t.a,t.n,t.st,1)).join('')}</div><div>${PH('حسب نوع السؤال')}${R.tys.length?R.tys.map(t=>ppRow(t.name,t.a,t.n,t.st,1)).join(''):'<p style="font-size:13px;color:#6b6396">لا توجد بيانات.</p>'}</div></div>`);
   if(R.planets.length)B.push(`<div class="pp-pls"><b>الكواكب:</b> ${R.planets.map(p=>`<span class="ph-pl${p.ok?' ok':''}">${p.ok?'✓':'○'} ${esc(p.title)}</span>`).join(' ')}</div>`);
@@ -6155,7 +6202,7 @@ const Dash={
   if(RepCfg.on('heat'))B.push(`<div class="pp-first">${PH('مفتاح الموضوعات')}<div class="ph-key">${A.topics.map((t,i)=>`<span><b>${AR(i+1)}</b> ${esc(t.name)}</span>`).join('')}</div></div>`);
   const cell=t=>`<td style="background:${t.n>=MINN?this.heat(t.a):'#f1f5f9'}">${t.n>=MINN?AR(t.a):'—'}</td>`;
   for(let i=0;RepCfg.on('heat')&&i<A.by.length;i+=13){const ch=A.by.slice(i,i+13);
-   B.push(`<div class="${i?'':'pp-first'}">${i?'':PH('جدول الطلاب وخريطة المواضيع','دقة كل موضوع ٪ (أخضر ٨٠+ · أصفر ٦٥+ · أحمر دون ذلك)')}<table class="ph-t"><tr><th>#</th><th>الطالب</th><th>الدرجة</th><th>٪</th><th>الدقة</th><th>كواكب</th>${A.topics.map((t,k)=>`<th>${AR(k+1)}</th>`).join('')}</tr>${ch.map(r=>`<tr><td>${r.empty?'—':AR(r.pos)}</td><td class="nm">${esc(r.name)}${A.byClass.length>1?` <small>${esc(r.cls)}</small>`:''}</td><td>${AR(r.pts)}</td><td>${AR(r.spct)}</td><td>${r.n?AR(r.acc)+'٪':'—'}</td><td>${AR(r.done)}/${AR(r.total)}</td>${r.tps.map(cell).join('')}</tr>`).join('')}</table></div>`)}
+   B.push(`<div class="${i?'':'pp-first'}">${i?'':PH('جدول الطلاب وخريطة المواضيع','دقة كل موضوع ٪ (أخضر ٨٠+ · أصفر ٦٥+ · أحمر دون ذلك)')}<table class="ph-t"><tr><th>#</th><th>الطالب</th><th>الدرجة</th><th>٪</th><th>الدقة</th><th>كواكب</th>${A.topics.map((t,k)=>`<th>${AR(k+1)}</th>`).join('')}</tr>${ch.map(r=>`<tr><td>${r.empty?'—':AR(r.pos)}</td><td class="nm">${esc(r.name)}${A.byClass.length>1?` <small>${esc(r.cls)}</small>`:''}</td><td>${AR(r.pts)}</td><td>${AR(r.spct)}</td><td>${r.n?AR(r.acc)+'٪':'—'}</td><td>${AR(r.done)}/${AR(r.total)}</td>${A.topics.map(x=>cell(r.tps[x.i])).join('')}</tr>`).join('')}</table></div>`)}
   if(RepCfg.on('notes'))B.push(`<div class="pp-note">${PH('ملاحظات المعلم')}<div class="pp-line"></div><div class="pp-line"></div><div class="pp-sign"><span>توقيع المعلم: ....................</span><span>التاريخ: ....................</span></div></div>`);
   return B},
  classPages(A){return this.flow(this.classBlocks(A),{title:esc(RepCfg.get('tCls')),sub:esc(RepCfg.sub('الفصل: '+this.scopeLabel())),mini:esc(RepCfg.get('tCls'))+': '+esc(this.scopeLabel()),foot:'مغامرة النحو والإعراب · '+this.scopeLabel()})},
@@ -6169,8 +6216,8 @@ const Dash={
   const end=()=>{document.body.classList.remove('printing');window.removeEventListener('afterprint',end)};window.addEventListener('afterprint',end);setTimeout(end,60000);setTimeout(()=>{try{window.print()}catch(e){end()}},150)}catch(e){if(msg)msg.textContent='تعذّرت الطباعة.'}},
  fn(t){return t.replace(/[\\/:*?"<>|\s]+/g,'_').slice(0,40)},
  csv(A){const q=v=>'"'+String(v).replace(/"/g,'""')+'"',H=['#','الطالب','الفصل','الهاتف (دولي)','الدرجة','الدرجة العظمى','النسبة ٪','النجوم','الدقة ٪','الإجابات','الصحيحة','الكواكب المنجزة','الأجزاء الناقصة','بونص','دقائق التعلّم','الرتبة','آخر نشاط'];
-  TP_ORDER.forEach(k=>H.push(TOPIC[k].n+' (٪)'));
-  const L=[H.map(q).join(',')];A.by.forEach(r=>L.push([r.empty?'':r.pos,r.name,r.cls,r.phone?'+'+this.intl(r.phone):'',r.pts,r.max,r.spct,r.stars,r.acc,r.n,r.c,r.done,r.inc,r.bp,r.mins,RANKS[r.rk].n,new Date(r.last).toISOString().slice(0,16).replace('T',' ')].concat(r.tps.map(t=>t.n>=MINN?t.a:'')).map(q).join(',')));
+  A.topics.forEach(t=>H.push(t.name+' (٪)'));
+  const L=[H.map(q).join(',')];A.by.forEach(r=>L.push([r.empty?'':r.pos,r.name,r.cls,r.phone?'+'+this.intl(r.phone):'',r.pts,r.max,r.spct,r.stars,r.acc,r.n,r.c,r.done,r.inc,r.bp,r.mins,RANKS[r.rk].n,new Date(r.last).toISOString().slice(0,16).replace('T',' ')].concat(A.topics.map(x=>{const t=r.tps[x.i];return t.n>=MINN?t.a:''})).map(q).join(',')));
   return new Blob(['﻿'+L.join('\r\n')],{type:'text/csv;charset=utf-8'})},
  /* ---------- loading ---------- */
  async load(){const S=this.S;
@@ -6235,7 +6282,7 @@ const Dash={
   const topics=!A.N?none:`<section class="dh-card"><h3>الأداء حسب الموضوعات</h3>${A.topics.map(t=>bar(esc(t.name),t.n?t.a:0,t.n?`${AR(t.a)}٪${t.weak?` <small>· ${AR(t.weak)} دون ٦٥٪</small>`:''}`:'—',ST_UI[t.st])).join('')}</section>
    <section class="dh-card"><h3>خريطة الموضوعات لكل طالب</h3><p class="dh-sub">كل خانة = دقة الطالب في الموضوع (أخضر ٨٠٪+، أصفر ٦٥٪+، أحمر أقل). الرقم يشير إلى الموضوع.</p>
     <div class="dh-key">${A.topics.map((t,i)=>`<span><b>${AR(i+1)}</b> ${esc(t.name)}</span>`).join('')}</div>
-    <div class="dh-sc"><table class="dh-heat"><tr><th>الطالب</th>${A.topics.map((t,i)=>`<th>${AR(i+1)}</th>`).join('')}</tr>${A.act.map(r=>`<tr><td><button type="button" data-o="${esc(r.k)}">${esc(r.name)}${multi?` <small>${esc(r.cls)}</small>`:''}</button></td>${r.tps.map(t=>`<td style="--h:${t.n>=MINN?this.heat(t.a):'#475569'}" class="${t.n>=MINN?'h':'x'}">${t.n>=MINN?AR(t.a):'—'}</td>`).join('')}</tr>`).join('')}</table></div></section>`;
+    <div class="dh-sc"><table class="dh-heat"><tr><th>الطالب</th>${A.topics.map((t,i)=>`<th>${AR(i+1)}</th>`).join('')}</tr>${A.act.map(r=>`<tr><td><button type="button" data-o="${esc(r.k)}">${esc(r.name)}${multi?` <small>${esc(r.cls)}</small>`:''}</button></td>${A.topics.map(x=>{const t=r.tps[x.i];return`<td style="--h:${t.n>=MINN?this.heat(t.a):'#475569'}" class="${t.n>=MINN?'h':'x'}">${t.n>=MINN?AR(t.a):'—'}</td>`}).join('')}</tr>`).join('')}</table></div></section>`;
   const fol=!A.regs?'':`<div class="dh-two">${A.support.length?`<section class="dh-card"><h3>${em('bullseye')} قد يحتاجون دعمًا</h3><div class="dh-chips">${chips(A.support,'w')}</div></section>`:''}
    ${A.enrich.length?`<section class="dh-card"><h3>${em('trophy')} متميّزون للإثراء</h3><div class="dh-chips">${chips(A.enrich,'g')}</div></section>`:''}
    ${A.idle.length||A.fresh.length?`<section class="dh-card"><h3>${em('thinking_face')} للمتابعة (غابوا أو لم يبدؤوا)</h3><div class="dh-chips">${chips(A.idle,'o')}${chips(A.fresh.filter(r=>!A.idle.includes(r)),'o')}</div><div class="dh-act"><button class="btn go sm" id="dhRm" type="button">${em('envelope')} أرسل تذكيرًا لأولياء أمورهم</button></div></section>`:''}</div>
@@ -6919,7 +6966,7 @@ Object.assign(Dash,{
  /* the analysis of ONE class (on copies of its rows, so the positions of the screen's own rows are not touched) */
  caOf(cls){const S=this.S;S.ca=S.ca||{};if(!S.ca[cls]){const rows=S.rows.filter(r=>r.cls===cls).map(r=>Object.assign({},r));S.ca[cls]={rows,A:this.analyse(rows)}}return S.ca[cls]},
  /* the game settings of a class apply to what its students see: run fn with that class's settings in place */
- withCfg(cls,fn){const old=Ctl.cfg;try{Ctl.cfg=Object.assign({},this.S.cfg,((this.S.cfg||{}).byCls||{})[cls]);return fn()}finally{Ctl.cfg=old}},
+ withCfg(cls,fn){const old=Ctl.cfg;try{Ctl.cfg=Object.assign({},this.S.cfg,((this.S.cfg||{}).byCls||{})[cls]);return Hid.strict(fn)}finally{Ctl.cfg=old}},
  withScope(sc,fn){const S=this.S,o=S.scope;S.scope=sc;try{return fn()}finally{S.scope=o}},
  tile(v,l,c){return`<div class="dh-tile"${c?` style="--tc:${c}"`:''}><b>${v}</b><small>${l}</small></div>`},
  hbar(l,pct,txt,col){return`<div class="dh-bar"><span>${l}</span><i><u style="width:${Math.max(pct,pct>0?3:0)}%;background:${col}"></u></i><em>${txt}</em></div>`},
@@ -6941,7 +6988,7 @@ Object.assign(Dash,{
 
  /* ================= THE STUDENT FILE ================= */
  async sfLoad(r){const S=this.S;S.sf=S.sf||{};if(S.sf[r.k])return S.sf[r.k];
-  const [det,j2]=r.empty?[null,await this.fullData(r,true).then(f=>({ok:false,crok:!!(f&&f.ok),cr:f&&f.ok?f.cr:null})).catch(()=>({ok:false}))]:await Promise.all([this.detail(r),this.fullData(r,true)]);
+  const [det,j2]=r.empty?[null,await this.fullData(r,true).then(f=>({ok:false,crok:!!(f&&f.ok),cr:f&&f.ok?f.cr:null,cx:f&&f.ok?f.cx:[]})).catch(()=>({ok:false}))]:await Promise.all([this.detail(r),this.fullData(r,true)]);
   const ca=this.caOf(r.cls),R=this.R(r,det),nt=this.notes(r,R,ca.A);
   const cr=ca.rows.find(x=>x.k===r.k),rr=Object.assign({},r,{pos:cr&&!r.empty?cr.pos:r.pos});
   return S.sf[r.k]={det,j2,R,nt,ca,build:()=>this.studentPages(rr,R,ca.A,nt)}},
@@ -6986,7 +7033,7 @@ Object.assign(Dash,{
   const st=!cr?['none','لم يحصل على شهادة بعد']:cr.st==='revoked'?['bad','الشهادة مسحوبة']:['','حصل على الشهادة'];
   const ds=cr?this.cdate(cr.at):'',up=cr&&cr.up>cr.at+1000?` · آخر تعديل ${this.cdate(cr.up)}`:'';
   const head=`<section class="dh-card"><h3>${em('trophy')} الشهادة</h3><p><span class="cf-st ${st[0]}">${st[1]}</span>${cr?` <span class="dh-sub">${cr.by==='t'?'منحها المعلم':'أنشأها الطالب'} · ${ds}${up}</span>`:''}</p>`;
-  if(!cr)return head+`<p class="dh-sub">يستطيع الطالب إنشاءها بنفسه حين يستوفي الشروط. ويمكنك منحه شهادة الآن بأرقامه الحالية، ثم تعدّل نصوصها وتصميمها.</p><div class="dh-act"><button class="btn gold sm" id="sfceG" type="button">${em('trophy')} امنح الشهادة</button></div><p class="dh-msg" id="sfceM" role="status"></p></section>`;
+  if(!cr)return head+`<p class="dh-sub">يستطيع الطالب إنشاءها بنفسه حين يستوفي الشروط. ويمكنك منحه شهادة الآن بأرقامه الحالية، ثم تعدّل نصوصها وتصميمها.</p><div class="dh-act"><button class="btn gold sm" id="sfceG" type="button">${em('trophy')} امنح الشهادة</button></div><p class="dh-msg" id="sfceM" role="status"></p></section>`+this.cxHtml(r,X);
   const f=(id,l,v,mx)=>`<label for="${id}">${l}</label><input id="${id}" class="inp" maxlength="${mx}" value="${esc(v)}">`;
   return head+`<canvas id="sfceCv" class="cf-cv" aria-label="شهادة الطالب"></canvas>
    <div class="dh-act">${cr.st==='revoked'?`<button class="btn go sm" id="sfceRs" type="button">إعادة الشهادة للطالب</button>`:`<button class="btn go sm" id="sfceSv" type="button">حفظ التعديلات (تصل الطالب تلقائيًا)</button><button class="btn ghost sm" id="sfceRd" type="button">الرجوع لتصميم الفصل</button><button class="btn pink sm" id="sfceRv" type="button">سحب الشهادة</button>`}<button class="btn sky sm" id="sfceIm" type="button">احفظ صورة</button></div>
@@ -6995,10 +7042,52 @@ Object.assign(Dash,{
     <div class="dh-set">${f('sfceN','الاسم المطبوع',cr.nm,40)}${f('sfceD','التاريخ (اتركه فارغًا ليُكتب تاريخ الحصول)',cr.dt||'',40)}${f('sfceT','العنوان',d.title,30)}${f('sfceL','سطر الإهداء',d.lead,50)}
     <label for="sfceB">نص الشهادة</label><textarea id="sfceB" class="bk-ta" rows="3" maxlength="220">${esc(d.body)}</textarea>${f('sfceH','اللقب (فارغ لإخفائه)',d.honor,40)}${f('sfceS','اسم المدرسة',d.school,60)}${f('sfceTc','اسم المعلم (التوقيع)',d.teacher,40)}${f('sfceR','صفة المعلم',d.role,40)}</div>
     <div class="dh-set"><b>اللون</b><div class="dh-sw-row">${Object.keys(CERT_THEMES).map(k=>`<label class="dh-col" title="${CERT_THEMES[k].n}"><input type="radio" name="sfceTh" value="${k}"${d.theme===k?' checked':''}><i style="background:linear-gradient(135deg,${CERT_THEMES[k].bg[0]},${CERT_THEMES[k].bg[1]});border:3px solid ${CERT_THEMES[k].line}"></i><span>${CERT_THEMES[k].n}</span></label>`).join('')}</div></div>
-    <div class="dh-set"><b>ما يُطبع عليها</b><div class="dh-lk">${[['logo','شعار الدرس'],['stats','الدرجة والنجوم'],['badges','الرتبة والأوسمة'],['bonus','نقاط البونص']].map(([k,l])=>`<label class="dh-sw"><input type="checkbox" data-sce="${k}"${d[k]?' checked':''}> ${l}</label>`).join('')}</div></div></section>`},
+    <div class="dh-set"><b>ما يُطبع عليها</b><div class="dh-lk">${[['logo','شعار الدرس'],['stats','الدرجة والنجوم'],['badges','الرتبة والأوسمة'],['bonus','نقاط البونص']].map(([k,l])=>`<label class="dh-sw"><input type="checkbox" data-sce="${k}"${d[k]?' checked':''}> ${l}</label>`).join('')}</div></div></section>`+this.cxHtml(r,X)},
  cdate(t){return new Date(t||Date.now()).toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'})},
+ /* --- extra certificates: the teacher can give one student any number of them, each with its own title, text and colour; they all show in his «شهاداتي» --- */
+ CXP:[['شهادة تفوق','تُمنح هذه الشهادة تقديرًا لتفوّقك وجهدك المتميّز في اللغة العربية'],['شهادة تميّز','تُمنح هذه الشهادة تقديرًا لتميّزك في النحو والإعراب'],['شهادة مشاركة','تُمنح هذه الشهادة تقديرًا لمشاركتك الفعّالة في الحصص'],['شهادة تحسّن','تُمنح هذه الشهادة تقديرًا لتحسّنك الملحوظ هذا الأسبوع'],['شهادة التزام','تُمنح هذه الشهادة تقديرًا لالتزامك وانتظامك في الحل']],
+ cxFields(p,x,d){const f=(k,l,v,mx)=>`<label for="${p}${k}">${l}</label><input id="${p}${k}" class="inp" maxlength="${mx}" value="${esc(v)}">`;
+  return`<div class="dh-set">${f('N','الاسم المطبوع',x.nm,40)}${f('D','التاريخ (اتركه فارغًا ليُكتب تاريخ اليوم)',x.dt||'',40)}${f('T','العنوان',d.title,30)}${f('L','سطر الإهداء',d.lead,50)}
+   <label for="${p}B">نص الشهادة</label><textarea id="${p}B" class="bk-ta" rows="3" maxlength="220">${esc(d.body)}</textarea>${f('H','اللقب (فارغ لإخفائه)',d.honor,40)}</div>
+   <div class="dh-set"><b>اللون</b><div class="dh-sw-row">${Object.keys(CERT_THEMES).map(k=>`<label class="dh-col" title="${CERT_THEMES[k].n}"><input type="radio" name="${p}Th" value="${k}"${d.theme===k?' checked':''}><i style="background:linear-gradient(135deg,${CERT_THEMES[k].bg[0]},${CERT_THEMES[k].bg[1]});border:3px solid ${CERT_THEMES[k].line}"></i><span>${CERT_THEMES[k].n}</span></label>`).join('')}</div></div>
+   <div class="dh-set"><b>ما يُطبع عليها</b><div class="dh-lk">${[['logo','شعار الدرس'],['stats','الدرجة والنجوم'],['badges','الرتبة والأوسمة'],['bonus','نقاط البونص']].map(([k,l])=>`<label class="dh-sw"><input type="checkbox" data-${p}="${k}"${d[k]?' checked':''}> ${l}</label>`).join('')}</div></div>`},
+ cxRead(box,p){const cf=Cert.cfg(),v=id=>($(`#${p}${id}`,box)||{}).value||'',d={title:v('T'),lead:v('L'),body:v('B'),honor:v('H'),theme:(($$(`[name=${p}Th]`,box).find(x=>x.checked))||{}).value||'gold'};$$(`[data-${p}]`,box).forEach(b=>d[b.dataset[p]]=b.checked);
+  const diff={};Object.keys(d).forEach(k=>{if(d[k]!==cf.d[k])diff[k]=d[k]});if(d.title)diff.title=d.title;return{nm:v('N'),dt:v('D'),d:diff,full:d}},
+ cxPaint(box,p,base){const cv0=$(`#${p}Cv`,box);if(!cv0)return;const id=cv0._tk=(cv0._tk||0)+1,x=this.cxRead(box,p);
+  Cert.draw(x.nm||base.nm,{d:x.d,s:CR.figs(Object.assign({},base,{dt:x.dt}))}).then(cv=>{if(id!==cv0._tk||!cv0.isConnected)return;cv0.width=cv.width;cv0.height=cv.height;cv0.getContext('2d').drawImage(cv,0,0);cv0._cv=cv})},
+ cxHtml(r,X){const j2=X.j2||{};if(!j2.ok&&!j2.crok)return'';const xs=Array.isArray(j2.cx)?j2.cx:[],cf=Cert.cfg(),full=xs.length>=20;
+  const cards=xs.map(x=>{const d=Object.assign({},cf.d,x.d||{}),bad=x.st==='revoked';
+   return`<div class="cx-it" data-cx="${esc(x.id)}"><h4><span class="cf-st ${bad?'bad':''}">${bad?'مسحوبة':'ظاهرة للطالب'}</span> ${esc(d.title)} <span class="dh-sub">${this.cdate(x.at)}${x.up>x.at+1000?' · آخر تعديل '+this.cdate(x.up):''}</span></h4>
+    <canvas id="cxv${esc(x.id)}Cv" class="cf-cv" aria-label="${esc(d.title)}"></canvas>
+    <div class="dh-act"><button class="btn gold sm" type="button" data-cxa="ed">تعديل</button>${bad?`<button class="btn go sm" type="button" data-cxa="ok">إعادتها للطالب</button>`:`<button class="btn pink sm" type="button" data-cxa="rv">سحبها</button>`}<button class="btn red sm" type="button" data-cxa="del">حذفها</button><button class="btn sky sm" type="button" data-cxa="im">احفظ صورة</button></div>
+    <div class="cx-ed" hidden>${this.cxFields('cxe'+esc(x.id),x,d)}<div class="dh-act"><button class="btn go sm" type="button" data-cxa="sv">حفظ التعديلات (تصل الطالب تلقائيًا)</button><button class="btn ghost sm" type="button" data-cxa="cl">إغلاق</button></div></div></div>`}).join('');
+  const nd=Object.assign({},cf.d,{title:'شهادة تقدير'});
+  return`<section class="dh-card" id="cxSec"><h3>${em('trophy')} شهادات إضافية <span class="dh-sub">(${AR(xs.length)} من ٢٠)</span></h3><p class="dh-sub">امنح ${esc(r.name)} شهادة أخرى في أي وقت (تفوق، مشاركة، تحسّن…). كلها تظهر له في «شهاداتي» وفي «لوحتي» ويصله إشعار.</p>${cards||'<p class="dh-sub">لم تمنحه شهادات إضافية بعد.</p>'}
+   ${full?'<p class="dh-msg">وصلت إلى الحد الأقصى (٢٠ شهادة)؛ احذف شهادة لتضيف غيرها.</p>':`<div class="cx-new"><h4>منح شهادة جديدة</h4><div class="cx-pre">${this.CXP.map((p,i)=>`<button class="btn ghost sm" type="button" data-cxp="${i}">${esc(p[0])}</button>`).join('')}</div>
+   <canvas id="cxnCv" class="cf-cv" aria-label="معاينة الشهادة"></canvas>${this.cxFields('cxn',{nm:r.name,dt:''},nd)}<div class="dh-act"><button class="btn gold sm" id="cxnGo" type="button">${em('trophy')} امنح الشهادة</button></div></div>`}
+   <p class="dh-msg" id="cxM" role="status"></p></section>`},
+ cxBind(box,r,X){const S=this.S,j2=X.j2||{};if(!j2.ok&&!j2.crok)return;const xs=Array.isArray(j2.cx)?j2.cx:[],msg=t=>{const m=$('#cxM',box);if(m)m.textContent=t};
+  const api=async(o,ok)=>{msg('جارٍ الحفظ…');const x=await Online.api('admin',Object.assign({aid:r.aid},o),S.key);if(!x.ok){msg(x.error==='cx_full'?'وصل الطالب إلى الحد الأقصى (٢٠ شهادة).':this.err(x));return null}
+   if(S.full&&S.full[r.k])S.full[r.k].cx=x.cx;X.j2=Object.assign({},X.j2,{cx:x.cx});if(S.sf&&S.sf[r.k])S.sf[r.k].j2=X.j2;toast(ok);this.sfPane($('#dash'),r,X,S.from==='cfile'?'cfile':'class');return x};
+  const cf=Cert.cfg();
+  xs.forEach(x=>{const el=$(`[data-cx="${CSS.escape(x.id)}"]`,box);if(!el)return;const p='cxe'+x.id,cv0=el.querySelector('canvas');
+   const draw=()=>Cert.draw(x.nm,{d:x.d,s:CR.figs(x)}).then(cv=>{if(!cv0.isConnected)return;cv0.width=cv.width;cv0.height=cv.height;cv0.getContext('2d').drawImage(cv,0,0);cv0._cv=cv});draw();
+   let tm=0;const soon=()=>{clearTimeout(tm);tm=setTimeout(()=>{const y=this.cxRead(el,p);Cert.draw(y.nm||x.nm,{d:y.d,s:CR.figs(Object.assign({},x,{dt:y.dt}))}).then(cv=>{if(!cv0.isConnected)return;cv0.width=cv.width;cv0.height=cv.height;cv0.getContext('2d').drawImage(cv,0,0);cv0._cv=cv})},250)};
+   const ed=$('.cx-ed',el);ed.addEventListener('input',soon);ed.addEventListener('change',soon);
+   el.addEventListener('click',async e=>{const b=e.target.closest('[data-cxa]');if(!b||!el.contains(b))return;const a=b.dataset.cxa;
+    if(a==='ed'){ed.hidden=false;return}if(a==='cl'){ed.hidden=true;draw();return}
+    if(a==='sv'){const y=this.cxRead(el,p);api({op:'certxset',id:x.id,nm:y.nm,dt:y.dt,d:y.d,reset:true},'حُفظت التعديلات ✓ وتصل الطالب تلقائيًا');return}
+    if(a==='rv'){api({op:'certxset',id:x.id,st:'revoked'},'سُحبت الشهادة ✓');return}
+    if(a==='ok'){api({op:'certxset',id:x.id,st:'ok'},'أُعيدت الشهادة ✓ وتصل الطالب تلقائيًا');return}
+    if(a==='del'){if(!b.dataset.s){b.dataset.s=1;b.textContent='اضغط مرة أخرى لحذفها نهائيًا';msg('ستُحذف هذه الشهادة من الطالب نهائيًا.');return}api({op:'certxdel',id:x.id},'حُذفت الشهادة ✓');return}
+    if(a==='im'){const c2=cv0._cv||cv0;const res=await Cert.save(c2,r.name,false);msg(res==='fail'?'تعذّر التصدير.':'حُفظت صورة الشهادة ✓')}})});
+  const nw=$('.cx-new',box);if(nw){const base={nm:r.name,at:Date.now(),s:{pts:r.pts,max:r.max,stars:r.stars,smax:r.smax,bonus:r.bp||0,bstars:r.bs||0,rank:RANKS[r.rk]?RANKS[r.rk].n:'',badges:[]}};
+   let tm=0;const soon=()=>{clearTimeout(tm);tm=setTimeout(()=>this.cxPaint(nw,'cxn',base),250)};nw.addEventListener('input',soon);nw.addEventListener('change',soon);soon();
+   nw.addEventListener('click',e=>{const pb=e.target.closest('[data-cxp]');if(pb){const q=this.CXP[+pb.dataset.cxp];$('#cxnT',nw).value=q[0];$('#cxnB',nw).value=q[1];soon();return}
+    if(e.target.closest('#cxnGo')){const y=this.cxRead(nw,'cxn');if(!y.d.title){msg('اكتب عنوانًا للشهادة.');return}api({op:'certadd',nm:y.nm||r.name,dt:y.dt,d:y.d,s:base.s},'مُنحت الشهادة ✓ وتصل الطالب تلقائيًا')}})}},
  sfCeBind(box,r,X){const S=this.S,j2=X.j2||{},cr=j2.ok||j2.crok?j2.cr:null,msg=t=>{const m=$('#sfceM',box);if(m)m.textContent=t},api=async(o,ok)=>{msg('جارٍ الحفظ…');const x=await Online.api('admin',Object.assign({aid:r.aid},o),S.key);
    if(!x.ok){msg(this.err(x));return null}if(S.full&&S.full[r.k])S.full[r.k].cr=x.cr;X.j2=Object.assign({},X.j2,{cr:x.cr});if(S.sf&&S.sf[r.k])S.sf[r.k].j2=X.j2;toast(ok);this.sfPane($('#dash'),r,X,S.from==='cfile'?'cfile':'class');return x};
+  this.cxBind(box,r,X);
   if(!cr){const g=$('#sfceG',box);if(g)g.onclick=()=>api({op:'certgive',nm:r.name,s:{pts:r.pts,max:r.max,stars:r.stars,smax:r.smax,bonus:r.bp||0,bstars:r.bs||0,rank:RANKS[r.rk]?RANKS[r.rk].n:'',badges:[]}},'مُنحت الشهادة ✓ وتصل الطالب تلقائيًا');return}
   const cf=Cert.cfg(),v=id=>($('#'+id,box)||{}).value||'',read=()=>{const d={title:v('sfceT'),lead:v('sfceL'),body:v('sfceB'),honor:v('sfceH'),school:v('sfceS'),teacher:v('sfceTc'),role:v('sfceR'),theme:(($$('[name=sfceTh]',box).find(x=>x.checked))||{}).value||'gold'};$$('[data-sce]',box).forEach(b=>d[b.dataset.sce]=b.checked);
    const diff={};Object.keys(d).forEach(k=>{if(d[k]!==cf.d[k])diff[k]=d[k]});return{nm:v('sfceN'),dt:v('sfceD'),d:diff}};
@@ -7015,7 +7104,7 @@ Object.assign(Dash,{
  sfOv(r,X){const {R,nt,ca}=X,A=ca.A,cr=ca.rows.find(x=>x.k===r.k),pos=cr&&!r.empty?cr.pos:0;
   if(r.empty)return`<section class="dh-card"><h3>${em('thinking_face')} لم يبدأ الحل بعد</h3><div id="dhPg" class="dh-pages"><div class="dh-wait"><p>سجّل ${esc(r.name)} ولم يُرسل أي نتيجة بعد. شجّعه على فتح رابط الدرس، أو أرسل لولي أمره تذكيرًا بزر واتساب أعلاه.</p></div></div></section>`;
   const below=A.act.filter(x=>x.k!==r.k&&x.spct<r.spct).length,pct=A.N>1?Math.round(below/(A.N-1)*100):0,dSc=r.spct-A.avg,dAc=r.acc-A.acc,sg=v=>(v>0?'+':v<0?'−':'')+AR(Math.abs(v));
-  const ev=R.top.map((t,i)=>({t,i,c:A.topics[i]})).filter(x=>x.t.n>=MINN);
+  const ev=R.top.map((t,i)=>({t,i,c:A.topics.find(x=>x.k===t.k)})).filter(x=>x.t.n>=MINN);
   const radar=ev.length>=3?`<div class="sf-rd">${Ch.radar(ev.map((_,j)=>j+1),[{v:ev.map(x=>x.c&&x.c.n>=MINN?x.c.a:0),c:'#94a3b8',fill:.1,dash:1},{v:ev.map(x=>x.t.a),c:'#a78bfa',fill:.28}])}
     <ul class="ch-lg"><li><i style="background:#a78bfa"></i><span>الطالب</span></li><li><i style="background:#94a3b8"></i><span>متوسط الفصل</span></li>${ev.map((x,j)=>`<li><b class="ch-k">${AR(j+1)}</b><span>${esc(x.t.name)}</span><b>${AR(x.t.a)}٪</b></li>`).join('')}</ul></div>`:`<p class="dh-sub">يلزم حلّ ${AR(MINN)} أسئلة على الأقل في ثلاثة موضوعات لرسم الخريطة العنكبوتية؛ تظهر مقارنة الموضوعات في تبويب «المهارات والأخطاء».</p>`;
   return`<div class="dh-tiles">${this.tile(AR(r.pts)+'/'+AR(r.max),'الدرجة · '+AR(r.spct)+'٪','#a78bfa')}${this.tile(AR(r.acc)+'٪','دقة الإجابات ('+AR(r.c)+' من '+AR(r.n)+')','#38bdf8')}${this.tile(AR(r.done)+'/'+AR(r.total),'الكواكب المنجزة','#4ade80')}${this.tile(AR(r.stars)+'/'+AR(r.smax),'النجوم','#fbbf24')}${this.tile(fmtTime(r.mins*60),'وقت التعلّم','#fb923c')}${this.tile(r.inc?AR(r.inc):'✓','أجزاء لم يُكملها','#f472b6')}</div>
@@ -7043,13 +7132,13 @@ Object.assign(Dash,{
    ${SEC.map(s=>`<details class="dh-card sc-sec"${s.max-s.v>0?'':''} open><summary><span>${em(s.ic)} ${s.n}</span><span class="sc-sv"><b>${AR(s.v)}</b> / ${AR(s.max)} <small>≈ ${StarBox.fx(s.stars)} ★</small></span></summary><p class="dh-sub">${s.note||''}</p><div class="dh-sc"><table class="dh-tab sc-t">${s.rows.map(row).join('')||'<tr><td>لا شيء هنا الآن.</td></tr>'}</table></div></details>`).join('')}`},
  /* --- skills and mistakes --- */
  sfSk(r,X){const {R,ca}=X,A=ca.A,col=t=>ST_UI[t.st]||'#64748b';
-  const tops=`<section class="dh-card"><h3>${em('ringed_planet')} الأداء حسب الموضوعات</h3><p class="dh-sub">العلامة الرمادية = متوسط الفصل في الموضوع نفسه.</p>${R.top.map((t,i)=>{const c=A.topics[i],ok=t.n>=MINN;return Ch.cmp(esc(t.name),ok?t.a:0,c&&c.n>=MINN?c.a:null,col(t),ok?`${AR(t.a)}٪ <small>(${AR(t.c)}/${AR(t.n)})</small>`:t.n?`<small>${AR(t.n)} أسئلة فقط</small>`:'—')}).join('')}</section>`;
+  const tops=`<section class="dh-card"><h3>${em('ringed_planet')} الأداء حسب الموضوعات</h3><p class="dh-sub">العلامة الرمادية = متوسط الفصل في الموضوع نفسه.</p>${R.top.map((t,i)=>{const c=A.topics.find(x=>x.k===t.k),ok=t.n>=MINN;return Ch.cmp(esc(t.name),ok?t.a:0,c&&c.n>=MINN?c.a:null,col(t),ok?`${AR(t.a)}٪ <small>(${AR(t.c)}/${AR(t.n)})</small>`:t.n?`<small>${AR(t.n)} أسئلة فقط</small>`:'—')}).join('')}</section>`;
   const lv=`<section class="dh-card"><h3>${em('bullseye')} حسب المستوى</h3>${R.lvs.map(x=>this.hbar(esc(x.name),x.n?x.a:0,x.n?`${AR(x.a)}٪ <small>(${AR(x.c)}/${AR(x.n)})</small>`:'—',ST_UI[x.st]||'#64748b')).join('')}${R.parts.length?`<h4>حسب نوع النشاط</h4>${R.parts.map(p=>this.hbar(esc(p[0]),pc(p[2],p[1]),p[1]?`${AR(pc(p[2],p[1]))}٪ <small>(${AR(p[2])}/${AR(p[1])})</small>`:'—','#38bdf8')).join('')}`:''}</section>`;
   const ty=R.tys.length?`<section class="dh-card"><h3>${em('light_bulb')} حسب المهارة / نوع السؤال</h3>${R.tys.map(x=>this.hbar(esc(x.name),x.a,`${AR(x.a)}٪ <small>(${AR(x.c)}/${AR(x.n)})</small>`,ST_UI[x.st]||'#64748b')).join('')}</section>`:'';
   const W=R.wrong,wr=`<section class="dh-card"><h3>${em('thinking_face')} أسئلة أخطأ فيها (${AR(W.length)})</h3>${W.length?`<ol class="sf-wr">${W.map(w=>`<li><span class="q">${esc(w.q)}${w.k>1?` <i class="sf-k">أخطأ ${AR(w.k)} مرات</i>`:''}</span><span class="a">الصواب: ${esc(w.a)}</span>${w.e?`<span class="e">${esc(w.e)}</span>`:''}<small>${esc((TOPIC[w.tp]||{}).n||'')}${w.lv?' · '+esc(LV_NAME[w.lv]||''):''}</small></li>`).join('')}</ol>`:`<p class="dh-sub">${X.det?'لا توجد أخطاء مسجّلة.':'لا توجد تفاصيل محفوظة (الأخطاء تصل مع التفاصيل التي يرسلها الطالب).'}</p>`}</section>`;
   return tops+`<div class="dh-two">${lv}${ty}</div>`+wr},
  /* --- lessons (planets) --- */
- sfLs(r,X){const {R,det}=X,B=this.sfStars(r,X),pls=this.planetTabs(),inc={};((det&&det.inc)||[]).forEach(p=>inc[p.id]=p);
+ sfLs(r,X){const {R,det}=X,B=this.sfStars(r,X),pls=this.planetTabs(r.cls),inc={};((det&&det.inc)||[]).forEach(p=>inc[p.id]=p);
   const find=(k,id)=>B&&(B.SEC.find(s=>s.k===k)||{rows:[]}).rows.find(x=>x.id===id);
   const rows=pls.map((t,i)=>{const ok=R.planets[i]?R.planets[i].ok:null,ls=find('lesson',t.id),dr=find('drills',t.id),p=inc[t.id],started=(ls&&ls.v>0)||(dr&&dr.v>0)||!!p;
    const stt=ok===true?'<span class="ls-ok">✓ منجز</span>':ok===false?(started?'<span class="ls-mid">جارٍ</span>':'<span class="ls-no">لم يبدأ</span>'):(ls&&ls.v>=ls.max&&ls.max?'<span class="ls-ok">✓</span>':started?'<span class="ls-mid">جارٍ</span>':'<span class="ls-no">—</span>');
@@ -7136,7 +7225,7 @@ Object.assign(Dash,{
   if(!A.N)return`<section class="dh-card"><p class="dh-sub">لا توجد نتائج لرسم التحليل بعد.</p></section>`;
   const pts=A.act.map(r=>({k:r.k,n:r.name,x:r.spct,y:r.acc,c:this.BANDC(r.spct)})),j=S.dets&&S.dets[cls];
   const heat=`<section class="dh-card"><h3>خريطة الموضوعات لكل طالب</h3><p class="dh-sub">كل خانة = دقة الطالب في الموضوع (أخضر ٨٠٪+، أصفر ٦٥٪+، أحمر أقل).</p><div class="dh-key">${A.topics.map((t,i)=>`<span><b>${AR(i+1)}</b> ${esc(t.name)}</span>`).join('')}</div>
-    <div class="dh-sc"><table class="dh-heat"><tr><th>الطالب</th>${A.topics.map((t,i)=>`<th>${AR(i+1)}</th>`).join('')}</tr>${A.act.map(r=>`<tr><td><button type="button" data-o="${esc(r.k)}">${esc(r.name)}</button></td>${r.tps.map(t=>`<td style="--h:${t.n>=MINN?this.heat(t.a):'#475569'}" class="${t.n>=MINN?'h':'x'}">${t.n>=MINN?AR(t.a):'—'}</td>`).join('')}</tr>`).join('')}</table></div></section>`;
+    <div class="dh-sc"><table class="dh-heat"><tr><th>الطالب</th>${A.topics.map((t,i)=>`<th>${AR(i+1)}</th>`).join('')}</tr>${A.act.map(r=>`<tr><td><button type="button" data-o="${esc(r.k)}">${esc(r.name)}</button></td>${A.topics.map(x=>{const t=r.tps[x.i];return`<td style="--h:${t.n>=MINN?this.heat(t.a):'#475569'}" class="${t.n>=MINN?'h':'x'}">${t.n>=MINN?AR(t.a):'—'}</td>`}).join('')}</tr>`).join('')}</table></div></section>`;
   const lead=`<div class="dh-two"><section class="dh-card"><h3>${em('bullseye')} الدرجة مقابل الدقة</h3>${Ch.scatter(pts)}<p class="dh-sub">كل نقطة طالب (اضغطها لفتح ملفه). الخطّان المتقطّعان: درجة ٦٠٪ ودقة ٦٥٪؛ ما دونهما يحتاج انتباهك. من يقع أسفل اليمين درجته عالية بدقة منخفضة (يحلّ كثيرًا ويخطئ)، ومن يقع أعلى اليسار دقيق لكنه لم يحلّ كثيرًا.</p></section>
     <section class="dh-card"><h3>${em('hundred_points')} الأسئلة والموضوعات</h3><div class="dh-tiles two">${this.tile(AR(A.act.reduce((s,r)=>s+r.n,0)),'إجمالي الأسئلة المجابة','#38bdf8')}${this.tile(AR(A.act.reduce((s,r)=>s+r.c,0)),'الإجابات الصحيحة','#4ade80')}</div>${A.topics.map(t=>this.hbar(esc(t.name),t.n?t.a:0,t.n?`${AR(t.a)}٪`:'—',ST_UI[t.st])).join('')}</section></div>`;
   let det;
@@ -7148,13 +7237,13 @@ Object.assign(Dash,{
   const j=await Online.api('report?cls='+encodeURIComponent(cls)+'&dets=1',undefined,S.key);S.dets[cls]=j&&j.ok?{ok:true,dets:j.dets||{}}:{ok:false};
   if(S.view==='cfile'&&S.cf.cls===cls&&S.cf.tab==='an'&&d.isConnected){const y=d.scrollTop;await this.classFile(d);d.scrollTop=y}},
  /* aggregates over the compact details of the class's students */
- cfDetHtml(cls,ca,j){const A=ca.A,ds=Object.values(j.dets||{}).map(x=>x&&x.d).filter(Boolean),pls=this.planetTabs(),S=this.S;
+ cfDetHtml(cls,ca,j){const A=ca.A,ds=Object.values(j.dets||{}).map(x=>x&&x.d).filter(Boolean),S=this.S;
   if(!ds.length)return`<section class="dh-card"><p class="dh-sub">لم يرسل أي طالب في هذا الفصل تفاصيله بعد (تصل مع أول مزامنة بعد التسجيل).</p></section>`;
   const sum=(f)=>ds.reduce((a,d)=>{f(d,a);return a},{}),lv=[0,1,2].map(i=>{let n=0,c=0;ds.forEach(d=>{const x=(d.lvs||[])[i]||[0,0];n+=x[0];c+=x[1]});return{n,c,a:pc(c,n),name:LV_NAME[i+1]}});
   const ty={};ds.forEach(d=>(d.tys||[]).forEach(t=>{const o=ty[t[0]]=ty[t[0]]||{n:0,c:0};o.n+=t[1];o.c+=t[2]}));
   const tys=Object.keys(ty).map(k=>({k,n:ty[k].n,c:ty[k].c,a:pc(ty[k].c,ty[k].n),name:TY_NAME[k]||k})).filter(t=>t.n>0&&t.k!=='meteor'&&t.k!=='det').sort((a,b)=>a.a-b.a);
   const parts=['أسئلة الدروس','التدريبات','الألعاب'].map((n,i)=>{let a=0,c=0;ds.forEach(d=>{const x=(d.parts||[])[i]||[0,0];a+=x[0];c+=x[1]});return{n,t:a,c,a:pc(c,a)}});
-  const pl=pls.map(t=>({t:t.title,k:ds.filter(d=>d.pl&&this.plOn(d,pls)[t.id]).length}));
+  const pls=this.planetTabs(cls),pl=pls.map(t=>({t:t.title,k:ds.filter(d=>d.pl&&this.plOn(d,cls)[t.id]).length}));
   const wq={};ds.forEach(d=>(d.wrong||[]).forEach(w=>{const o=wq[w.q]=wq[w.q]||{q:w.q,a:w.a,tp:w.tp,lv:w.lv,s:0,k:0};o.s++;o.k+=Math.max(1,w.k||1)}));
   const wl=Object.values(wq).sort((a,b)=>b.s-a.s||b.k-a.k).slice(0,12);
   const aw=Object.values(j.dets).reduce((s,x)=>s+((x&&x.aw)|0),0),ce=Object.values(j.dets).filter(x=>x&&x.ce).length;
@@ -7374,7 +7463,7 @@ const Online={
  detail(){try{const R=REP(),A=Ach.get(),cut=(x,n)=>String(x==null?'':x).slice(0,n);
   return{v:1,at:Date.now(),parts:R.parts.map(p=>[p[1],p[2]]),top:R.top.map(t=>[t.n,t.c]),lvs:R.lvs.map(t=>[t.n,t.c]),tys:R.tys.map(t=>[t.k,t.n,t.c]),
    wrong:R.wrong.slice(0,25).map(w=>({q:cut(w.q,160),a:cut(w.a,100),e:cut(w.e,160),k:w.k|0,tp:cut(w.tp,2),lv:w.lv|0})),
-   pl:R.planets.map(p=>p.ok?1:0),pi:R.planets.map(p=>p.id),inc:R.inc.planets.map(p=>({id:p.id,t:cut(p.title,40),i:p.items.slice(0,8).map(i=>[cut(i.t,80),cut(i.note,60)])})),incN:[R.inc.count,R.inc.nQ],
+   pl:R.planets.map(p=>p.ok?1:0),pi:R.planets.map(p=>p.id),inc:R.inc.planets.map(p=>({id:p.id,t:cut(p.title,40),n:p.items.length,i:p.items.slice(0,8).map(i=>[cut(i.t,80),cut(i.note,60)])})),incN:[R.inc.count,R.inc.nQ],
    bc:R.bc,br:R.br,best:R.best,fixed:R.fixed,sec:Math.round(ST.sec),qa:R.qa,qt:R.qt,rank:A.rank,bd:A.badges.map(b=>cut(b.n,30)),pg:[A.pages,A.pagesT],won:A.won?1:0,dc:A.dc}}catch(e){return null}},
  /* ---------- saving + sending (one call: progress snapshot, result code, detailed report) ---------- */
  async sync(o){o=o||{};const a=this.acct();if(!a)return{ok:false,error:'busy'};try{CR.ensure()}catch(e){}
@@ -7382,14 +7471,14 @@ const Online={
   const sg=this.sig();if(!o.force&&sg===this.lastSig)return{ok:true,status:'same'};
   this.busy=1;
   try{try{saveST()}catch(e){}
-   const snap=store.snapshot(),body={aid:a.aid,sk:a.sk,bv:a.bv,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),snap:JSON.stringify(snap),ts:snap.ts||0,code:Code.make(),detail:this.detail(),wk:typeof Week!=='undefined'?Week.report():undefined,crv:CR.v(),cr:CR.pend()||undefined};
+   const snap=store.snapshot(),body={aid:a.aid,sk:a.sk,bv:a.bv,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),snap:JSON.stringify(snap),ts:snap.ts||0,code:Code.make(),detail:this.detail(),wk:typeof Week!=='undefined'?Week.report():undefined,crv:CR.v(),cxv:CR.xv(),cr:CR.pend()||undefined};
    const r=await this.api('sync',body,'',JSON.stringify(body).length<60000);
    if(r.ok){if(r.rst)this.applyReset(r.rst);const a2=this.acct()||a;if(r.rv!==undefined&&a2.bv!==r.rv){a2.bv=r.rv;this.setAcct(a2)}
     if(r.status==='old'&&r.snap){   // another device saved in between: both versions are merged (nothing of either is lost) and the merged one is sent
      try{store.load(store.merge(store.snapshot(),JSON.parse(r.snap)));Prof.rehydrate();toast(em('check_mark_button')+' جمعتُ تقدّمك من جهازك ومن حسابك معًا')}catch(e){}
      this.lastSig='';this.again=1}
     else this.lastSig=sg;
-    this.stat={ok:true,at:Date.now()};if(r.cfg)Ctl.apply(r.cfg);if(r.ce!==undefined&&typeof Cert!=='undefined')Cert.setForced(!!r.ce);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);if(r.wk!==undefined&&typeof Week!=='undefined')Week.set(r.wk);if('cr' in r)CR.take(r.cr);
+    this.stat={ok:true,at:Date.now()};if(r.cfg)Ctl.apply(r.cfg);if(r.ce!==undefined&&typeof Cert!=='undefined')Cert.setForced(!!r.ce);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);if(r.wk!==undefined&&typeof Week!=='undefined')Week.set(r.wk);if('cr' in r)CR.take(r.cr);if('cx' in r)CR.takeX(r.cx);
     let fin=false;try{fin=Incomplete.list().count===0}catch(e){}
     if(fin&&!a2.fin){a2.fin=1;this.setAcct(a2);toast(em('trophy')+' أكملتَ الرحلة، ووصل تقريرك النهائي إلى معلمك ✓')}
     else if(!a2.first&&!o.quiet){a2.first=1;this.setAcct(a2);toast(em('check_mark_button')+' تقدّمك محفوظ في حسابك ويصل إلى معلمك تلقائيًا')}}
@@ -7402,7 +7491,7 @@ const Online={
  async ping(){if(document.visibilityState!=='visible')return;const a=this.acct();
   if(!a){const r=await this.api('config');if(r.ok&&r.cfg)Ctl.apply(r.cfg);return}
   try{CR.ensure()}catch(e){}
-  const r=await this.api('sync',{aid:a.aid,sk:a.sk,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),wk:typeof Week!=='undefined'?Week.report():undefined,crv:CR.v(),cr:CR.pend()||undefined});if(r.ok&&'cr' in r)CR.take(r.cr);if(r.ok&&r.cfg){Ctl.apply(r.cfg);if(r.ce!==undefined&&typeof Cert!=='undefined')Cert.setForced(!!r.ce);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);if(r.wk!==undefined&&typeof Week!=='undefined')Week.set(r.wk);if(r.rst)this.applyReset(r.rst)}else if(r.error==='bad_session'||r.error==='no_account')this.expired()},
+  const r=await this.api('sync',{aid:a.aid,sk:a.sk,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),wk:typeof Week!=='undefined'?Week.report():undefined,crv:CR.v(),cxv:CR.xv(),cr:CR.pend()||undefined});if(r.ok&&'cr' in r)CR.take(r.cr);if(r.ok&&'cx' in r)CR.takeX(r.cx);if(r.ok&&r.cfg){Ctl.apply(r.cfg);if(r.ce!==undefined&&typeof Cert!=='undefined')Cert.setForced(!!r.ce);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);if(r.wk!==undefined&&typeof Week!=='undefined')Week.set(r.wk);if(r.rst)this.applyReset(r.rst)}else if(r.error==='bad_session'||r.error==='no_account')this.expired()},
  /* the teacher reset some parts of this student's progress: apply it once on this device (the same keys as the server's list) */
  RS:{score:['led','pb','dq','ps','gb','fb'],progress:['done','seen','sd','pos','lit','pu'],bonus:['bn','cmb'],daily:['dc','wk','wkh'],badges:['bdg','gift','rk'],stats:['st']},
  applyReset(rst){const a=this.acct();if(!rst||!rst.id||!a||a.rid===rst.id||!Array.isArray(rst.scopes))return false;
@@ -7629,8 +7718,9 @@ const Ctl={
 .g-off{opacity:.45;filter:grayscale(.7);position:relative}.g-off::after{content:'🔒 مغلقة';position:absolute;top:8px;inset-inline-start:8px;padding:2px 10px;border-radius:10px;background:#0009;color:#fff;font-size:.8rem}.tabbtn.locked{opacity:.5;filter:grayscale(.6)}.tabbtn[hidden]{display:none!important}.tabbtn.locked b::after{content:' 🚧'}`,
  /* a teacher who only uses this page as the teacher is never blocked; on a device with a student account the settings apply to the student */
  isT(){return !!Online.teacherKey()&&!Online.acct()},
- locked(id){const c=this.cfg;return !!(c&&Array.isArray(c.lock)&&c.lock.includes(id))&&!this.isT()},
- hidden(id){const c=this.cfg;return !!(c&&Array.isArray(c.hide)&&c.hide.includes(id))&&!this.isT()},
+ force:0,   // > 0 while a report is being built: the teacher's own device then sees the lessons as a student does (a closed or hidden planet is not in the report)
+ locked(id){const c=this.cfg;return !!(c&&Array.isArray(c.lock)&&c.lock.includes(id))&&(this.force>0||!this.isT())},
+ hidden(id){const c=this.cfg;return !!(c&&Array.isArray(c.hide)&&c.hide.includes(id))&&(this.force>0||!this.isT())},
  gameOff(id){const c=this.cfg;return !!(c&&Array.isArray(c.gamesOff)&&c.gamesOff.includes(id))&&!this.isT()},
  /* the daily opening hours (device clock): outside them the game shows the waiting screen */
  closedNow(){const w=this.cfg&&this.cfg.win;if(!w||!w.on||this.isT())return'';const n=new Date(),m=n.getHours()*60+n.getMinutes(),f=x=>{const a=String(x).split(':');return(+a[0])*60+(+a[1])};
