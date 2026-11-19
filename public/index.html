@@ -1970,6 +1970,9 @@ body.cls .opt{min-height:4.6rem}
 .cf-st.bad{background:#dc262626;border-color:#f87171}
 .cf-st.none{background:#64748b30;border-color:#94a3b8}
 .cf-cv{display:block;width:100%;max-width:42rem;height:auto;margin:.6rem auto;border-radius:14px;box-shadow:0 12px 32px #0006}
+.hn-vw{display:flex;margin:0 auto .7rem;width:max-content;max-width:100%}
+.hn-cl{display:block;font-size:.72rem;font-weight:600;color:var(--muted);line-height:1.3}
+.hn-pi small{font-size:.72rem;color:var(--muted)}
 </style></head><body><div class="sky" aria-hidden="true"><div class="stars"></div><div class="stars b"></div><img class="float-pl a" data-em="p2" alt=""><img class="float-pl b" data-em="p3" alt=""><i class="comet"></i></div>
 <header class="top"><div class="top-in">
  <div class="brand"><img data-em="logo" alt=""><div><h1>مغامرة النحو والإعراب</h1><small>رحلة بين الكواكب مع الأستاذ إسلام قنديل</small></div></div>
@@ -6258,11 +6261,11 @@ const Dash={
   const multi=S.scope==='all',sec=S.sec||'over',now=this.now();
   const scopeSel=`<label class="sr" for="dhSc">اختر الفصل</label><select id="dhSc" class="inp dh-sel"><option value="all"${multi?' selected':''}>كل الفصول</option>${S.classes.map(c=>`<option value="${esc(c)}"${S.scope===c?' selected':''}>${esc(c)}</option>`).join('')}</select>`;
   const top=`<div class="dh-top"><b>${em('man_teacher')} لوحة المعلم</b><span>${scopeSel}<button class="btn ghost sm" id="dhR" type="button">تحديث</button><button class="btn ghost sm" id="dhX" type="button">إغلاق</button></span></div>
-   <div class="dh-nav2"><button class="btn gold sm" id="dhG" type="button">${em('bullseye')} التحكم باللعبة</button><button class="btn gold sm" id="dhCt" type="button">${em('books')} مركز المحتوى</button><button class="btn gold sm" id="dhWk" type="button">${em('trophy')} تحدّي الأسبوع</button><button class="btn sky sm" id="dhCf" type="button">${em('books')} ملف الفصل</button><button class="btn gold sm" id="dhHo" type="button">${em('1st_place_medal')} لوحة الشرف</button><button class="btn sky sm" id="dhRd" type="button">${em('closed_book')} تصميم التقارير</button><button class="btn gold sm" id="dhCe" type="button">${em('1st_place_medal')} الشهادة</button><button class="btn ghost sm" id="dhM2" type="button">إدارة الفصول</button><button class="btn ghost sm" id="dhCm" type="button">وضع الحصة</button><button class="btn ghost sm" id="dhAc" type="button">حسابي</button><button class="btn red sm" id="dhLo" type="button">تسجيل الخروج</button></div>`;
+   <div class="dh-nav2"><button class="btn gold sm" id="dhG" type="button">${em('bullseye')} التحكم باللعبة</button><button class="btn gold sm" id="dhCt" type="button">${em('books')} مركز المحتوى</button><button class="btn gold sm" id="dhWk" type="button">${em('trophy')} تحدّي الأسبوع</button><button class="btn sky sm" id="dhCf" type="button">${em('books')} ملف الفصل</button><button class="btn gold sm" id="dhHo" type="button">${em('1st_place_medal')} لوحات الشرف</button><button class="btn sky sm" id="dhRd" type="button">${em('closed_book')} تصميم التقارير</button><button class="btn gold sm" id="dhCe" type="button">${em('1st_place_medal')} الشهادة</button><button class="btn ghost sm" id="dhM2" type="button">إدارة الفصول</button><button class="btn ghost sm" id="dhCm" type="button">وضع الحصة</button><button class="btn ghost sm" id="dhAc" type="button">حسابي</button><button class="btn red sm" id="dhLo" type="button">تسجيل الخروج</button></div>`;
   const bind=()=>{$('#dhX',d).onclick=()=>this.close();
    $('#dhR',d).onclick=async()=>{const r=await this.load();if(r.ok)this.classView(d)};
    $('#dhSc',d).onchange=async e=>{S.scope=e.target.value;S.q='';S.sel=new Set();const r=await this.load();if(r.ok)this.classView(d)};
-   $('#dhCf',d).onclick=()=>this.openCf();$('#dhM2',d).onclick=()=>this.manage();$('#dhG',d).onclick=()=>this.ctl();$('#dhCt',d).onclick=()=>this.show('hub');$('#dhWk',d).onclick=()=>this.week();$('#dhHo',d).onclick=()=>this.honorAdmin();$('#dhRd',d).onclick=()=>this.design();$('#dhCe',d).onclick=()=>this.certDesign();$('#dhAc',d).onclick=()=>this.account();$('#dhLo',d).onclick=()=>Online.teacherLogout();$('#dhCm',d).onclick=()=>{this.close();try{Cls.toggle()}catch(e){toast('وضع الحصة غير متاح')}}};
+   $('#dhCf',d).onclick=()=>this.openCf();$('#dhM2',d).onclick=()=>this.manage();$('#dhG',d).onclick=()=>this.ctl();$('#dhCt',d).onclick=()=>this.show('hub');$('#dhWk',d).onclick=()=>this.week();$('#dhHo',d).onclick=()=>this.hbOpen();$('#dhRd',d).onclick=()=>this.design();$('#dhCe',d).onclick=()=>this.certDesign();$('#dhAc',d).onclick=()=>this.account();$('#dhLo',d).onclick=()=>Online.teacherLogout();$('#dhCm',d).onclick=()=>{this.close();try{Cls.toggle()}catch(e){toast('وضع الحصة غير متاح')}}};
   if(!A.regs){d.innerHTML=top+`<div class="dh-wrap"><div class="dh-wait"><p>لا يوجد طلاب مسجّلون ${S.scope==='all'?'بعد':'في هذا الفصل بعد'}. أعطِ طلابك رابط الدرس؛ يسجّل كل طالب اسمه وفصله ورقم هاتفه.</p></div></div>`;bind();return}
   const tile=(v,l,c)=>`<div class="dh-tile"${c?` style="--tc:${c}"`:''}><b>${v}</b><small>${l}</small></div>`;
   const bar=(l,pct,txt,col)=>`<div class="dh-bar"><span>${l}</span><i><u style="width:${Math.max(pct,pct>0?3:0)}%;background:${col}"></u></i><em>${txt}</em></div>`;
@@ -6877,6 +6880,7 @@ body.dash-on{overflow:hidden}
 .dh-bulk{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:8px 10px;margin:6px 0;border-radius:14px;background:#fbbf2418;border:1.5px solid #fbbf2466}
 .dh-tab tr.sel{background:#fbbf2414}.dh-tab input[type=checkbox]{width:1.1rem;height:1.1rem;accent-color:var(--gold2)}.dh-tab td.dh-ac{white-space:nowrap}.dh-tab td.dh-ac .btn{margin-inline-start:4px}
 .dh-tab tr.dh-grp td{background:#ffffff14;padding:8px 10px;font-size:1rem}
+.hb-tabs,.hb-chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}.hb-pv{max-width:100%;border-radius:12px}.hb-cpod{margin:6px 0}.dh-sw{display:flex;gap:8px;align-items:center;font-weight:700}
 .dh-pod{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;align-items:end;margin:8px 0}.dh-pd{display:grid;gap:2px;justify-items:center;padding:12px 6px;border-radius:16px;background:#ffffff10;border:1.5px solid var(--line);color:inherit;font:inherit;cursor:pointer}.dh-pd .m{font-size:2rem}.dh-pd em{font-style:normal;font:400 1.4rem var(--f-display)}.dh-pd.p1{padding-block:20px;background:#fbbf2426;border-color:#fbbf24}.dh-pd b{text-align:center}
 .dh-hn2{margin-top:6px}
 .dh-md .dh-tbl{grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr))}.dh-tr .dh-sel{min-width:92px;max-width:112px;flex:0 0 auto}.dh-tr>.dh-tn{flex:1 1 auto}
@@ -7311,6 +7315,178 @@ Object.assign(Dash,{
   if(a==='delcls'){if(!btn.dataset.s){btn.dataset.s=1;btn.textContent='اضغط مرة أخرى لإزالة الفصل';return}
    Online.api('admin',{op:'delclass',name:cls},S.key).then(async r=>{if(!r.ok){msg.textContent=r.error==='has_students'?'في هذا الفصل طلاب؛ انقلهم أو أعد تسميته بدل إزالته.':r.error==='bad_class'?'لا يمكن إزالة آخر فصل.':this.err(r);btn.textContent='إزالة الفصل';delete btn.dataset.s;return}if(S.scope===cls)S.scope='all';S.cf.cls='';Gate.classes=null;await this.load();redraw();toast('أُزيل الفصل')});return}},
  cfMgBind(d,cls,ca,msg,redraw){this.cfAddBind(d,cls,msg,redraw)}
+});
+
+/* ===== a honour board drawn on a canvas, so the teacher can save it as a picture (for each class, the best class, all classes) ===== */
+const HBImg={
+ W:1200,
+ T:{bg:['#1b1240','#3a2a8c'],gold:'#ffd43b',ink:'#f4efff',soft:'#c4b5fd',card:'rgba(255,255,255,.09)',line:'rgba(255,255,255,.2)'},
+ hue(n){let h=0;for(const ch of String(n))h=(h*31+ch.charCodeAt(0))%360;return h},
+ NF:s=>`700 ${s}px "Scheherazade New","Aref Ruqaa",Amiri,serif`,
+ LF:s=>`400 ${s}px Lalezar,"Baloo Bhaijaan 2",sans-serif`,
+ BF:s=>`700 ${s}px "Baloo Bhaijaan 2",Amiri,sans-serif`,
+ /* the biggest size (down to min) at which the text fits in maxW */
+ fit(x,t,F,s,maxW,min){let z=s;x.font=F(z);while(x.measureText(t).width>maxW&&z>(min||18)){z-=2;x.font=F(z)}return z},
+ rr(x,X,Y,w,h,r){x.beginPath();x.moveTo(X+r,Y);x.arcTo(X+w,Y,X+w,Y+h,r);x.arcTo(X+w,Y+h,X,Y+h,r);x.arcTo(X,Y+h,X,Y,r);x.arcTo(X,Y,X+w,Y,r);x.closePath()},
+ /* o: {title, sub, motto, foot, rows:[{i (0 = not ranked), n, s (small line), v (text), bar (0..1)}]} */
+ async draw(o){await Cert.fonts();
+  const W=this.W,T=this.T,rows=o.rows||[],pod=rows.filter(r=>r.i>=1&&r.i<=3),rest=rows.filter(r=>!(r.i>=1&&r.i<=3)),podH=pod.length?590:0,rowH=108;
+  const H=340+podH+(rest.length?rest.length*rowH+30:60)+(o.motto?120:30)+170;
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;const x=cv.getContext('2d');x.direction='rtl';x.textBaseline='alphabetic';x.textAlign='center';
+  let g=x.createLinearGradient(0,0,W*.4,H);g.addColorStop(0,T.bg[0]);g.addColorStop(1,T.bg[1]);x.fillStyle=g;x.fillRect(0,0,W,H);
+  /* stars */
+  let sd=7;const rnd=()=>{sd=(sd*9301+49297)%233280;return sd/233280};x.fillStyle='rgba(255,255,255,.5)';for(let i=0;i<90;i++){const r=rnd()*2.2+.4;x.globalAlpha=.15+rnd()*.5;x.beginPath();x.arc(rnd()*W,rnd()*H,r,0,7);x.fill()}x.globalAlpha=1;
+  const gl=x.createRadialGradient(W/2,200,20,W/2,200,520);gl.addColorStop(0,'rgba(255,212,59,.22)');gl.addColorStop(1,'rgba(255,212,59,0)');x.fillStyle=gl;x.fillRect(0,0,W,700);
+  /* frame */
+  x.strokeStyle=T.gold;x.lineWidth=6;this.rr(x,22,22,W-44,H-44,34);x.stroke();x.strokeStyle=T.line;x.lineWidth=2;this.rr(x,40,40,W-80,H-80,26);x.stroke();
+  /* title */
+  const tr=await Cert.img('trophy');if(tr)x.drawImage(tr,W/2-52,70,104,104);
+  x.fillStyle=T.gold;x.shadowColor='rgba(0,0,0,.45)';x.shadowBlur=14;this.fit(x,o.title||'لوحة الشرف',this.LF,96,W-200,44);x.fillText(o.title||'لوحة الشرف',W/2,262);x.shadowBlur=0;
+  x.fillStyle=T.ink;this.fit(x,o.sub||'',this.NF,40,W-200,24);x.fillText(o.sub||'',W/2,318);
+  /* podium */
+  let y=340;
+  if(pod.length){const base=y+podH-30;
+   const spec={1:{h:300,c:['#ffe27a','#f2a900'],tx:'#5a3a00',cx:W/2},2:{h:230,c:['#f1f5f9','#94a3b8'],tx:'#1f2937',cx:W/2+330},3:{h:190,c:['#f6c9a0','#c2763a'],tx:'#4a2410',cx:W/2-330}};
+   pod.forEach(r=>{const s=spec[r.i],top=base-s.h,pw=300;
+    const pg=x.createLinearGradient(0,top,0,base);pg.addColorStop(0,s.c[0]);pg.addColorStop(1,s.c[1]);x.fillStyle=pg;this.rr(x,s.cx-pw/2,top,pw,s.h,22);x.fill();
+    x.fillStyle=s.tx;x.font=this.LF(110);x.fillText(AR(r.i),s.cx,top+118);x.font=this.BF(38);this.fit(x,r.v||'',this.BF,38,pw-30,20);x.fillText(r.v||'',s.cx,top+s.h-34);
+    const ny=top-18;x.fillStyle='#fff';this.fit(x,r.n,this.NF,46,pw+60,24);x.fillText(r.n,s.cx,ny);
+    let ay=ny-(r.s?146:112);if(r.s){x.fillStyle=T.soft;this.fit(x,r.s,this.NF,30,pw+40,18);x.fillText(r.s,s.cx,ny-52)}
+    x.fillStyle=`hsl(${this.hue(r.n)} 70% 55%)`;x.beginPath();x.arc(s.cx,ay,50,0,7);x.fill();x.strokeStyle=s.c[0];x.lineWidth=6;x.stroke();
+    x.fillStyle='#fff';x.font=this.NF(58);x.fillText(r.a||String(r.n).trim().charAt(0)||'؟',s.cx,ay+20);
+    if(r.i===1){x.fillStyle=T.gold;x.beginPath();const cy=ay-62;x.moveTo(s.cx-34,cy+24);x.lineTo(s.cx-40,cy-6);x.lineTo(s.cx-18,cy+8);x.lineTo(s.cx,cy-18);x.lineTo(s.cx+18,cy+8);x.lineTo(s.cx+40,cy-6);x.lineTo(s.cx+34,cy+24);x.closePath();x.fill()}});
+   y+=podH}
+  /* the rest */
+  if(rest.length){const max=Math.max(1,...rest.map(r=>r.bar||0));rest.forEach((r,k)=>{const Y=y+k*rowH;
+    x.fillStyle=T.card;this.rr(x,80,Y,W-160,rowH-14,22);x.fill();const mid=Y+(rowH-14)/2;
+    x.fillStyle=r.i?'rgba(255,212,59,.2)':'rgba(255,255,255,.08)';x.beginPath();x.arc(W-130,mid,29,0,7);x.fill();
+    x.fillStyle=r.i?T.gold:T.soft;x.font=this.BF(34);x.fillText(r.i?AR(r.i):'—',W-130,mid+12);
+    x.textAlign='right';x.fillStyle='#fff';const nz=this.fit(x,r.n,this.NF,40,400,22);x.fillText(r.n,W-185,r.s?Y+38:mid+14);
+    if(r.s){x.fillStyle=T.soft;this.fit(x,r.s,this.NF,26,400,16);x.fillText(r.s,W-185,Y+78)}
+    x.textAlign='center';
+    if(r.bar!=null){const bx=285,bw=300,bh=16,by=mid-8;x.fillStyle='rgba(255,255,255,.12)';this.rr(x,bx,by,bw,bh,8);x.fill();const w=Math.max(10,bw*(r.bar/max));x.fillStyle=r.i&&r.i<=10?T.gold:'#8b7bd8';this.rr(x,bx+bw-w,by,w,bh,8);x.fill()}
+    x.fillStyle=T.gold;this.fit(x,r.v||'',this.BF,36,170,20);x.textAlign='left';x.fillText(r.v||'',110,mid+12);x.textAlign='center'});
+   y+=rest.length*rowH+30}
+  else y+=30;
+  /* footer */
+  if(o.motto){x.fillStyle=T.gold;this.fit(x,o.motto,this.NF,44,W-220,24);x.fillText(o.motto,W/2,y+58);y+=110}
+  x.strokeStyle=T.line;x.lineWidth=2;x.beginPath();x.moveTo(140,H-150);x.lineTo(W-140,H-150);x.stroke();
+  x.fillStyle=T.ink;this.fit(x,o.foot||'',this.NF,34,W-220,20);x.fillText(o.foot||'',W/2,H-96);
+  x.fillStyle=T.soft;x.font=this.NF(28);x.fillText('مغامرة النحو والإعراب',W/2,H-56);
+  return cv},
+ async save(cv,fn){const blob=await Cert.blob(cv);if(!blob)return'fail';try{const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);return'saved'}catch(e){return'fail'}}};
+
+/* ===== «لوحات الشرف» (teacher dashboard): every class's board with the students' activity, the best-class board (classes compete as teams),
+   the board of all students across all classes, and the full management of the three. Each can be saved as a picture. ===== */
+Object.assign(Dash,{
+ HBM:{
+  team:[['avg','متوسط نسبة الدرجة لطلاب الفصل','الأعدل: يقارن الفصول مهما اختلف عدد طلابها.'],['part','النسبة × مشاركة الفصل','يكافئ الفصل الذي يشارك كل طلابه معًا (العمل الجماعي): متوسط النسبة مضروبًا في نسبة من أرسل نتائجه.'],['pts','متوسط النقاط للطالب','كم نقطة يجمع الطالب الواحد في المتوسط.'],['stars','متوسط النجوم للطالب',''],['tot','مجموع نقاط الفصل','يميل للفصل الأكبر عددًا؛ يصلح لتحدٍّ يشارك فيه الجميع.']],
+  all:[['pct','نسبة الدرجة (الأعدل)'],['pts','مجموع النقاط'],['stars','عدد النجوم']],
+  cls:[['pct','نسبة الدرجة (الأعدل)'],['pts','مجموع النقاط'],['stars','عدد النجوم']]},
+ hbName(n,mode){n=String(n||'');const w=n.split(' ').filter(Boolean);if(mode==='full')return n;if(mode==='initial'&&w.length>1)return w[0]+' '+w[w.length-1][0]+'.';return w[0]||n},
+ hbAgo(ms){const now=this.now();if(!ms)return'لم يدخل بعد';const d=now-ms;if(d<3600e3)return'الآن تقريبًا';if(d<864e5)return'اليوم';if(d<2*864e5)return'أمس';return'منذ '+AR(Math.floor(d/864e5))+' يومًا'},
+ hbOpen(tab,sel){const S=this.S,H=this.HB=this.HB||{tab:'cls',cls:null,m:{},rows:null,bs:{},team:{},all:{}};
+  if(tab)H.tab=tab;if(sel)H.cls=sel;if(!H.cls||!S.classes.includes(H.cls))H.cls=S.scope&&S.scope!=='all'&&S.classes.includes(S.scope)?S.scope:S.classes[0];
+  const TABS4=[['cls','لوحات الفصول'],['team','أفضل فصل'],['all','كل الفصول'],['mng','الإدارة']];
+  this.modal(`<h3>${em('trophy')} لوحات الشرف</h3><p class="dh-sub">لوحة لكل فصل، ولوحة «أفضل فصل» لتنافس الفصول معًا، ولوحة لكل الطلاب على مستوى الفصول. تُحسب تلقائيًا من نتائج الطلاب، ويمكنك حفظ أي لوحة صورةً ونشرها.</p>
+   <div class="hb-tabs" role="tablist" aria-label="اللوحات">${TABS4.map(([k,t])=>`<button class="btn ${H.tab===k?'gold':'ghost'} sm" type="button" role="tab" aria-selected="${H.tab===k}" data-hbt="${k}">${t}</button>`).join('')}</div>
+   <div id="hbBody"><p class="dh-sub">جارٍ التحميل…</p></div><p class="dh-msg" id="hbMsg" role="status"></p><div class="row"><button class="btn ghost sm" id="hbCl" type="button">إغلاق</button></div>`,m=>{
+   const g=()=>S.cfg||{},hb=()=>{const h=g().hb||{};return{team:Object.assign({on:false,by:'avg',min:1,title:'',motto:''},h.team),all:Object.assign({on:false,by:'pct',top:10,names:'first',cls:true,title:'',motto:''},h.all)}},
+    ef=c=>Object.assign({},g(),(g().byCls||{})[c]||{}),msg=t=>{const e=$('#hbMsg',m);if(e)e.textContent=t},body=()=>$('#hbBody',m),season=()=>g().boardSeason||null,
+    post=async(cfg,ok)=>{msg('جارٍ الحفظ…');const r=await Online.api('config',{cfg},S.key);if(!m.isConnected)return false;if(!r.ok){msg(this.err(r));return false}S.cfg=r.cfg;msg(ok||'حُفظ ✓ ويصل إلى الطلاب خلال دقيقة تقريبًا.');return true},
+    date=()=>new Date().toLocaleDateString('ar-EG',{day:'numeric',month:'long',year:'numeric'}),
+    foot=()=>{const d=Cert.cfg().d;return[d.teacher||'',d.school||'',date()].filter(Boolean).join('  |  ')},
+    sel=(id,o,v)=>`<select id="${id}" class="inp dh-sel">${o.map(([k,t])=>`<option value="${k}"${v===k?' selected':''}>${t}</option>`).join('')}</select>`,
+    r1=v=>Math.round(v*10)/10,
+    tag=on=>`<span class="cf-st ${on?'':'none'}">${on?'ظاهرة للطلاب':'مغلقة عن الطلاب'}</span>`;
+   const loadRows=async()=>{const j=await Online.api('board?cls=all',undefined,S.key);if(!m.isConnected)return false;if(!j.ok){msg(this.err(j));return false}S.cfg=j.cfg||S.cfg;H.rows=(j.students||[]).map(s=>{try{return this.mkRow(s)}catch(e){return null}}).filter(Boolean);H.bs=j.bs||{};return true};
+   /* the choice shown (a method, or the running season) */
+   const mode=(k,def)=>H.m[k]||(season()?'season':def);
+   const unit=(by,v,sea,team)=>sea?'+'+AR(r1(v))+' نقطة':by==='pts'||by==='tot'?AR(Math.round(v))+' نقطة':by==='stars'?AR(r1(v))+' نجمة':AR(r1(v))+'٪';
+   /* ---- 1. the boards of the classes ---- */
+   const crank=(cls,by)=>{const hide=new Set(g().boardHide||[]),sea=by==='season';
+    return H.rows.filter(r=>r.cls===cls&&!r.empty&&(r.pts>0||r.n>0)).map(r=>{const sp=Math.max(0,r.pts-(+H.bs[r.k]||0));return{r,sp,hid:hide.has(r.k),v:sea?sp:by==='pts'?r.pts:by==='stars'?r.stars:r1(r.pts*100/Math.max(1,r.max))}})
+     .sort((a,b)=>b.v-a.v||b.r.pts/b.r.max-a.r.pts/a.r.max||b.r.stars-a.r.stars||a.r.name.localeCompare(b.r.name,'ar')).map((x,i)=>Object.assign(x,{i:i+1}))};
+   const clsSpec=(cls,by)=>{const e=ef(cls),L=crank(cls,by).filter(x=>!x.hid).slice(0,20),mx=Math.max(1,...L.map(x=>x.v)),sea=by==='season';
+    return{title:e.boardTitle||'قاعة الأبطال',sub:`${cls} · ${sea?season().t:({pct:'بنسبة الدرجة',pts:'بمجموع النقاط',stars:'بعدد النجوم'})[by]}`,motto:e.boardMotto||'',foot:foot(),
+     rows:L.map((x,k)=>({i:k+1,n:this.hbName(x.r.name,e.boardNames||'first'),s:`${AR(x.r.spct)}٪ · ${RANKS[x.r.rk].n}`,v:unit(by,x.v,sea),bar:x.v}))}};
+   const paintCls=()=>{const cls=H.cls,e=ef(cls),by=mode('cls',e.boardBy||'pct'),L=crank(cls,by),sea=by==='season',mine=H.rows.filter(r=>r.cls===cls),sent=mine.filter(r=>!r.empty),now=this.now();
+    const act7=mine.filter(r=>r.seen&&now-r.seen<7*864e5).length,act1=mine.filter(r=>r.seen&&now-r.seen<864e5).length,never=mine.filter(r=>!r.seen&&r.empty).length,avg=sent.length?Math.round(sent.reduce((t,r)=>t+r.spct,0)/sent.length):0,qs=sent.reduce((t,r)=>t+r.n,0),M=['🥇','🥈','🥉'];
+    const on=e.board&&e.board!=='off',opts=this.HBM.cls.concat(season()?[['season',season().t+' (الموسم الجاري)']]:[]);
+    body().innerHTML=`<div class="hb-chips" role="group" aria-label="الفصل">${S.classes.map(c=>`<button class="btn ${c===cls?'gold':'ghost'} sm" type="button" data-hbc="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+     <div class="dh-set"><b>${esc(cls)} ${tag(on)}</b><small>${on?`يرى الطالب ${{top3:'أفضل ٣',top5:'أفضل ٥',top10:'أفضل ١٠',all:'كل'}[e.board]} طلاب فصله.`:'اللوحة مغلقة؛ ما يلي معاينة لك فقط (فعّلها من «الإدارة»).'}</small>
+      <div class="dh-tiles"><div><b>${AR(mine.length)}</b><span>طالب مسجّل</span></div><div><b>${AR(sent.length)}</b><span>أرسلوا نتائج${mine.length?' ('+AR(Math.round(sent.length*100/mine.length))+'٪)':''}</span></div><div><b>${AR(act1)}</b><span>نشطوا اليوم</span></div><div><b>${AR(act7)}</b><span>نشطوا آخر ٧ أيام</span></div><div><b>${AR(avg)}٪</b><span>متوسط الدرجة</span></div><div><b>${AR(qs)}</b><span>سؤالًا أُجيب</span></div></div>
+      ${never?`<small>${AR(never)} ${never===1?'طالب سجّل':'طلاب سجّلوا'} ولم يبدؤوا بعد.</small>`:''}</div>
+     <div class="dh-set"><label for="hbBy">طريقة الترتيب (للمعاينة والصورة)</label>${sel('hbBy',opts,by)}</div>
+     ${L.length?`<div class="dh-sc"><table class="dh-tab"><tr><th>#</th><th>الطالب</th><th>${sea?'نقاط الموسم':'القيمة'}</th><th>الدرجة</th><th>أسئلة</th><th>آخر نشاط</th></tr>${L.map(x=>`<tr${x.hid?' style="opacity:.55"':''}><td>${x.hid?'—':M[x.i-1]||AR(x.i)}</td><td>${esc(x.r.name)}${x.hid?' <small>(مخفي عن الطلاب)</small>':''}</td><td>${unit(by,x.v,sea)}</td><td>${AR(x.r.spct)}٪</td><td>${AR(x.r.n)}</td><td>${this.hbAgo(x.r.last)}</td></tr>`).join('')}</table></div>`:'<p class="dh-sub">لا نتائج بعد في هذا الفصل.</p>'}
+     <div class="row"><button class="btn gold sm" id="hbDl" type="button">${em('star')} حمّل لوحة ${esc(cls)} صورة</button><button class="btn sky sm" id="hbDa" type="button">حمّل لوحات كل الفصول (صورة لكل فصل)</button></div>
+     <canvas id="hbPv" class="hb-pv" hidden aria-label="معاينة اللوحة"></canvas>`;
+    $$('[data-hbc]',m).forEach(b=>b.onclick=()=>{H.cls=b.dataset.hbc;paintCls()});
+    $('#hbBy',m).onchange=e=>{H.m.cls=e.target.value;paintCls()};
+    const dl=async c=>{const cv=await HBImg.draw(clsSpec(c,c===cls?by:ef(c).boardBy||'pct'));return HBImg.save(cv,`maf3ool-bihi-honor-class-${S.classes.indexOf(c)+1}.png`)};
+    $('#hbDl',m).onclick=async()=>{msg('جارٍ رسم اللوحة…');const r=await dl(cls);msg(r==='saved'?'حُفظت اللوحة صورةً ✓':'تعذّر الحفظ.')};
+    $('#hbDa',m).onclick=async()=>{msg('جارٍ رسم لوحات الفصول…');let k=0;for(const c of S.classes){if(!crank(c,ef(c).boardBy||'pct').length)continue;await dl(c);k++;await new Promise(r=>setTimeout(r,500))}msg(k?`حُفظت ${AR(k)} لوحة ✓ (قد يطلب المتصفح السماح بتنزيل عدة ملفات).`:'لا نتائج في أي فصل بعد.')}};
+   /* ---- 2. the best class ---- */
+   const teamSpec=r=>{const sea=r.mode==='season',by=r.by,mx=Math.max(1,...r.list.map(x=>x.v));
+    return{title:r.title||'أفضل فصل',sub:`تنافس الفصول · ${sea?r.season.t:(this.HBM.team.find(x=>x[0]===by)||[])[1]||''}`,motto:r.motto||'',foot:foot(),rows:r.list.map(x=>({i:x.pend?0:x.i,n:x.c,a:String(x.c).trim().split(' ').pop().charAt(0),s:x.pend?`لم يكتمل نصاب المشاركين (${AR(x.n)} من ${AR(x.enr)})`:`${AR(x.n)} من ${AR(x.enr)} طالب · متوسط ${AR(x.avg)}٪`,v:x.pend?'—':unit(by,x.v,sea),bar:x.pend?0:x.v}))}};
+   const getTeam=async()=>{const k=mode('team',hb().team.by),q=k==='season'?{mode:'season'}:{mode:'all',by:k};q.min=H.min||hb().team.min;const r=await Online.api('rank',Object.assign({t:1,view:'team'},q),S.key);if(!m.isConnected)return null;if(!r.ok){msg(this.err(r));return null}H.team=r;return r};
+   const paintTeam=async()=>{body().innerHTML='<p class="dh-sub">جارٍ الحساب…</p>';const r=await getTeam();if(!r)return;const on=hb().team.on,M=['🥇','🥈','🥉'],by=mode('team',hb().team.by),opts=this.HBM.team.map(x=>[x[0],x[1]]).concat(season()?[['season',season().t+' (الموسم الجاري)']]:[]),dsc=(this.HBM.team.find(x=>x[0]===by)||[])[2]||(by==='season'?'نقاط الفصل في الموسم مقسومة على عدد المسجلين فيه.':'');
+    body().innerHTML=`<div class="dh-set"><b>${em('crown')} أفضل فصل ${tag(on)}</b><small>الفصل يتنافس كفريق على نتائج كل طلابه. ${on?'يراها كل طالب في «قاعة الأبطال».':'مغلقة؛ ما يلي معاينة لك (فعّلها من «الإدارة»).'}</small>
+      <label for="hbTm">طريقة التنافس</label>${sel('hbTm',opts,by)}${dsc?`<small>${esc(dsc)}</small>`:''}
+      <label for="hbMn">أقل عدد طلاب يشاركون ليُرتَّب الفصل</label>${sel('hbMn',[1,2,3,5,8,10].map(n=>[String(n),AR(n)]),String(r.min))}</div>
+     ${r.list.length?`<div class="dh-pod hb-cpod">${[1,0,2].map(i=>r.list.filter(x=>!x.pend)[i]).filter(Boolean).map(x=>`<div class="dh-pd p${x.i}"><span class="m">${M[x.i-1]}</span><b>${esc(x.c)}</b><em>${unit(r.by,x.v,r.mode==='season')}</em><small>${AR(x.n)} من ${AR(x.enr)} طالب</small></div>`).join('')}</div>
+      <div class="dh-sc"><table class="dh-tab"><tr><th>#</th><th>الفصل</th><th>القيمة</th><th>المشاركون</th><th>متوسط الدرجة</th><th>متوسط النقاط</th><th>النجوم</th><th>المجموع</th></tr>${r.list.map(x=>`<tr${x.pend?' style="opacity:.55"':''}><td>${x.pend?'—':M[x.i-1]||AR(x.i)}</td><td>${esc(x.c)}${x.pend?' <small>(لم يكتمل النصاب)</small>':''}</td><td>${unit(r.by,x.v,r.mode==='season')}</td><td>${AR(x.n)} / ${AR(x.enr)} (${AR(x.part)}٪)</td><td>${AR(x.avg)}٪</td><td>${AR(x.pts)}</td><td>${AR(x.stars)}</td><td>${AR(x.tot)}</td></tr>`).join('')}</table></div>`:'<p class="dh-sub">لا فصول بعد.</p>'}
+     <div class="row"><button class="btn gold sm" id="hbDl" type="button">${em('star')} حمّل لوحة أفضل فصل صورة</button><button class="btn ${on?'red':'go'} sm" id="hbTg" type="button">${on?'أغلق اللوحة عن الطلاب':'أظهرها للطلاب'}</button></div>`;
+    $('#hbTm',m).onchange=e=>{H.m.team=e.target.value;paintTeam()};$('#hbMn',m).onchange=e=>{H.min=+e.target.value;paintTeam()};
+    $('#hbDl',m).onclick=async()=>{msg('جارٍ رسم اللوحة…');const x=await HBImg.draw(teamSpec(r)),k=await HBImg.save(x,'maf3ool-bihi-honor-best-class.png');msg(k==='saved'?'حُفظت اللوحة صورةً ✓':'تعذّر الحفظ.')};
+    $('#hbTg',m).onclick=async()=>{if(await post({hb:{team:{on:!on}}},on?'أُغلقت لوحة أفضل فصل ✓':'ظهرت لوحة أفضل فصل للطلاب ✓'))paintTeam()}};
+   /* ---- 3. all students of all classes ---- */
+   const allSpec=(r,names)=>{const sea=r.mode==='season',L=r.list.slice(0,20),mx=Math.max(1,...L.map(x=>x.v));
+    return{title:r.title||'أبطال المدرسة',sub:`كل الفصول · ${sea?r.season.t:(this.HBM.all.find(x=>x[0]===r.by)||[])[1]||''}`,motto:r.motto||'',foot:foot(),rows:L.map(x=>({i:x.i,n:this.hbName(x.n,names),s:x.c,v:unit(r.by,x.v,sea),bar:x.v}))}};
+   const paintAll=async()=>{body().innerHTML='<p class="dh-sub">جارٍ الحساب…</p>';const k=mode('all',hb().all.by),r=await Online.api('rank',Object.assign({t:1,view:'all'},k==='season'?{mode:'season'}:{mode:'all',by:k}),S.key);if(!m.isConnected)return;if(!r.ok){msg(this.err(r));return}H.all=r;
+    const on=hb().all.on,M=['🥇','🥈','🥉'],hide=new Set(g().boardHide||[]),opts=this.HBM.all.concat(season()?[['season',season().t+' (الموسم الجاري)']]:[]),sea=r.mode==='season';
+    body().innerHTML=`<div class="dh-set"><b>${em('world_map')} كل الفصول ${tag(on)}</b><small>كل الطلاب على مستوى جميع الفصول في ترتيب واحد. ${on?`يرى الطالب أفضل ${AR(hb().all.top)} ومركزه.`:'مغلقة؛ ما يلي معاينة لك.'}</small>
+      <label for="hbAm">طريقة الترتيب</label>${sel('hbAm',opts,k)}</div>
+     ${r.list.length?`<div class="dh-sc"><table class="dh-tab"><tr><th>#</th><th>الطالب</th><th>الفصل</th><th>القيمة</th><th>الدرجة</th></tr>${r.list.slice(0,50).map(x=>`<tr><td>${M[x.i-1]||AR(x.i)}</td><td>${esc(x.n)}</td><td>${esc(x.c)}</td><td>${unit(r.by,x.v,sea)}</td><td>${AR(x.pct)}٪</td></tr>`).join('')}</table></div>${r.list.length>50?'<p class="dh-sub">يظهر أعلى ٥٠ فقط هنا.</p>':''}`:'<p class="dh-sub">لا نتائج بعد.</p>'}
+     <div class="row"><button class="btn gold sm" id="hbDl" type="button">${em('star')} حمّل لوحة كل الفصول صورة (أفضل ٢٠)</button><button class="btn ${on?'red':'go'} sm" id="hbTg" type="button">${on?'أغلق اللوحة عن الطلاب':'أظهرها للطلاب'}</button></div>`;
+    $('#hbAm',m).onchange=e=>{H.m.all=e.target.value;paintAll()};
+    $('#hbDl',m).onclick=async()=>{msg('جارٍ رسم اللوحة…');const x=await HBImg.draw(allSpec(r,hb().all.names)),q=await HBImg.save(x,'maf3ool-bihi-honor-all-classes.png');msg(q==='saved'?'حُفظت اللوحة صورةً ✓ (الأسماء كما ضبطتها للطلاب).':'تعذّر الحفظ.')};
+    $('#hbTg',m).onclick=async()=>{if(await post({hb:{all:{on:!on}}},on?'أُغلقت لوحة كل الفصول ✓':'ظهرت لوحة كل الفصول للطلاب ✓'))paintAll()}};
+   /* ---- 4. management ---- */
+   const paintMng=()=>{const h=hb(),G=g(),OPT=[['inherit','يتبع الإعداد العام'],['off','مغلقة'],['top3','أفضل ٣'],['top5','أفضل ٥'],['top10','أفضل ١٠'],['all','كل طلاب الفصل']],st=c=>{const o=(G.byCls||{})[c];return o&&o.board?o.board:'inherit'};
+    body().innerHTML=`<div class="dh-set"><b>${em('trophy')} لوحات الفصول</b><small>لكل فصل لوحته (يرى الطالب فصله فقط). اختر ما يظهر في كل فصل، أو دعه يتبع الإعداد العام.</small>
+      <div class="dh-cr"><label for="hbGl">الإعداد العام</label>${sel('hbGl',OPT.slice(1),G.board||'off')}<button class="btn go sm" id="hbGs" type="button">طبّق</button></div>
+      ${S.classes.map(c=>`<div class="dh-cr"><label for="hbC-${esc(c)}">${esc(c)}</label>${sel('hbC-'+c,OPT,st(c))}</div>`).join('')}
+      <div class="row"><button class="btn ghost sm" id="hbAd" type="button">إعدادات متقدمة: الترتيب والأسماء والمواسم وإخفاء الطلاب</button></div></div>
+     <div class="dh-set"><b>${em('crown')} أفضل فصل ${tag(h.team.on)}</b><label class="dh-sw"><input type="checkbox" id="hbTOn"${h.team.on?' checked':''}> تفعيل لوحة أفضل فصل للطلاب</label>
+      <label for="hbTBy">طريقة التنافس</label>${sel('hbTBy',this.HBM.team.map(x=>[x[0],x[1]]),h.team.by)}<small id="hbTD">${esc((this.HBM.team.find(x=>x[0]===h.team.by)||[])[2]||'')}</small>
+      <label for="hbTMn">أقل عدد طلاب يشاركون ليُرتَّب الفصل</label>${sel('hbTMn',[1,2,3,5,8,10].map(n=>[String(n),AR(n)]),String(h.team.min))}
+      <div class="dh-cr"><label for="hbTTi">عنوان اللوحة</label><input class="inp" id="hbTTi" maxlength="40" placeholder="أفضل فصل" value="${esc(h.team.title)}"></div><div class="dh-cr"><label for="hbTMo">شعار يحفّز الفصول</label><input class="inp" id="hbTMo" maxlength="100" placeholder="مثال: معًا نصل إلى القمة!" value="${esc(h.team.motto)}"></div>
+      <div class="row"><button class="btn go sm" id="hbTSv" type="button">حفظ لوحة أفضل فصل</button></div></div>
+     <div class="dh-set"><b>${em('world_map')} كل الفصول ${tag(h.all.on)}</b><label class="dh-sw"><input type="checkbox" id="hbAOn"${h.all.on?' checked':''}> تفعيل لوحة كل الفصول للطلاب</label>
+      <label for="hbABy">طريقة الترتيب</label>${sel('hbABy',this.HBM.all,h.all.by)}
+      <label for="hbATp">كم طالبًا يظهرون</label>${sel('hbATp',[3,5,10,20,50].map(n=>[String(n),'أفضل '+AR(n)]),String(h.all.top))}
+      <label for="hbANm">كيف تظهر الأسماء</label>${sel('hbANm',[['first','الاسم الأول'],['initial','الاسم الأول + حرف العائلة'],['full','الاسم الكامل']],h.all.names)}
+      <label class="dh-sw"><input type="checkbox" id="hbACl"${h.all.cls?' checked':''}> أظهر اسم فصل كل طالب</label>
+      <div class="dh-cr"><label for="hbATi">عنوان اللوحة</label><input class="inp" id="hbATi" maxlength="40" placeholder="أبطال المدرسة" value="${esc(h.all.title)}"></div><div class="dh-cr"><label for="hbAMo">شعار يحفّز الطلاب</label><input class="inp" id="hbAMo" maxlength="100" placeholder="مثال: من يلحق بأبطال المدرسة؟" value="${esc(h.all.motto)}"></div>
+      <div class="row"><button class="btn go sm" id="hbASv" type="button">حفظ لوحة كل الفصول</button></div></div>
+     <div class="dh-set"><b>تحكّم سريع</b><small>المواسم (سباق قصير يبدأ فيه الجميع من الصفر) تُدار من «إعدادات متقدمة» وتسري على اللوحات الثلاث.</small><div class="row"><button class="btn red sm" id="hbOff" type="button">أغلق كل اللوحات الآن</button><button class="btn sky sm" id="hbOn3" type="button">فعّل اللوحات الثلاث (أفضل ١٠)</button></div></div>`;
+    $('#hbAd',m).onclick=()=>this.honorAdmin(H.cls);
+    $('#hbGs',m).onclick=async()=>{if(await post({board:$('#hbGl',m).value},'حُفظ الإعداد العام ✓'))paintMng()};
+    S.classes.forEach(c=>{const e=document.getElementById('hbC-'+c);if(e)e.onchange=async()=>{const v=e.value;if(await post(v==='inherit'?{scope:c,boardReset:true}:{scope:c,board:v},v==='inherit'?'عاد '+c+' إلى الإعداد العام ✓':'حُفظ لوحة '+c+' ✓'))paintMng()}});
+    $('#hbTBy',m).onchange=e=>{$('#hbTD',m).textContent=(this.HBM.team.find(x=>x[0]===e.target.value)||[])[2]||''};
+    $('#hbTSv',m).onclick=async()=>{if(await post({hb:{team:{on:$('#hbTOn',m).checked,by:$('#hbTBy',m).value,min:+$('#hbTMn',m).value,title:$('#hbTTi',m).value,motto:$('#hbTMo',m).value}}},'حُفظت لوحة أفضل فصل ✓'))paintMng()};
+    $('#hbASv',m).onclick=async()=>{if(await post({hb:{all:{on:$('#hbAOn',m).checked,by:$('#hbABy',m).value,top:+$('#hbATp',m).value,names:$('#hbANm',m).value,cls:$('#hbACl',m).checked,title:$('#hbATi',m).value,motto:$('#hbAMo',m).value}}},'حُفظت لوحة كل الفصول ✓'))paintMng()};
+    $('#hbOff',m).onclick=async()=>{let ok=await post({board:'off',hb:{team:{on:false},all:{on:false}}},'');for(const c of S.classes){if(((G.byCls||{})[c]||{}).board&&((S.cfg.byCls||{})[c]||{}).board!=='off')ok=await post({scope:c,board:'off'},'')&&ok}if(ok){msg('أُغلقت كل اللوحات ✓');paintMng()}};
+    $('#hbOn3',m).onclick=async()=>{let ok=await post({board:'top10',hb:{team:{on:true},all:{on:true}}},'');for(const c of S.classes){if(((S.cfg.byCls||{})[c]||{}).board==='off')ok=await post({scope:c,boardReset:true},'')&&ok}if(ok){msg('فُعّلت اللوحات الثلاث ✓ وتصل إلى الطلاب خلال دقيقة تقريبًا.');paintMng()}}};
+   const paint=async()=>{$$('[data-hbt]',m).forEach(b=>{const on=b.dataset.hbt===H.tab;b.className='btn '+(on?'gold':'ghost')+' sm';b.setAttribute('aria-selected',String(on))});
+    if(H.tab==='mng'){paintMng();return}
+    if(H.tab==='cls'){if(!H.rows){body().innerHTML='<p class="dh-sub">جارٍ تحميل النتائج…</p>';if(!await loadRows())return}paintCls();return}
+    if(!H.rows&&!await loadRows())return;
+    H.tab==='team'?await paintTeam():await paintAll()};
+   $$('[data-hbt]',m).forEach(b=>b.onclick=()=>{H.tab=b.dataset.hbt;msg('');paint()});
+   $('#hbCl',m).onclick=()=>this.modal('');
+   H.rows=null;paint()})}
 });
 
 /* ===== the content hub: every lesson and every game in one place (status, questions, names, texts, difficulty, game data) ===== */
@@ -7788,22 +7964,30 @@ Online.init();
 /* ---- the class honour hall (students): podium, ranked list, my position, seasons, hall of fame. Teacher turns it on per class from «لوحة الشرف». ---- */
 const Honor={
  d:{},mode:'season',busy:0,
- on(){const c=Ctl.cfg||{};return !!(Online.acct()&&c.board&&c.board!=='off')},
+ cOn(){const c=Ctl.cfg||{};return !!(Online.acct()&&c.board&&c.board!=='off')},
+ /* the boards the teacher opened for this student: his class, the best class, all classes */
+ views(){const c=Ctl.cfg||{},h=c.hb||{},v=[];if(this.cOn())v.push('cls');if(Online.acct()&&h.t)v.push('team');if(Online.acct()&&h.a)v.push('all');return v},
+ on(){return this.views().length>0},
+ view:'cls',
+ VN:{cls:'فصلي',team:'أفضل فصل',all:'كل الفصول'},
  hasSeason(){const c=Ctl.cfg||{};return !!c.bseason},
  key(){return this.hasSeason()?this.mode:'all'},
  unit(r){return r.mode==='season'||r.by==='pts'?'نقطة':r.by==='stars'?'نجمة':'٪'},
  fmt(n){return AR(String(Math.round(n*10)/10).replace('.','٫'))},
  val(r,x){return r.mode==='season'?'+'+this.fmt(x.sp)+' نقطة':r.by==='pts'?this.fmt(x.p)+' نقطة':r.by==='stars'?this.fmt(x.s)+' ★':this.fmt(x.pct)+'٪'},
  hue(n){let h=0;for(const ch of String(n))h=(h*31+ch.charCodeAt(0))%360;return h},
- av(n,c){return`<i class="hn-av${c?' '+c:''}" style="--h:${this.hue(n)}" aria-hidden="true">${esc(String(n).trim().charAt(0)||'؟')}</i>`},
+ av(n,c,l){return`<i class="hn-av${c?' '+c:''}" style="--h:${this.hue(n)}" aria-hidden="true">${esc(l||String(n).trim().charAt(0)||'؟')}</i>`},
  lv(x){try{const r=RANKS[Rank.at(x.p,x.m)];return IMG[r.ic]?`<img class="em hn-lv" src="${IMG[r.ic]}" alt="" title="${esc(r.n)}">`:''}catch(e){return''}},
  aw(x){return x.ic&&IMG[x.ic]?`<img class="em hn-aw" src="${IMG[x.ic]}" alt="" title="${esc(x.at||'')}">`:''},
- async load(force){const a=Online.acct();if(!a||!this.on())return null;const k=this.key(),o=this.d[k];
+ async load(force){const a=Online.acct();if(!a||!this.cOn())return null;const k=this.key(),o=this.d[k];
   if(!force&&o&&Date.now()-o.at<60000)return o.r;
   const r=await Online.api('rank',{aid:a.aid,sk:a.sk,mode:k==='all'?'all':'season'});if(!r||!r.ok)return o?o.r:r;this.d[k]={at:Date.now(),r};return r},
+ async loadV(view,force){const a=Online.acct();if(!a)return null;const k=view+(this.hasSeason()?this.mode:'all'),o=this.d[k];
+  if(!force&&o&&Date.now()-o.at<60000)return o.r;
+  const r=await Online.api('rank',{aid:a.aid,sk:a.sk,view,mode:this.hasSeason()&&this.mode==='season'?'season':'all'});if(!r||!r.ok)return o?o.r:r;r.view=view;this.d[k]={at:Date.now(),r};return r},
  /* the header button shows the current position */
  paintBtn(){const b=$('#rkBtn');if(!b)return;const on=this.on();b.hidden=!on;if(!on){this.paintMini();return}
-  const r=(this.d[this.key()]||{}).r;const s=$('span',b);if(s)s.textContent=r&&r.pos?'المركز '+AR(r.pos):'الترتيب';
+  const r=(this.d[this.key()]||{}).r;const s=$('span',b);if(s)s.textContent=this.cOn()&&r&&r.pos?'المركز '+AR(r.pos):'الترتيب';
   if(!this.busy&&(!this.d[this.key()]||Date.now()-this.d[this.key()].at>120000)&&!document.hidden){this.busy=1;this.peek().finally(()=>{this.busy=0})}},
  /* a quiet look every couple of minutes: celebrate when the student climbed */
  async peek(){const r=await this.load(true);if(!r||!r.ok||r.off)return;this.paintBtn();this.paintMini();
@@ -7813,8 +7997,9 @@ const Honor={
  /* the small card on the home screen and the games hub */
  paintMini(){const hs=document.querySelectorAll('.hn-mini');if(!hs.length)return;
   if(!this.on()){hs.forEach(h=>{h.innerHTML=''});return}
-  const r=(this.d[this.key()]||{}).r;
-  hs.forEach(h=>{if(!r||!r.ok||r.off){h.innerHTML=`<button class="hn-card" type="button"><span class="hn-ct">${em('trophy')} لوحة شرف الفصل</span><span class="hn-cs">اضغط لترى ترتيبك بين زملائك</span></button>`;h.firstChild.onclick=()=>Honor.open();return}
+  const r=this.cOn()?(this.d[this.key()]||{}).r:null,V=this.views();
+  hs.forEach(h=>{if(!this.cOn()){h.innerHTML=`<button class="hn-card" type="button"><span class="hn-ct">${em('trophy')} قاعة الأبطال</span><span class="hn-cs">${V.includes('team')?'تنافَس مع الفصول الأخرى':'شاهد ترتيب المدرسة'}${V.includes('all')&&V.includes('team')?' وترتيبك بين كل الطلاب':''}</span></button>`;h.firstChild.onclick=()=>Honor.open();return}
+   if(!r||!r.ok||r.off){h.innerHTML=`<button class="hn-card" type="button"><span class="hn-ct">${em('trophy')} لوحة شرف الفصل</span><span class="hn-cs">اضغط لترى ترتيبك بين زملائك</span></button>`;h.firstChild.onclick=()=>Honor.open();return}
    const t3=r.list.filter(x=>x.i<=3).slice(0,3),M=['🥇','🥈','🥉'];
    h.innerHTML=`<button class="hn-card" type="button" aria-label="افتح لوحة الشرف"><span class="hn-ct">${em('trophy')} ${esc(r.title||'قاعة الأبطال')}${r.mode==='season'&&r.season?` <em>${esc(r.season.t)}</em>`:''}</span>
     <span class="hn-cp">${t3.map(x=>`<span class="hn-cm${x.me?' me':''}"><b>${M[x.i-1]}</b>${this.av(x.n)}<span>${esc(x.n)}</span><small>${this.val(r,x)}</small></span>`).join('')||'<span class="hn-cs">كن أول من يظهر في اللوحة!</span>'}</span>
@@ -7829,24 +8014,53 @@ const Honor={
   document.body.appendChild(o);document.body.classList.add('hn-on');
   o.onkeydown=e=>{if(e.key==='Escape')Honor.close()};$('.hn-x',o).onclick=()=>Honor.close();o.onclick=e=>{if(e.target===o)Honor.close()};setTimeout(()=>{try{$('.hn-x',o).focus()}catch(e){}},60);
   await this.draw(true)},
- async draw(first){const o=$('#hnHall');if(!o)return;const B=$('#hnB',o);const r=await this.load(true);if(!$('#hnHall'))return;
+ async draw(first){const o=$('#hnHall');if(!o)return;const B=$('#hnB',o),V=this.views();
+  if(!V.length){B.innerHTML='<p class="hn-wait">أغلق المعلم لوحة الشرف الآن.</p>';this.paintBtn();this.paintMini();return}
+  if(!V.includes(this.view))this.view=V[0];
+  await (this.view==='team'?this.drawTeam(B,first):this.drawCls(B,first,this.view));
+  if(!$('#hnHall'))return;this.tabs(B,V)},
+ /* the switch between the boards the teacher opened (only when more than one is open) */
+ tabs(B,V){if(V.length<2||!$('.hn-hd',B))return;const t=document.createElement('div');t.className='hn-tg hn-vw';t.setAttribute('role','group');t.setAttribute('aria-label','اللوحة');
+  t.innerHTML=V.map(v=>`<button type="button" data-v="${v}" aria-pressed="${this.view===v}">${this.VN[v]}</button>`).join('');B.insertBefore(t,B.firstChild);
+  $$('button',t).forEach(b=>b.onclick=()=>{if(Honor.view===b.dataset.v)return;Honor.view=b.dataset.v;B.innerHTML='<p class="hn-wait">…</p>';Honor.draw()})},
+ /* the best-class board: the classes compete as teams */
+ tv(r,x){return r.mode==='season'?'+'+this.fmt(x.sp/Math.max(1,x.enr))+' نقطة للطالب':r.by==='pts'||r.by==='tot'?this.fmt(x.v)+' نقطة':r.by==='stars'?this.fmt(x.v)+' ★':this.fmt(x.v)+'٪'},
+ async drawTeam(B,first){const r=await this.loadV('team',true);if(!$('#hnHall'))return;
   if(!r||!r.ok){B.innerHTML=`<p class="hn-wait">${esc(r&&r.error==='bad_session'?Online.why.session:Online.err(r||{}))}</p>`;return}
-  if(r.off){B.innerHTML='<p class="hn-wait">أغلق المعلم لوحة الشرف الآن.</p>';this.paintBtn();return}
-  this.paintBtn();this.paintMini();
+  if(r.off){B.innerHTML='<p class="hn-wait">أغلق المعلم هذه اللوحة الآن.</p>';return}
+  const ok=r.list.filter(x=>!x.pend),pend=r.list.filter(x=>x.pend),top3=ok.filter(x=>x.i<=3),rest=ok.filter(x=>x.i>3),max=Math.max(1,...ok.map(x=>x.v)),M=['🥇','🥈','🥉'],pod=[1,0,2].map(i=>top3[i]).filter(Boolean);
+  const how={avg:'متوسط نسبة الدرجة لطلاب الفصل',part:'متوسط النسبة × مشاركة كل طلاب الفصل',pts:'متوسط نقاط الطالب في الفصل',stars:'متوسط نجوم الطالب في الفصل',tot:'مجموع نقاط الفصل'}[r.by]||'';
+  const me=r.list.find(x=>x.me),lt=x=>String(x.c).trim().split(' ').pop().charAt(0)||'؟';
+  const msg=!me?'':me.pend?`فصلك لم يدخل الترتيب بعد: شارك ${AR(r.min)} طلاب بنتائجهم على الأقل (شارك ${AR(me.n)}).`:r.pos===1?'فصلك في القمة! ساعد زملاءك ليبقى كذلك.':r.near?`يفصل فصلك <b>${this.fmt(r.near.gap)}${r.by==='avg'||r.by==='part'?'٪':' '+(r.by==='stars'?'نجمة':'نقطة')}</b> عن «${esc(r.near.c)}» صاحب المركز ${AR(r.near.i)}.`:'';
+  B.innerHTML=`<header class="hn-hd"><span class="hn-cr">${em('crown','xl')}</span><h2 id="hnT">${esc(r.title||'أفضل فصل')}</h2><p class="hn-sub">${AR(r.total)} ${r.total===1?'فصل':'فصول'} تتنافس · ${how}</p>
+    ${(Ctl.cfg||{}).bseason?`<div class="hn-tg hn-ms" role="group" aria-label="نوع الترتيب"><button type="button" data-m="season" aria-pressed="${r.mode==='season'}">${em('fire')} ${esc((Ctl.cfg.bseason.t)||'الموسم')}</button><button type="button" data-m="all" aria-pressed="${r.mode!=='season'}">${em('milky_way')} الإجمالي</button></div>`:''}
+    ${r.motto?`<p class="hn-motto">${esc(r.motto)}</p>`:''}</header>
+   ${top3.length?`<div class="hn-pod n${pod.length}">${pod.map(x=>`<div class="hn-p k${x.i}${x.me?' me':''}" style="--d:${x.i===1?3:x.i===2?1:2}">${x.i===1?`<span class="hn-crown">${em('crown')}</span>`:''}${this.av(x.c,'big',lt(x))}<b class="hn-pn">${esc(x.c)}${x.me?' (فصلك)':''}</b><span class="hn-pv">${this.tv(r,x)}</span><span class="hn-pi"><small>${AR(x.n)} من ${AR(x.enr)} طالب</small></span><div class="hn-st"><em>${M[x.i-1]}</em></div></div>`).join('')}</div>`:`<p class="hn-wait">لا نتائج بعد. شاركوا بنتائجكم ليظهر فصلكم!</p>`}
+   ${rest.length?`<ol class="hn-l" start="4">${rest.map(x=>`<li class="hn-r${x.me?' me':''}"><b class="hn-n">${AR(x.i)}</b>${this.av(x.c,'',lt(x))}<span class="hn-nm">${esc(x.c)}${x.me?' <em>فصلك</em>':''}<small class="hn-cl">${AR(x.n)} من ${AR(x.enr)} طالب</small></span><span class="hn-bar" aria-hidden="true"><i style="width:${Math.max(4,Math.round(x.v/max*100))}%"></i></span><b class="hn-v">${this.tv(r,x)}</b></li>`).join('')}</ol>`:''}
+   ${pend.length?`<p class="hn-sub">لم يكتمل نصاب المشاركين بعد: ${pend.map(x=>esc(x.c)+(x.me?' (فصلك)':'')).join('، ')}.</p>`:''}
+   <footer class="hn-ft"><div class="hn-me"><span class="hn-pos">${me&&!me.pend&&r.pos?AR(r.pos):'—'}</span><span class="hn-mt"><b>ترتيب فصلك ${esc(r.my||'')}</b><span>${msg}</span></span><button class="btn go sm" type="button" id="hnGo">${r.pos===1?'ابقَ في القمة ←':'ارفع فصلك ←'}</button></div></footer>`;
+  $$('.hn-ms button',B).forEach(b=>b.onclick=()=>{Honor.mode=b.dataset.m;Honor.d={};B.innerHTML='<p class="hn-wait">…</p>';Honor.draw()});
+  const go0=$('#hnGo',B);if(go0)go0.onclick=()=>{Honor.close();try{const i=TABS.findIndex(t=>t.id==='games');if(i>=0)go(i,0)}catch(e){}};
+  if(first&&me&&r.pos&&r.pos<=3){try{sfx('win');FX.confetti(r.pos===1?70:40)}catch(e){}}},
+ /* the board of a class (view 'cls') or of all students of all classes (view 'all') */
+ async drawCls(B,first,view){const o=$('#hnHall');const all=view==='all',r=all?await this.loadV('all',true):await this.load(true);if(!$('#hnHall'))return;
+  if(!r||!r.ok){B.innerHTML=`<p class="hn-wait">${esc(r&&r.error==='bad_session'?Online.why.session:Online.err(r||{}))}</p>`;return}
+  if(r.off){B.innerHTML='<p class="hn-wait">أغلق المعلم لوحة الشرف الآن.</p>';if(!all)this.paintBtn();return}
+  if(!all){this.paintBtn();this.paintMini()}
   const top3=r.list.filter(x=>x.i<=3),rest=r.list.filter(x=>x.i>3),max=Math.max(1,...r.list.map(x=>x.v)),M=['🥇','🥈','🥉'],u=this.unit(r);
   /* movement since the last visit */
-  const mk='mf_hv_'+r.cls+'_'+r.mode;let prev=0;try{prev=+localStorage.getItem(mk)||0}catch(e){}if(r.pos){try{localStorage.setItem(mk,String(r.pos))}catch(e){}}
+  const mk='mf_hv_'+(all?'all_'+r.my:r.cls)+'_'+r.mode;let prev=0;try{prev=+localStorage.getItem(mk)||0}catch(e){}if(r.pos){try{localStorage.setItem(mk,String(r.pos))}catch(e){}}
   const mv=r.pos&&prev?(r.pos<prev?`<span class="hn-up">▲ تقدّمتَ ${AR(prev-r.pos)} ${prev-r.pos>2?'مراكز':prev-r.pos===2?'مركزين':'مركزًا'}</span>`:r.pos>prev?`<span class="hn-dn">▼ تراجعتَ ${AR(r.pos-prev)}</span>`:''):'';
   const pod=[1,0,2].map(i=>top3[i]).filter(Boolean);   // 2nd – 1st – 3rd
   const msg=r.hidden?'اسمك غير ظاهر في لوحة الشرف الآن.':!r.pos?'أكمل بعض الأجزاء لتظهر في الترتيب.':r.pos===1?'أنت في القمة! حافظ على صدارتك.':r.near?`يفصلك <b>${this.fmt(r.near.gap)}${u==='٪'?'٪':' '+u}</b> عن «${esc(r.near.n)}» صاحب المركز ${AR(r.near.i)}.`:'';
-  B.innerHTML=`<header class="hn-hd"><span class="hn-cr">${em('trophy','xl')}</span><h2 id="hnT">${esc(r.title||'قاعة الأبطال')}</h2><p class="hn-sub">${esc(r.cls)} · ${AR(r.total)} ${r.total===1?'طالب':'طلاب'}${r.avg?` · متوسط الفصل ${this.fmt(r.avg)}٪`:''}</p>
-    ${(Ctl.cfg||{}).bseason?`<div class="hn-tg" role="group" aria-label="نوع الترتيب"><button type="button" data-m="season" aria-pressed="${r.mode==='season'}">${em('fire')} ${esc((Ctl.cfg.bseason.t)||'الموسم')}</button><button type="button" data-m="all" aria-pressed="${r.mode!=='season'}">${em('milky_way')} الإجمالي</button></div>`:''}
+  B.innerHTML=`<header class="hn-hd"><span class="hn-cr">${em('trophy','xl')}</span><h2 id="hnT">${esc(r.title||(all?'أبطال المدرسة':'قاعة الأبطال'))}</h2><p class="hn-sub">${esc(all?'كل الفصول':r.cls)} · ${AR(r.total)} ${r.total===1?'طالب':'طلاب'}${r.avg?` · متوسط الفصل ${this.fmt(r.avg)}٪`:''}</p>
+    ${(Ctl.cfg||{}).bseason?`<div class="hn-tg hn-ms" role="group" aria-label="نوع الترتيب"><button type="button" data-m="season" aria-pressed="${r.mode==='season'}">${em('fire')} ${esc((Ctl.cfg.bseason.t)||'الموسم')}</button><button type="button" data-m="all" aria-pressed="${r.mode!=='season'}">${em('milky_way')} الإجمالي</button></div>`:''}
     ${r.motto?`<p class="hn-motto">${esc(r.motto)}</p>`:''}</header>
-   ${top3.length?`<div class="hn-pod n${pod.length}">${pod.map(x=>`<div class="hn-p k${x.i}${x.me?' me':''}" style="--d:${x.i===1?3:x.i===2?1:2}">${x.i===1?`<span class="hn-crown">${em('crown')}</span>`:''}${this.av(x.n,'big')}<b class="hn-pn">${esc(x.n)}${x.me?' (أنت)':''}</b><span class="hn-pv">${this.val(r,x)}</span><span class="hn-pi">${this.lv(x)}${this.aw(x)}</span><div class="hn-st"><em>${M[x.i-1]}</em></div></div>`).join('')}</div>`:`<p class="hn-wait">لا توجد نتائج بعد. كن أول من يظهر في اللوحة!</p>`}
-   ${rest.length?`<ol class="hn-l" start="4">${rest.map(x=>`<li class="hn-r${x.me?' me':''}${x.i>r.top&&x.me?' far':''}"><b class="hn-n">${AR(x.i)}</b>${this.av(x.n)}<span class="hn-nm">${esc(x.n)}${x.me?' <em>أنت</em>':''}${this.aw(x)}</span>${this.lv(x)}<span class="hn-bar" aria-hidden="true"><i style="width:${Math.max(4,Math.round(x.v/max*100))}%"></i></span><b class="hn-v">${this.val(r,x)}</b></li>`).join('')}</ol>`:''}
+   ${top3.length?`<div class="hn-pod n${pod.length}">${pod.map(x=>`<div class="hn-p k${x.i}${x.me?' me':''}" style="--d:${x.i===1?3:x.i===2?1:2}">${x.i===1?`<span class="hn-crown">${em('crown')}</span>`:''}${this.av(x.n,'big')}<b class="hn-pn">${esc(x.n)}${x.me?' (أنت)':''}</b>${x.c?`<small class="hn-cl">${esc(x.c)}</small>`:''}<span class="hn-pv">${this.val(r,x)}</span><span class="hn-pi">${this.lv(x)}${this.aw(x)}</span><div class="hn-st"><em>${M[x.i-1]}</em></div></div>`).join('')}</div>`:`<p class="hn-wait">لا توجد نتائج بعد. كن أول من يظهر في اللوحة!</p>`}
+   ${rest.length?`<ol class="hn-l" start="4">${rest.map(x=>`<li class="hn-r${x.me?' me':''}${x.i>r.top&&x.me?' far':''}"><b class="hn-n">${AR(x.i)}</b>${this.av(x.n)}<span class="hn-nm">${esc(x.n)}${x.me?' <em>أنت</em>':''}${this.aw(x)}${x.c?`<small class="hn-cl">${esc(x.c)}</small>`:''}</span>${this.lv(x)}<span class="hn-bar" aria-hidden="true"><i style="width:${Math.max(4,Math.round(x.v/max*100))}%"></i></span><b class="hn-v">${this.val(r,x)}</b></li>`).join('')}</ol>`:''}
    ${r.hall&&r.hall.length?`<section class="hn-hall"><h3>${em('crown')} قاعة الأمجاد</h3>${r.hall.map(h=>`<div class="hn-hs"><b>${esc(h.t)}</b><span>${h.top.map((x,i)=>`${M[i]} ${esc(x.n)} <small>${AR(x.sp)}</small>`).join(' · ')}</span></div>`).join('')}</section>`:''}
    <footer class="hn-ft"><div class="hn-me"><span class="hn-pos">${r.pos&&!r.hidden?AR(r.pos):'—'}</span><span class="hn-mt"><b>ترتيبك ${mv}</b><span>${msg}</span></span><button class="btn go sm" type="button" id="hnGo">${r.pos===1?'ابقَ في القمة ←':'ارتقِ بالترتيب ←'}</button></div></footer>`;
-  $$('.hn-tg button',B).forEach(b=>b.onclick=()=>{Honor.mode=b.dataset.m;Honor.d={};B.innerHTML='<p class="hn-wait">…</p>';Honor.draw()});
+  $$('.hn-ms button',B).forEach(b=>b.onclick=()=>{Honor.mode=b.dataset.m;Honor.d={};B.innerHTML='<p class="hn-wait">…</p>';Honor.draw()});
   const go0=$('#hnGo',B);if(go0)go0.onclick=()=>{Honor.close();try{const i=TABS.findIndex(t=>t.id==='games');if(i>=0)go(i,0)}catch(e){}};
   if(first&&r.pos&&r.pos<=3){try{sfx('win');FX.confetti(r.pos===1?70:40)}catch(e){}}}};
 /* the home and games-hub cards appear wherever a placeholder .hn-mini is rendered */

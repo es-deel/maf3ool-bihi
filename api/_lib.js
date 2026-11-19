@@ -74,7 +74,7 @@ async function deny(req, res) {
    scoped keys (global, or overridden for one class in byCls[class]): notice, pause, pauseMsg, lock[], cheer + cheerAt,
    board ('off' | 'top3' | 'top5' | 'top10' | 'all'), boardBy ('pct' | 'pts' | 'stars'), boardNames ('first' | 'full' | 'initial'), boardTitle, boardMotto */
 const SCOPED = ['notice', 'pause', 'pauseMsg', 'lock', 'hide', 'gamesOff', 'cheer', 'cheerAt', 'board', 'boardBy', 'boardNames', 'boardTitle', 'boardMotto'];
-const CFG0 = { v: 0, ct: 0, notice: '', lock: [], pause: false, pauseMsg: '', hide: [], gamesOff: [], reg: true, hints: true, sound: true, fx: true, win: { on: false, from: '08:00', to: '14:00' }, rep: {}, cheer: '', cheerAt: 0, board: 'off', boardBy: 'pct', boardNames: 'first', boardTitle: '', boardMotto: '', boardHide: [], boardSeason: null, boardHall: [], byCls: {} };
+const CFG0 = { v: 0, ct: 0, notice: '', lock: [], pause: false, pauseMsg: '', hide: [], gamesOff: [], reg: true, hints: true, sound: true, fx: true, win: { on: false, from: '08:00', to: '14:00' }, rep: {}, cheer: '', cheerAt: 0, board: 'off', boardBy: 'pct', boardNames: 'first', boardTitle: '', boardMotto: '', boardHide: [], boardSeason: null, boardHall: [], hb: null, byCls: {} };
 let cfgCache = { at: 0, v: CFG0 };
 async function cfg(fresh) {
   if (!fresh && Date.now() - cfgCache.at < 8000) return cfgCache.v;
@@ -110,6 +110,7 @@ function cleanCfg(b, old) {
   if (b.win && typeof b.win === 'object') { const hm = x => /^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(String(x)) ? String(x) : null; c.win = { on: !!b.win.on, from: hm(b.win.from) || '08:00', to: hm(b.win.to) || '14:00' }; }
   if (b.rep && typeof b.rep === 'object') c.rep = cleanRep(b.rep, c.rep);
   if (Array.isArray(b.boardHide)) c.boardHide = [...new Set(b.boardHide.map(x => String(x || '').slice(0, 200)).filter(Boolean))].slice(0, 300);
+  if (b.hb && typeof b.hb === 'object') c.hb = cleanHB(b.hb, c.hb);
   if (b.sc && typeof b.sc === 'object') c.sc = { x: b.sc.x !== false };   // whether the extra games and the last battle count in the score (otherwise they only earn the bonus)
   if (b.cert && typeof b.cert === 'object') c.cert = cleanCert(b.cert, c.cert);
   if ('wk' in b) {   // the weekly class goal: {on, t, goal, days, cls:[…]} starts a new one; {on:false} ends it
@@ -118,6 +119,27 @@ function cleanCfg(b, old) {
     else c.wk = { id: Date.now().toString(36), t: tx(w.t, 60) || 'تحدّي الفصل الأسبوعي', goal: Math.max(10, Math.min(50000, Math.floor(+w.goal) || 300)), end: Date.now() + Math.max(1, Math.min(30, Math.floor(+w.days) || 7)) * 86400000, cls: (Array.isArray(w.cls) ? w.cls : []).map(x => tx(x, 24)).filter(Boolean).slice(0, 16), from: Date.now() };
   }
   c.v = Date.now(); return c;
+}
+/* the two boards besides each class's own: «the best class» (team work: classes compete) and «all classes» (every student across the school).
+   hb = { team: {on, by, min, title, motto}, all: {on, by, top, names, cls, title, motto} }; the class boards keep their own settings (board…) */
+const HB0 = { team: { on: false, by: 'avg', min: 1, title: '', motto: '' }, all: { on: false, by: 'pct', top: 10, names: 'first', cls: true, title: '', motto: '' } };
+const TEAM_BY = ['avg', 'pts', 'stars', 'tot', 'part'], ALL_BY = ['pct', 'pts', 'stars'];
+const hbOf = c => { const h = (c && c.hb) || {}; return { team: Object.assign({}, HB0.team, h.team), all: Object.assign({}, HB0.all, h.all) }; };
+function cleanHB(b, old) {
+  const r = hbOf({ hb: old }), t = b.team, a = b.all;
+  if (t && typeof t === 'object') {
+    if ('on' in t) r.team.on = !!t.on; if (TEAM_BY.includes(t.by)) r.team.by = t.by;
+    if ('min' in t) r.team.min = Math.max(1, Math.min(10, Math.floor(+t.min) || 1));
+    if ('title' in t) r.team.title = tx(t.title, 40); if ('motto' in t) r.team.motto = tx(t.motto, 100);
+  }
+  if (a && typeof a === 'object') {
+    if ('on' in a) r.all.on = !!a.on; if (ALL_BY.includes(a.by)) r.all.by = a.by;
+    if ([3, 5, 10, 20, 50].includes(+a.top)) r.all.top = +a.top;
+    if (['first', 'full', 'initial'].includes(a.names)) r.all.names = a.names;
+    if ('cls' in a) r.all.cls = !!a.cls;
+    if ('title' in a) r.all.title = tx(a.title, 40); if ('motto' in a) r.all.motto = tx(a.motto, 100);
+  }
+  return r;
 }
 const CERT_TH = ['gold', 'royal', 'emerald', 'rose', 'space'];
 /* the certificate: conditions for getting it (min) and its design (d) */
@@ -167,6 +189,7 @@ function eff(c, cls) {
   const o = c.byCls && cls ? c.byCls[cls] || {} : {}, r = { v: c.v, reg: c.reg !== false, hints: c.hints !== false, sound: c.sound !== false, fx: c.fx !== false, win: c.win || CFG0.win, rep: c.rep || {}, ct: c.ct || 0, sc: c.sc || { x: true }, cert: c.cert || null };
   SCOPED.forEach(k => { r[k] = k in o ? o[k] : c[k]; });
   r.board = r.board || 'off'; r.boardBy = r.boardBy || 'pct'; r.boardNames = r.boardNames || 'first'; r.boardTitle = r.boardTitle || ''; r.boardMotto = r.boardMotto || '';
+  { const h = hbOf(c); r.hb = { t: !!h.team.on, a: !!h.all.on }; }   // which of the extra boards the students may open
   r.bseason = c.boardSeason && c.boardSeason.id ? { id: c.boardSeason.id, t: c.boardSeason.t, from: c.boardSeason.from } : null;
   if ((o.cheerAt || 0) < (c.cheerAt || 0)) { r.cheer = c.cheer; r.cheerAt = c.cheerAt; }
   { const w = c.wk; if (w && w.id && w.end > Date.now() && (!w.cls || !w.cls.length || !cls || w.cls.includes(cls))) r.wk = { id: w.id, t: w.t, goal: w.goal, end: w.end }; }
@@ -187,10 +210,38 @@ function rankRows(L, by, season, base) {
   R.sort((a, b) => b.v - a.v || b.p / b.m - a.p / a.m || b.s - a.s || b.a - a.a || a.n.localeCompare(b.n, 'ar'));
   return R;
 }
+/* every class with its students that have sent a result: [{c, enr (registered), L}] */
+async function classData() {
+  const out = [];
+  for (const c of await classes()) {
+    const rows = h2o((await redis(['HGETALL', 'mf:cls:' + c])) || []), L = [];
+    Object.keys(rows).forEach(k => { let r = {}; try { r = JSON.parse(rows[k]); } catch (e) { } const x = r.c ? parseCode(r.c) : null; if (x) L.push({ k, n: r.n || x.name, c, p: x.pts, m: x.max, s: x.stars, a: x.n ? x.c / x.n : 0 }); });
+    out.push({ c, enr: Object.keys(rows).length, L });
+  }
+  return out;
+}
+/* the classes ranked as teams. by: avg (average percentage — the fairest), pts (average points), stars (average stars), tot (total points: favours big classes),
+   part (average percentage × the share of the class that took part — rewards a whole class working together); in a season, the points the class earned since it began per registered student.
+   A class with fewer than `min` students taking part is listed but not ranked. */
+function teamBoard(data, by, season, base, min) {
+  const r1 = x => Math.round(x * 10) / 10;
+  const R = data.map(d => {
+    const L = d.L, n = L.length, sum = f => L.reduce((t, x) => t + f(x), 0), sp = x => Math.max(0, x.p - (+(base && base[x.k]) || 0));
+    const pct = n ? sum(x => x.p * 100 / Math.max(1, x.m)) / n : 0, pts = n ? sum(x => x.p) / n : 0, stars = n ? sum(x => x.s) / n : 0, tot = sum(x => x.p), part = d.enr ? n / d.enr : 0, spt = sum(sp);
+    const v = season ? (d.enr ? spt / d.enr : 0) : by === 'pts' ? pts : by === 'stars' ? stars : by === 'tot' ? tot : by === 'part' ? pct * part : pct;
+    return { c: d.c, n, enr: d.enr, avg: r1(pct), pts: r1(pts), stars: r1(stars), tot, part: Math.round(part * 100), sp: r1(spt), v: r1(v), pend: n < Math.max(1, +min || 1) };
+  });
+  R.sort((a, b) => (a.pend - b.pend) || b.v - a.v || b.avg - a.avg || b.tot - a.tot || a.c.localeCompare(b.c, 'ar'));
+  let i = 0; R.forEach(r => { r.i = r.pend ? 0 : ++i; }); return R;
+}
+/* every student of every class in one ranking (the students the teacher hid are left out) */
+function allBoard(data, by, season, base, hide) {
+  return rankRows([].concat(...data.map(d => d.L.filter(x => !hide.has(x.k)))), by, season, base);
+}
 async function seasonBase() { return h2o((await redis(['HGETALL', 'mf:bs'])) || []); }
 async function saveCfg(c) { await redis(['SET', 'mf:cfg', JSON.stringify(c)]); cfgCache = { at: Date.now(), v: c }; return c; }
 /* a rate limit: true when this key has been hit more than max times in 10 minutes */
 async function limited(key, max) { const n = await redis(['INCR', key]); await redis(['EXPIRE', key, '600']); return n > max; }
 const qs = (req, k) => (req.query && req.query[k]) || new URL(req.url, 'http://x').searchParams.get(k);
 const ip = req => String(req.headers['x-forwarded-for'] || '').split(',')[0].trim().slice(0, 45) || 'x';
-module.exports = { cleanCRs, cleanCRd, parseCR, newCR, parseCX, MAX_CX, parseCode, nameKey, normCls, redis, pipeline, h2o, normPhone, intlPhone, normName, classes, aidOf, DEFAULT_CLASSES, dbConf, body, send, deny, qs, hashPw, checkPw, userKey, same, newToken, cfg, cleanCfg, saveCfg, eff, limited, ip, TOKEN_TTL, classRows, rankRows, boardName, seasonBase, BOARD_TOP };
+module.exports = { hbOf, cleanHB, classData, teamBoard, allBoard, TEAM_BY, ALL_BY, cleanCRs, cleanCRd, parseCR, newCR, parseCX, MAX_CX, parseCode, nameKey, normCls, redis, pipeline, h2o, normPhone, intlPhone, normName, classes, aidOf, DEFAULT_CLASSES, dbConf, body, send, deny, qs, hashPw, checkPw, userKey, same, newToken, cfg, cleanCfg, saveCfg, eff, limited, ip, TOKEN_TTL, classRows, rankRows, boardName, seasonBase, BOARD_TOP };
