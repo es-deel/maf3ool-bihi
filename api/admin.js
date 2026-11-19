@@ -1,6 +1,6 @@
 'use strict';
 const crypto = require('crypto');
-const { redis, pipeline, send, deny, body, classes, h2o, hashPw, cfg, saveCfg, normPhone, normName, aidOf, classRows, rankRows, seasonBase, parseCR, newCR, cleanCRs, cleanCRd, parseCX, MAX_CX } = require('./_lib');
+const { redis, pipeline, send, deny, body, classes, h2o, hashPw, cfg, saveCfg, normPhone, normName, aidOf, classRows, rankRows, seasonBase, classData, teamBoard, allBoard, parseCR, newCR, cleanCRs, cleanCRd, parseCX, MAX_CX } = require('./_lib');
 const err = e => ({ code: e.code === 'no_db' ? 503 : 500, o: { error: e.code === 'no_db' ? 'no_db' : 'server' } });
 
 /* delete one student and everything stored about him */
@@ -200,7 +200,7 @@ module.exports = async (req, res) => {
       const top = Object.keys(m).sort((a, b) => m[b] - m[a]).slice(0, 10);
       const info = top.length ? await pipeline(top.map(a => ['HMGET', 'mf:acc:' + a, 'name', 'cls'])) : [];
       top.forEach((a, i) => rows.push({ n: (info[i] && info[i][0]) || '—', c: (info[i] && info[i][1]) || '', v: m[a] }));
-      return send(res, 200, { ok: true, wk: { id: w.id, t: w.t, goal: w.goal, end: w.end, cls: w.cls || [], from: w.from || 0 }, tot, parts: Object.keys(m).length, top: rows });
+      return send(res, 200, { ok: true, wk: { id: w.id, t: w.t, goal: w.goal, end: w.end, cls: w.cls || [], from: w.from || 0, boss: w.boss || null, rw: w.rw || '' }, tot, parts: Object.keys(m).length, top: rows });
     }
     if (op === 'season') {   // the honour board's seasons: {on:true, t} starts one (everyone's points now become the zero line); {on:false} ends it and keeps the top three of every class in the hall of fame
       const g = Object.assign({}, await cfg(true)), tt = String(b.t || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 40);
@@ -213,7 +213,9 @@ module.exports = async (req, res) => {
         const s0 = g.boardSeason; if (!s0) return send(res, 200, { ok: true });
         const base = await seasonBase(), top = {}, hide = new Set(g.boardHide || []);
         for (const k of await classes()) { const R = rankRows((await classRows(k)).filter(x => !hide.has(x.k)), 'pts', true, base).filter(x => x.sp > 0).slice(0, 3); if (R.length) top[k] = R.map(x => ({ n: x.n, sp: x.sp })); }
-        g.boardHall = [Object.assign({}, s0, { to: Date.now(), top })].concat(g.boardHall || []).slice(0, 8); g.boardSeason = null; await redis(['DEL', 'mf:bs']);
+        /* the museum keeps more than the class podiums: the best classes (average points earned per registered student) and the school's heroes */
+        const data = (await classData()).map(d => Object.assign({}, d, { L: d.L.filter(x => !hide.has(x.k)) })), tm = teamBoard(data, 'avg', true, base, 1).filter(x => !x.pend && x.v > 0).slice(0, 3).map(x => ({ c: x.c, v: x.v, n: x.n, enr: x.enr })), al = allBoard(data, 'pts', true, base, new Set()).filter(x => x.sp > 0).slice(0, 5).map(x => ({ n: x.n, c: x.c, sp: x.sp }));
+        g.boardHall = [Object.assign({}, s0, { to: Date.now(), top, team: tm, all: al })].concat(g.boardHall || []).slice(0, 40); g.boardSeason = null; await redis(['DEL', 'mf:bs']);
       }
       g.v = Date.now(); await saveCfg(g); return send(res, 200, { ok: true, cfg: g });
     }

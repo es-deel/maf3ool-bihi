@@ -116,10 +116,13 @@ function cleanCfg(b, old) {
   if ('wk' in b) {   // the weekly class goal: {on, t, goal, days, cls:[…]} starts a new one; {on:false} ends it
     const w = b.wk;
     if (!w || !w.on) c.wk = null;
-    else c.wk = { id: Date.now().toString(36), t: tx(w.t, 60) || 'تحدّي الفصل الأسبوعي', goal: Math.max(10, Math.min(50000, Math.floor(+w.goal) || 300)), end: Date.now() + Math.max(1, Math.min(30, Math.floor(+w.days) || 7)) * 86400000, cls: (Array.isArray(w.cls) ? w.cls : []).map(x => tx(x, 24)).filter(Boolean).slice(0, 16), from: Date.now() };
+    else c.wk = { id: Date.now().toString(36), t: tx(w.t, 60) || 'تحدّي الفصل الأسبوعي', goal: Math.max(10, Math.min(50000, Math.floor(+w.goal) || 300)), end: Date.now() + Math.max(1, Math.min(30, Math.floor(+w.days) || 7)) * 86400000, cls: (Array.isArray(w.cls) ? w.cls : []).map(x => tx(x, 24)).filter(Boolean).slice(0, 16), from: Date.now(),
+      boss: w.boss && typeof w.boss === 'object' && w.boss.k ? { k: w.boss.k === 'robot' ? 'robot' : 'alien_monster', n: tx(w.boss.n, 30) || 'وحش الأخطاء' } : null, rw: tx(w.rw, 80) };
   }
   c.v = Date.now(); return c;
 }
+/* the title and the frame a student picked in his cabinet (shown beside his name on the boards): ids only, the page knows their words */
+function cleanEq(o) { o = o && typeof o === 'object' ? o : {}; const t = String(o.t || ''), f = String(o.f || ''); return { t: /^(pg|bd|rk):[a-z0-9_]{1,24}$/.test(t) ? t : '', f: /^[a-z]{2,10}$/.test(f) ? f : '' }; }
 /* the two boards besides each class's own: «the best class» (team work: classes compete) and «all classes» (every student across the school).
    hb = { team: {on, by, min, title, motto}, all: {on, by, top, names, cls, title, motto} }; the class boards keep their own settings (board…) */
 const HB0 = { team: { on: false, by: 'avg', min: 1, title: '', motto: '' }, all: { on: false, by: 'pct', top: 10, names: 'first', cls: true, title: '', motto: '' } };
@@ -190,18 +193,34 @@ function eff(c, cls) {
   SCOPED.forEach(k => { r[k] = k in o ? o[k] : c[k]; });
   r.board = r.board || 'off'; r.boardBy = r.boardBy || 'pct'; r.boardNames = r.boardNames || 'first'; r.boardTitle = r.boardTitle || ''; r.boardMotto = r.boardMotto || '';
   { const h = hbOf(c); r.hb = { t: !!h.team.on, a: !!h.all.on }; }   // which of the extra boards the students may open
+  r.mu = !!(c.boardHall && c.boardHall.length);   // the museum has something to show
   r.bseason = c.boardSeason && c.boardSeason.id ? { id: c.boardSeason.id, t: c.boardSeason.t, from: c.boardSeason.from } : null;
   if ((o.cheerAt || 0) < (c.cheerAt || 0)) { r.cheer = c.cheer; r.cheerAt = c.cheerAt; }
-  { const w = c.wk; if (w && w.id && w.end > Date.now() && (!w.cls || !w.cls.length || !cls || w.cls.includes(cls))) r.wk = { id: w.id, t: w.t, goal: w.goal, end: w.end }; }
+  { const w = c.wk; if (w && w.id && w.end > Date.now() && (!w.cls || !w.cls.length || !cls || w.cls.includes(cls))) r.wk = { id: w.id, t: w.t, goal: w.goal, end: w.end, boss: w.boss || null, rw: w.rw || '' }; }
   return r;
 }
 /* ---------- the class honour board ---------- */
 const BOARD_TOP = { top3: 3, top5: 5, top10: 10, all: 60 };
 const boardName = (n, mode) => { n = String(n || ''); const w = n.split(' ').filter(Boolean); if (mode === 'full') return n; if (mode === 'initial' && w.length > 1) return w[0] + ' ' + w[w.length - 1][0] + '.'; return w[0] || n; };
+/* the school week (Sunday → Saturday, Riyadh/Cairo clock): its number, and the weekly points of a student's record.
+   A record keeps wi (the week of the last result), wb (his points when that week began) and wl (his latest points), so «this week» = wl − wb; the week that just ended is kept as lw when a new week starts. */
+const weekId = ts => Math.floor((Math.floor(((+ts || Date.now()) + 3 * 3600000) / 86400000) - 3) / 7);
+const weekStart = id => (id * 7 + 3) * 86400000 - 3 * 3600000;
+function weekGain(r, now) {
+  const W = weekId(now), g = r && r.wi === W ? Math.max(0, (r.wl || 0) - (r.wb || 0)) : 0, last = r ? (r.wi === W ? r.lw || 0 : r.wi === W - 1 ? Math.max(0, (r.wl || 0) - (r.wb || 0)) : 0) : 0;
+  return { wd: g, lw: last };
+}
+/* the record to store after a new result with `pts` points: carries the week figures forward */
+function nextWeek(prev, pts, now) {
+  const W = weekId(now); let wi = prev && prev.wi, wb = prev && prev.wb, wl = prev && prev.wl, lw = (prev && prev.lw) || 0;
+  if (!prev || wi === undefined) { let p0 = 0; if (prev && prev.c) { const x = parseCode(prev.c); p0 = x ? x.pts : 0; } wi = W; wb = p0; lw = 0; }
+  else if (wi !== W) { lw = wi === W - 1 ? Math.max(0, (wl || 0) - (wb || 0)) : 0; wb = wl || 0; wi = W; }
+  return { wi: W, wb: Math.min(wb, pts), wl: pts, lw };
+}
 /* every student of one class that has sent a valid result code */
 async function classRows(cls) {
   const rows = h2o((await redis(['HGETALL', 'mf:cls:' + cls])) || []), L = [];
-  Object.keys(rows).forEach(k => { let r = {}; try { r = JSON.parse(rows[k]); } catch (e) { } const x = r.c ? parseCode(r.c) : null; if (x) L.push({ k, n: r.n || x.name, p: x.pts, m: x.max, s: x.stars, a: x.n ? x.c / x.n : 0 }); });
+  Object.keys(rows).forEach(k => { let r = {}; try { r = JSON.parse(rows[k]); } catch (e) { } const x = r.c ? parseCode(r.c) : null; if (x) L.push(Object.assign({ k, n: r.n || x.name, p: x.pts, m: x.max, s: x.stars, a: x.n ? x.c / x.n : 0 }, weekGain(r))); });
   return L;
 }
 /* ranks them: 'season' counts only the points earned since the season began (base = {aid: points then}); otherwise by percentage, points or stars */
@@ -215,7 +234,7 @@ async function classData() {
   const out = [];
   for (const c of await classes()) {
     const rows = h2o((await redis(['HGETALL', 'mf:cls:' + c])) || []), L = [];
-    Object.keys(rows).forEach(k => { let r = {}; try { r = JSON.parse(rows[k]); } catch (e) { } const x = r.c ? parseCode(r.c) : null; if (x) L.push({ k, n: r.n || x.name, c, p: x.pts, m: x.max, s: x.stars, a: x.n ? x.c / x.n : 0 }); });
+    Object.keys(rows).forEach(k => { let r = {}; try { r = JSON.parse(rows[k]); } catch (e) { } const x = r.c ? parseCode(r.c) : null; if (x) L.push(Object.assign({ k, n: r.n || x.name, c, p: x.pts, m: x.max, s: x.stars, a: x.n ? x.c / x.n : 0 }, weekGain(r))); });
     out.push({ c, enr: Object.keys(rows).length, L });
   }
   return out;
@@ -244,4 +263,4 @@ async function saveCfg(c) { await redis(['SET', 'mf:cfg', JSON.stringify(c)]); c
 async function limited(key, max) { const n = await redis(['INCR', key]); await redis(['EXPIRE', key, '600']); return n > max; }
 const qs = (req, k) => (req.query && req.query[k]) || new URL(req.url, 'http://x').searchParams.get(k);
 const ip = req => String(req.headers['x-forwarded-for'] || '').split(',')[0].trim().slice(0, 45) || 'x';
-module.exports = { hbOf, cleanHB, classData, teamBoard, allBoard, TEAM_BY, ALL_BY, cleanCRs, cleanCRd, parseCR, newCR, parseCX, MAX_CX, parseCode, nameKey, normCls, redis, pipeline, h2o, normPhone, intlPhone, normName, classes, aidOf, DEFAULT_CLASSES, dbConf, body, send, deny, qs, hashPw, checkPw, userKey, same, newToken, cfg, cleanCfg, saveCfg, eff, limited, ip, TOKEN_TTL, classRows, rankRows, boardName, seasonBase, BOARD_TOP };
+module.exports = { cleanEq, weekId, weekStart, weekGain, nextWeek, hbOf, cleanHB, classData, teamBoard, allBoard, TEAM_BY, ALL_BY, cleanCRs, cleanCRd, parseCR, newCR, parseCX, MAX_CX, parseCode, nameKey, normCls, redis, pipeline, h2o, normPhone, intlPhone, normName, classes, aidOf, DEFAULT_CLASSES, dbConf, body, send, deny, qs, hashPw, checkPw, userKey, same, newToken, cfg, cleanCfg, saveCfg, eff, limited, ip, TOKEN_TTL, classRows, rankRows, boardName, seasonBase, BOARD_TOP };

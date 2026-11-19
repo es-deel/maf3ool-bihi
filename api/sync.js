@@ -1,5 +1,5 @@
 'use strict';
-const { redis, pipeline, send, body, parseCode, nameKey, cfg, eff, same, parseCR, newCR, parseCX } = require('./_lib');
+const { redis, pipeline, send, body, parseCode, nameKey, cfg, eff, same, parseCR, newCR, parseCX, nextWeek, weekGain, cleanEq } = require('./_lib');
 const MAX_SNAP = 250000, MAX_DETAIL = 40000;
 /* the student's page calls this: a heartbeat (who is writing now), and the progress snapshot + result code + detailed report when something changed */
 module.exports = async (req, res) => {
@@ -30,10 +30,13 @@ module.exports = async (req, res) => {
         let det = '';
         if (b.detail && typeof b.detail === 'object' && !Array.isArray(b.detail)) { try { det = JSON.stringify({ c: b.code, d: b.detail }); } catch (e) { det = ''; } if (det.length > MAX_DETAIL) det = ''; }
         set.push('code', b.code); if (det) set.push('det', det);
-        cmds.push(['HSET', 'mf:cls:' + cls, aid, JSON.stringify({ n: name, p: phone, c: b.code, d: det ? 1 : (b.keepDet ? 1 : 0), pv: 2 })]);
+        let prev = null; try { prev = JSON.parse(await redis(['HGET', 'mf:cls:' + cls, aid]) || 'null'); } catch (e) { prev = null; }
+        const wk0 = nextWeek(prev, x.pts, now); extra.wd = weekGain(wk0, now).wd; extra.lw = wk0.lw;
+        cmds.push(['HSET', 'mf:cls:' + cls, aid, JSON.stringify(Object.assign({ n: name, p: phone, c: b.code, d: det ? 1 : (b.keepDet ? 1 : 0), pv: 2 }, wk0))]);
         status = status === 'old' ? status : 'saved';
       }
     }
+    if (b.eq && typeof b.eq === 'object') set.push('eq', JSON.stringify(cleanEq(b.eq)));
     /* the certificate: a student who made his certificate on his device registers it here once (the teacher then owns it: edits, withdraws, restores). The page gets the record back whenever its version differs. */
     let cr = parseCR(cr0);
     if (!cr && b.cr && typeof b.cr === 'object') { cr = newCR(b.cr, 's'); set.push('cr', JSON.stringify(cr)); extra.cr = cr; }

@@ -1973,6 +1973,43 @@ body.cls .opt{min-height:4.6rem}
 .hn-vw{display:flex;margin:0 auto .7rem;width:max-content;max-width:100%}
 .hn-cl{display:block;font-size:.72rem;font-weight:600;color:var(--muted);line-height:1.3}
 .hn-pi small{font-size:.72rem;color:var(--muted)}
+.mu-b{display:grid;gap:.7rem;max-height:60vh;overflow:auto;text-align:start}
+.mu-s{padding:.7rem .9rem;border-radius:16px;background:color-mix(in srgb,var(--gold,#ffd43b) 10%,transparent);border:1px solid color-mix(in srgb,var(--gold,#ffd43b) 35%,transparent)}
+.mu-s h3{margin:0 0 .4rem;font-size:1.05rem}.mu-s h3 small{font-weight:600;opacity:.7;font-size:.78rem}
+.mu-r{display:grid;gap:.15rem;margin:.35rem 0}.mu-r b{font-size:.85rem;opacity:.8}.mu-r small{opacity:.7}.mu-r em{font-style:normal;color:var(--gold,#ffd43b);font-weight:700}
+.hn-mur{justify-content:center;margin-top:.6rem}
+
+.wk-boss{text-align:center;justify-items:center}
+.wk-mon{display:grid;place-items:center;padding:.3rem}
+.wk-mon .em{width:5rem;height:5rem}
+.wk-mon.hit{animation:wkHit .5s}
+.wk-mon.dead{filter:grayscale(1);opacity:.55;transform:rotate(-18deg)}
+@keyframes wkHit{0%,100%{transform:none}20%{transform:translateX(.6rem) rotate(6deg);filter:brightness(2)}40%{transform:translateX(-.6rem) rotate(-6deg)}60%{transform:translateX(.4rem)}}
+.wk-bn{font-size:1.05rem}
+.wk-hp{width:100%;height:1rem;border-radius:99px;background:#0005;overflow:hidden}
+.wk-hp i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#ef4444,#f97316);transition:width .6s}
+.wk-rw{margin:0;display:flex;gap:.4rem;align-items:center;justify-content:center;font-weight:700}
+@media (prefers-reduced-motion:reduce){.wk-mon.hit{animation:none}}
+
+.hn-av.fr{box-shadow:0 0 0 3px var(--fa),0 0 14px var(--fb);border-color:var(--fa)}
+.hn-tt{display:inline-block;margin-inline-start:.35rem;padding:0 .45rem;border-radius:99px;background:#ffffff1f;font-style:normal;font-size:.72rem;font-weight:700;color:#fde68a;white-space:nowrap}
+.cab-ttl{display:flex;flex-wrap:wrap;gap:.4rem;margin:.3rem 0 .8rem}
+.cab-ttl button{border:1.5px solid #ffffff40;background:#ffffff14;color:inherit;border-radius:99px;padding:.25rem .7rem;font:inherit;font-size:.85rem;cursor:pointer}
+.cab-ttl button[aria-pressed=true]{background:#fde047;color:#3b2a00;border-color:#fde047;font-weight:700}
+.cab-ttl button:disabled{opacity:.45;cursor:not-allowed}
+.cab-fr{display:flex;flex-wrap:wrap;gap:.6rem;margin:.3rem 0 .8rem}
+.cab-fr button{display:grid;justify-items:center;gap:.2rem;border:0;background:none;color:inherit;font:inherit;font-size:.75rem;cursor:pointer;width:4.4rem}
+.cab-fr button:disabled{opacity:.4;cursor:not-allowed}
+.cab-fr i{width:2.6rem;height:2.6rem;border-radius:50%;background:#ffffff22;box-shadow:0 0 0 3px var(--fa,#ffffff55),0 0 12px var(--fb,transparent)}
+.cab-fr button[aria-pressed=true] i{outline:3px solid #fff;outline-offset:3px}
+.hc-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(8.4rem,1fr));gap:.7rem;margin:.4rem 0 .9rem}
+.hc{position:relative;display:grid;justify-items:center;gap:.15rem;padding:.7rem .4rem .6rem;border-radius:1rem;text-align:center;color:#fff;background:linear-gradient(160deg,var(--ca),var(--cb));box-shadow:0 4px 14px #0006,inset 0 0 0 2px #ffffff55}
+.hc b{font-size:.92rem}.hc small{font-size:.72rem;opacity:.92}
+.hc .hc-r{position:absolute;top:.3rem;inset-inline-start:.35rem;font-size:.62rem;background:#0006;border-radius:99px;padding:0 .4rem}
+.hc.lock{background:#ffffff12;box-shadow:inset 0 0 0 2px #ffffff22;color:#ffffff88}
+.hc.legend{animation:hcSh 3s infinite}
+@keyframes hcSh{0%,100%{filter:none}50%{filter:brightness(1.25) drop-shadow(0 0 8px #fde04799)}}
+@media (prefers-reduced-motion:reduce){.hc.legend{animation:none}}
 </style></head><body><div class="sky" aria-hidden="true"><div class="stars"></div><div class="stars b"></div><img class="float-pl a" data-em="p2" alt=""><img class="float-pl b" data-em="p3" alt=""><i class="comet"></i></div>
 <header class="top"><div class="top-in">
  <div class="brand"><img data-em="logo" alt=""><div><h1>مغامرة النحو والإعراب</h1><small>رحلة بين الكواكب مع الأستاذ إسلام قنديل</small></div></div>
@@ -4836,7 +4873,7 @@ const Rank={
  at(pts,max){let i=0;RANKS.forEach((r,k)=>{if(pts>=Math.round(r.f*max))i=k});return i},
  cur(){const pts=Score.total(),max=Score.max(),i=this.at(pts,max),r=RANKS[i],nx=RANKS[i+1]||null,lo=Math.round(r.f*max),hi=nx?Math.round(nx.f*max):max;
   return{i,n:r.n,ic:r.ic,pts,max,next:nx,need:nx?Math.max(0,hi-pts):0,pct:nx?Math.max(0,Math.min(100,Math.round((pts-lo)/Math.max(1,hi-lo)*100))):100}},
- paint(){const c=this.cur(),ic=$('#rankIc'),tx=$('#rankTxt');if(!ic||!tx)return;ic.src=IMG[c.ic];tx.textContent=c.n;
+ paint(){const c=this.cur(),ic=$('#rankIc'),tx=$('#rankTxt');if(!ic||!tx)return;ic.src=IMG[c.ic];tx.textContent=c.n;if(typeof Coll!=='undefined')Coll.apply();
   const b=$('#nameBtn');if(b)b.title=`${NAME()||'الطالب'} · رتبتك: ${c.n}${c.next?` · بقي ${AR(c.need)} نقطة للرتبة التالية`:''} · اضغط لتفتح «لوحتي»`},
  init(){if(store.get('rk',null)===null)store.set('rk',this.cur().i);this.paint()},
  check(){const c=this.cur(),prev=store.get('rk',null);if(prev===null){store.set('rk',c.i);this.paint();return}
@@ -4941,9 +4978,11 @@ const Cab={
     <div class="cab-fin ${fb.won?'won':ready?'ready':''}">${em('robot','lg')}<div><b>المعركة الأخيرة</b><span>${fb.won?'هزمتَ الروبوت واستعدتَ الكتاب كله!':ready?'اكتملت الصفحات! واجه الروبوت الآن.':`تُفتح عندما تستردّ ${AR(Pg.core().length)} صفحة (استرددتَ ${AR(Pg.core().filter(p=>Pg.got(p.id)).length)}).`}</span></div>${ready?`<button class="btn ${fb.won?'ghost':'gold'} sm" type="button" data-act="fin">${fb.won?'العب مرة أخرى':'ابدأ المعركة'}</button>`:''}</div>
     <h3>الأوسمة <small>${AR(Bdg.n())} من ${AR(BADGES.length)}</small></h3>
     <div class="cab-g">${bds}</div>
+    ${Coll.html()}
    </div>
    <div class="row dlg-row"><button class="btn ghost" type="button" data-act="x">إغلاق</button></div></div>`;
-  act(d,{x:close,pg:b=>{const id=b.dataset.id;close();Pg.open(id)},fin:()=>{close();if(typeof Final!=='undefined')Final.start()}});
+  const keep=f=>{const sc=($('.cab-body',d)||{}).scrollTop||0;f();Cab.open();const nb=$('.cab-body',d);if(nb)nb.scrollTop=sc};
+  act(d,{x:close,eqt:b=>keep(()=>Coll.set('t',b.dataset.id)),eqf:b=>keep(()=>Coll.set('f',b.dataset.id)),pg:b=>{const id=b.dataset.id;close();Pg.open(id)},fin:()=>{close();if(typeof Final!=='undefined')Final.start()}});
   d.onkeydown=e=>{if(e.key==='Escape')close()};
   setTimeout(()=>{try{$('[data-act=x]',d).focus()}catch(e){}},60)}};
 
@@ -4953,6 +4992,59 @@ Eng.mh.push(()=>{Bdg.check();Rank.check()});
 Eng.dh.push((id,q)=>{Pg.onDone(id,q);Bdg.check()});
 Eng.ih.push(()=>{Rank.init();Bdg.init()});
 REHYD.push(()=>{Rank.init();Bdg.init()});
+
+/* --- coll.js --- */
+/* ===== the collection: a hero card for every planet he finishes (rarity from how many of the planet's points he earned),
+   titles and frames unlocked by achievements; the one he equips is shown beside his name on the honour boards ===== */
+const RAR=[{k:'legend',n:'أسطورية',min:95,c:['#fde047','#d97706']},{k:'epic',n:'ملحمية',min:80,c:['#c084fc','#6d28d9']},{k:'rare',n:'نادرة',min:60,c:['#60a5fa','#1d4ed8']},{k:'common',n:'عادية',min:0,c:['#a8a29e','#57534e']}];
+const FRAMES=[
+ {id:'none',n:'بدون',c:null,ok:()=>true,d:''},
+ {id:'sky',n:'سماوي',c:['#7dd3fc','#0ea5e9'],ok:()=>Rank.cur().i>=1,d:'الرتبة الثانية'},
+ {id:'gold',n:'ذهبي',c:['#fde047','#f59e0b'],ok:()=>Rank.cur().i>=3,d:'الرتبة الرابعة'},
+ {id:'fire',n:'ناري',c:['#fb923c','#dc2626'],ok:()=>!!Bdg.have().blaze,d:'وسام «لهيب»'},
+ {id:'royal',n:'ملكي',c:['#c084fc','#7c3aed'],ok:()=>!!Bdg.have().conq,d:'وسام «فاتح الكواكب»'},
+ {id:'gem',n:'جوهري',c:['#5eead4','#14b8a6'],ok:()=>!!Bdg.have().gem,d:'وسام «جوهرة»'}];
+const Coll={
+ /* percent of a planet's lesson points the student has earned */
+ pct(id){let g=0,m=0;LQ.forEach(q=>{if(q.tab===id){m+=q.pts;g+=LED[q.key]||0}});return m?Math.round(g/m*100):80},
+ rar(id){const p=this.pct(id);return RAR.find(r=>p>=r.min)||RAR[RAR.length-1]},
+ cards(){return Pg.list().map(p=>{const T=TABS.find(t=>t.id===p.id),got=Pg.got(p.id);return{id:p.id,ic:p.ic,t:p.t,planet:T?T.title:'',n:Pg.num(p.id),got,pct:got?this.pct(p.id):0,r:got?this.rar(p.id):null}})},
+ /* titles: the ranks reached, the planets' titles earned, the badges won */
+ titles(){const L=[],ri=Rank.cur().i,have=Bdg.have();
+  RANKS.forEach((r,i)=>L.push({id:'rk:'+i,t:r.n,on:i<=ri,g:'رتبة'}));
+  Pg.list().forEach(p=>L.push({id:'pg:'+p.id,t:p.t,on:Pg.got(p.id),g:'كوكب'}));
+  BADGES.forEach(b=>L.push({id:'bd:'+b.id,t:b.n,on:!!have[b.id],g:'وسام'}));return L},
+ /* the words of a title, whoever owns it (for boards) / only if I own it (what I may wear) */
+ label(id){const t=this.titles().find(x=>x.id===id);return t?t.t:''},
+ titleText(id){const t=this.titles().find(x=>x.id===id);return t&&t.on?t.t:''},
+ frame(id){const f=FRAMES.find(x=>x.id===id);return f&&f.c?f:null},
+ get(){const o=store.get('eq',null)||{};return{t:String(o.t||''),f:String(o.f||'')}},
+ /* what he actually wears (an item he no longer qualifies for is dropped) */
+ eq(){const o=this.get(),f=FRAMES.find(x=>x.id===o.f);return{t:o.t&&this.titleText(o.t)?o.t:'',f:f&&f.ok()?f.id:''}},
+ set(k,v){const o=Object.assign(this.get(),{[k]:v});store.set('eq',o);Rank.paint();try{Online.ping()}catch(e){}},
+ /* the header: the title replaces the rank's words, the frame rings the rank's icon */
+ apply(){const e=this.eq(),tx=$('#rankTxt'),ic=$('#rankIc');if(tx&&e.t)tx.textContent=this.titleText(e.t);
+  if(ic){const f=this.frame(e.f);ic.style.boxShadow=f?`0 0 0 2px ${f.c[0]},0 0 10px ${f.c[1]}`:'';ic.style.borderRadius=f?'50%':''}},
+ /* a quiet notice when something new unlocks (the first run only records what is already his) */
+ keys(){return this.titles().filter(x=>x.on).map(x=>x.id).concat(FRAMES.filter(f=>f.id!=='none'&&f.ok()).map(f=>'f:'+f.id)).concat(this.cards().filter(c=>c.got).map(c=>'c:'+c.id+':'+c.r.k))},
+ check(){const have=store.get('cu',null),now=this.keys();if(have===null){store.set('cu',now);return}
+  const nw=now.filter(k=>!have.includes(k));if(!nw.length)return;store.set('cu',now);
+  const cd=nw.filter(k=>k[0]==='c')[0],fr=nw.filter(k=>k[0]==='f')[0],tt=nw.filter(k=>k[0]!=='c'&&k[0]!=='f')[0];
+  try{if(cd){const c=this.cards().find(x=>x.id===cd.split(':')[1]);Banner.show({ic:c.ic,k:'بطاقة جديدة في مجموعتك!',t:c.t,s:`بطاقة ${c.r.n} · ${AR(c.pct)}٪ من نقاط الكوكب`,sfx:'win',conf:30,cls:'badge',b:['خزانتي',()=>Cab.open()]})}
+   else if(fr){const f=FRAMES.find(x=>x.id===fr.slice(2));toast(`${em('gem_stone')} إطار جديد: ${f.n}. غيّره من خزانتي`)}
+   else if(tt)toast(`${em('crown')} لقب جديد: ${this.titleText(tt)}. اختره من خزانتي`)}catch(e){}},
+ html(){const cs=this.cards(),got=cs.filter(c=>c.got).length,e=this.eq(),T=this.titles();
+  const card=c=>c.got?`<div class="hc ${c.r.k}" style="--ca:${c.r.c[0]};--cb:${c.r.c[1]}" title="${esc(c.planet)}"><span class="hc-r">${c.r.n}</span>${em(c.ic,'lg')}<b>${esc(c.t)}</b><small>${esc(c.planet)}</small><small>${AR(c.pct)}٪ من النقاط</small></div>`
+   :`<div class="hc lock">${em('locked','lg')}<b>بطاقة ${AR(c.n)}</b><small>تُفتح بإنجاز الكوكب</small></div>`;
+  return`<h3>بطاقاتي <small>${AR(got)} من ${AR(cs.length)}</small></h3>
+   <p class="sub">كل كوكب تُنجزه يمنحك بطاقة بطل. كلما حصلتَ على نقاط أكثر في الكوكب صارت بطاقتك أندر: عادية ثم نادرة ثم ملحمية ثم أسطورية.</p>
+   <div class="hc-g">${cs.map(card).join('')}</div>
+   <h3>لقبي <small>يظهر بجانب اسمك في لوحات الشرف</small></h3>
+   <div class="cab-ttl" role="group" aria-label="اختر لقبك"><button type="button" data-act="eqt" data-id="" aria-pressed="${!e.t}">بدون لقب</button>${T.map(x=>`<button type="button" data-act="eqt" data-id="${x.id}" aria-pressed="${e.t===x.id}"${x.on?'':' disabled'} title="${x.on?esc(x.g):'لم يُفتح بعد'}">${x.on?'':'🔒 '}${esc(x.t)}</button>`).join('')}</div>
+   <h3>إطاري <small>حلقة حول صورتك في اللوحات</small></h3>
+   <div class="cab-fr" role="group" aria-label="اختر إطارك">${FRAMES.map(f=>{const ok=f.ok();return`<button type="button" data-act="eqf" data-id="${f.id==='none'?'':f.id}" aria-pressed="${e.f===(f.id==='none'?'':f.id)}"${ok?'':' disabled'} title="${ok?'':esc('يُفتح بـ '+f.d)}"><i style="${f.c?`--fa:${f.c[0]};--fb:${f.c[1]}`:''}"></i>${f.n}${ok?'':'<small>🔒</small>'}</button>`}).join('')}</div>`}};
+Eng.sh.push(()=>Coll.check());Eng.ah.push(()=>Coll.check());Eng.mh.push(()=>Coll.check());Eng.dh.push(()=>Coll.check());
+Eng.ih.push(()=>{Coll.check();Coll.apply()});REHYD.push(()=>{Coll.check();Coll.apply()});
 
 /* --- eng_c.js --- */
 /* ===== answer chain (combo ×2 ×3 ×4), ⚡ excitement points and the power-ups used in the games =====
@@ -5525,6 +5617,7 @@ const Mine={
       <div class="mn-t">${em('closed_book')}<b>${fa(A.pages,A.pagesT)}</b><small>صفحات الكتاب</small></div><div class="mn-t">${em('1st_place_medal')}<b>${fa(A.nb,A.nbT)}</b><small>الأوسمة</small></div></div>
      <p class="mn-k">من أين جاءت درجتك؟ ${partsTxt(R)}. والنجوم تُحسب من هذا المجموع الكلي.</p>
      <div class="row"><button class="btn ghost sm" type="button" data-act="cab">${em('crown')} افتح خزانتي</button>${gf?`<button class="btn pink sm" type="button" data-act="rg">${GIFT(20)} ${giftTxt(gf)}</button>`:''}</div></section>
+    ${typeof WCard!=='undefined'&&typeof Online!=='undefined'&&Online.acct()?`<section class="mn-c"><h3>${em('sparkles')} بطاقتي الأسبوعية</h3><p>${WCard.wd==null?'بطاقة جميلة بتقدّمك لتريها لأهلك.':`كسبتَ هذا الأسبوع <b>${AR(WCard.wd)}</b> نقطة${WCard.lw?` (الأسبوع الماضي ${AR(WCard.lw)})`:''}. احفظ بطاقتك وأرِها لأهلك!`}</p><div class="row"><button class="btn gold sm" type="button" data-act="wcd">${em('star')} احفظ بطاقتي صورة</button></div></section>`:''}
     <section class="mn-c mn-cr"><h3>${em('trophy')} شهاداتي</h3><div id="mnCr" class="cr-box"></div></section>
     <section class="mn-c mn-bn"><h3>${em('sparkles')} التقييم الإضافي (البونص)</h3>
      <p>تقييم <b>منفصل</b> عن درجتك ونجومك: تكسبه عندما تُعيد الحل أو تحقّق سلسلة إجابات صحيحة متتالية.</p>
@@ -5541,7 +5634,7 @@ const Mine={
    </div>
    <div class="row dlg-row"><button class="btn ghost" type="button" data-act="x">إغلاق</button></div></div>`;
   act(d,{x:close,sbx:()=>{close();StarBox.open('s')},rc:()=>{close();Resume.goPos()},rf:()=>{close();Resume.goFirst()},rl:()=>{close();IncDlg.open('review')},pl:b=>{close();Resume.toPlanet(b.dataset.id)},
-   rd:()=>{close();Daily.open()},cab:()=>Cab.open(),bn:()=>Bonus.open(),rg:()=>{close();const u=Pg.unopened()[0];if(u)Pg.open(u.id)},rcert:()=>{close();goTab('certificate')},rrep:()=>{close();goTab('report')},
+   rd:()=>{close();Daily.open()},cab:()=>Cab.open(),wcd:()=>WCard.saveMine(),bn:()=>Bonus.open(),rg:()=>{close();const u=Pg.unopened()[0];if(u)Pg.open(u.id)},rcert:()=>{close();goTab('certificate')},rrep:()=>{close();goTab('report')},
    cc:async()=>{toast(await copyTxt(code,$('#mnCode',d))?'نُسخ الرمز ✓':'حدّد الرمز وانسخه يدويًا')},
    bk:()=>Backup.open(),nm:()=>Prof.ask('edit'),cls:()=>{close();Cls.toggle()},brd:()=>Board.open()});
   try{CR.ensure();CR.mountAll($('#mnCr',d),{mini:true})}catch(e){}
@@ -5857,11 +5950,19 @@ const Week={
    const h=Object.assign({g:0,b:0},store.get('wkh',null)||{}),n=Math.max(this.mine(),this.cur.n||0);
    if(n>h.b){h.b=n;store.set('wkh',h)}
    if(this.cur.tot>=this.cur.goal&&!o.d){o=Object.assign({},o,{d:1});store.set('wk',o);if(n>0){h.g=(h.g||0)+1;store.set('wkh',h)}
-    try{Banner.show({ic:'trophy',k:'حقّق فصلك الهدف!',t:this.cur.t,s:`أنجزتم معًا ${AR(this.cur.goal)} إجابة صحيحة`,sfx:'win',conf:50,cls:'badge'})}catch(e){}
+    try{Banner.show({ic:'trophy',k:this.cur.boss?'هزمتم '+(this.cur.boss.n||'الوحش')+'!':'حقّق فصلك الهدف!',t:this.cur.t,s:this.cur.boss&&this.cur.rw?'المكافأة: '+this.cur.rw:`أنجزتم معًا ${AR(this.cur.goal)} إجابة صحيحة`,sfx:'win',conf:50,cls:'badge'})}catch(e){}
     try{Bdg.check()}catch(e){}}
    else try{Bdg.check()}catch(e){}}
   this.paint()},
- card(){const w=this.cur;if(!w)return'';const done=w.tot>=w.goal,pct=Math.min(100,Math.round(w.tot/w.goal*100)),days=Math.ceil((w.end-Date.now())/86400000);
+ card(){const w=this.cur;if(!w)return'';const done=w.tot>=w.goal,pct=Math.min(100,Math.round(w.tot/w.goal*100)),days=Math.ceil((w.end-Date.now())/86400000),bs=w.boss;
+  if(bs){/* the error monster: the class's correct answers are blows; its health bar falls as the total rises */
+   const hp=Math.max(0,w.goal-w.tot),hit=this._t!=null&&w.tot>this._t&&!done;this._t=w.tot;
+   return`<div class="wk-card wk-boss${done?' done':''} rise"><h3>${em(done?'trophy':'collision')} ${esc(w.t||'تحدّي الفصل الأسبوعي')}</h3>
+   <div class="wk-mon${hit?' hit':''}${done?' dead':''}" aria-hidden="true">${em(bs.k==='robot'?'robot':'alien_monster','xl')}</div>
+   <b class="wk-bn">${esc(bs.n||'وحش الأخطاء')}</b>
+   <div class="wk-hp" role="img" aria-label="حياة الوحش ${AR(100-pct)}٪"><i style="width:${100-pct}%"></i></div>
+   <small>${done?'هُزم الوحش! أحسنتم يا أبطال. ':`بقي له <b>${AR(hp)}</b> نقطة حياة · كل إجابة صحيحة منكم ضربة. `}<b>${AR(w.tot)}</b> من <b>${AR(w.goal)}</b> · ضرباتك: <b>${AR(this.mine())}</b> · ${done?'':days>0?'بقي '+NUM(days,N_DAYS):'ينتهي اليوم'}</small>
+   ${done&&w.rw?`<p class="wk-rw">${em('gem_stone')} المكافأة: ${esc(w.rw)}</p>`:(!done&&w.rw?`<p class="wk-rw">${em('gem_stone')} المكافأة عند هزيمته: ${esc(w.rw)}</p>`:'')}</div>`}
   return`<div class="wk-card${done?' done':''} rise"><h3>${em(done?'trophy':'flexed_biceps')} ${esc(w.t||'تحدّي الفصل الأسبوعي')}</h3><div class="wk-bar" role="img" aria-label="تقدّم الفصل ${AR(pct)}٪"><i style="width:${pct}%"></i></div>
    <small>${done?'حقّق فصلكم الهدف! ':''}<b>${AR(w.tot)}</b> من <b>${AR(w.goal)}</b> إجابة صحيحة من فصلكم · مساهمتك: <b>${AR(this.mine())}</b> · ${days>0?'بقي '+NUM(days,N_DAYS):'ينتهي اليوم'}</small></div>`},
  paint(){const b=$('#wkBox');if(b)b.innerHTML=this.card()}};
@@ -6041,7 +6142,7 @@ const Dash={
  now(){return Date.now()+(this.S.skew||0)},
  scopeLabel(){return this.S.scope==='all'?'كل الفصول':this.S.scope},
  /* one student of the board: with a result code, or just registered (nothing sent yet) */
- mkRow(st){const x=st.code?Code.parse(st.code):null,base={k:st.aid,aid:st.aid,cls:st.cls,phone:st.phone,cv:st.cv||0,det:!!st.det,seen:st.seen||0,w:st.w||''};
+ mkRow(st){const x=st.code?Code.parse(st.code):null,base={k:st.aid,aid:st.aid,cls:st.cls,phone:st.phone,cv:st.cv||0,det:!!st.det,seen:st.seen||0,w:st.w||'',wd:st.wd||0,lw:st.lw||0};
   if(!x){const T=this.planetTabs(st.cls).length;
    return Object.assign({},base,{name:st.name,empty:true,t:0,pts:0,max:this.withCfg(st.cls,()=>Score.max()),stars:0,smax:Score.starsMax(),done:0,total:T,n:0,c:0,bd:0,dc:0,won:0,mins:0,inc:1,tp:[],bp:0,bs:0,code:'',spct:0,acc:0,rk:0,tps:TP_ORDER.map(k=>({k,n:0,c:0,a:0})),last:st.seen||0,weak:[]})}
   const tps=x.tp.map((t,i)=>({k:TP_ORDER[i],n:t[0],c:t[1],a:pc(t[1],t[0])}));
@@ -6529,6 +6630,8 @@ const Dash={
    <div class="dh-set"><b>تحدٍّ جديد</b><div class="dh-cr"><label for="dhWt">العنوان</label><input class="inp" id="dhWt" maxlength="60" value="تحدّي الفصل الأسبوعي"></div>
     <div class="dh-cr"><label for="dhWg">الهدف (إجابة صحيحة)</label><input class="inp" id="dhWg" type="number" min="10" max="50000" value="300" style="max-width:8rem"><label for="dhWd">المدة</label><select class="inp dh-sel" id="dhWd"><option value="3">٣ أيام</option><option value="5">٥ أيام</option><option value="7" selected>أسبوع</option><option value="14">أسبوعان</option></select></div>
     <div class="dh-lk">${S.classes.map(c=>`<label class="dh-ck"><input type="checkbox" data-wc="${esc(c)}" checked> ${esc(c)}</label>`).join('')}</div>
+    <div class="dh-cr"><label for="dhWsh">الشكل</label><select class="inp dh-sel" id="dhWsh"><option value="">تحدٍّ عادي (شريط تقدّم)</option><option value="alien_monster">وحش الأخطاء: تُنزل إجاباتكم حياته</option><option value="robot">الروبوت المتمرّد: تُنزل إجاباتكم حياته</option></select></div>
+    <div class="dh-cr"><label for="dhWn">اسم الوحش</label><input class="inp" id="dhWn" maxlength="30" value="وحش الأخطاء"><label for="dhWr">المكافأة</label><input class="inp" id="dhWr" maxlength="80" placeholder="مثال: ١٠ دقائق لعب حر"></div>
     <small>تشمل كل الفصول المحدَّدة. بدء تحدٍّ جديد يلغي السابق.</small>
     <div class="row"><button class="btn go sm" id="dhWs" type="button">ابدأ التحدّي</button><button class="btn red sm" id="dhWe" type="button" hidden>أنهِ التحدّي الحالي</button></div></div>
    <p class="dh-msg" id="dhWm" role="status"></p><div class="row"><button class="btn ghost sm" id="dhWx" type="button">إغلاق</button></div>`,m=>{
@@ -6537,11 +6640,11 @@ const Dash={
     if(!r.ok){b.innerHTML='';msg(this.err(r));return}
     if(!r.wk){b.innerHTML='<p class="dh-sub">لا يوجد تحدٍّ جارٍ الآن.</p>';$('#dhWe',m).hidden=true;return}
     const w=r.wk,pct=Math.min(100,Math.round(r.tot/w.goal*100)),days=Math.ceil((w.end-Date.now())/86400000);$('#dhWe',m).hidden=false;
-    b.innerHTML=`<div class="dh-card"><h3>${esc(w.t)}</h3><div class="wk-bar" style="background:#0004"><i style="width:${pct}%"></i></div><p class="dh-sub"><b>${AR(r.tot)}</b> من <b>${AR(w.goal)}</b> (${AR(pct)}٪) · مشاركون: ${AR(r.parts)} · ${days>0?'بقي '+NUM(days,N_DAYS):'انتهت المدة'}${w.cls&&w.cls.length?' · الفصول: '+esc(w.cls.join('، ')):' · كل الفصول'}</p>
+    b.innerHTML=`<div class="dh-card"><h3>${esc(w.t)}${w.boss?' · '+esc(w.boss.n):''}</h3><div class="wk-bar" style="background:#0004"><i style="width:${pct}%"></i></div><p class="dh-sub"><b>${AR(r.tot)}</b> من <b>${AR(w.goal)}</b> (${AR(pct)}٪) · مشاركون: ${AR(r.parts)} · ${days>0?'بقي '+NUM(days,N_DAYS):'انتهت المدة'}${w.cls&&w.cls.length?' · الفصول: '+esc(w.cls.join('، ')):' · كل الفصول'}</p>
      ${r.top.length?`<p class="dh-sub">الأكثر مساهمة:</p><div class="dh-chips">${r.top.map((x,i)=>`<span class="dh-chip on">${i===0?em('crown'):''} ${esc(x.n)} <small>${esc(x.c)} · ${AR(x.v)}</small></span>`).join('')}</div>`:''}</div>`};
    $('#dhWx',m).onclick=()=>this.modal('');
    const post=async wk=>{msg('جارٍ الحفظ…');const r=await Online.api('config',{cfg:{wk}},S.key);if(!r.ok){msg(this.err(r));return false}S.cfg=r.cfg;msg(wk.on?'بدأ التحدّي ✓ ويصل إلى الطلاب خلال دقيقة تقريبًا.':'أُنهي التحدّي.');load();return true};
-   $('#dhWs',m).onclick=()=>{const cls=$$('[data-wc]',m).filter(x=>x.checked).map(x=>x.dataset.wc);if(!cls.length){msg('اختر فصلًا واحدًا على الأقل.');return}post({on:true,t:$('#dhWt',m).value,goal:+$('#dhWg',m).value||300,days:+$('#dhWd',m).value||7,cls:cls.length===S.classes.length?[]:cls})};
+   $('#dhWs',m).onclick=()=>{const cls=$$('[data-wc]',m).filter(x=>x.checked).map(x=>x.dataset.wc);if(!cls.length){msg('اختر فصلًا واحدًا على الأقل.');return}post({on:true,t:$('#dhWt',m).value,goal:+$('#dhWg',m).value||300,days:+$('#dhWd',m).value||7,cls:cls.length===S.classes.length?[]:cls,boss:$("#dhWsh",m).value?{k:$("#dhWsh",m).value,n:$('#dhWn',m).value}:null,rw:$('#dhWr',m).value})};
    $('#dhWe',m).onclick=()=>post({on:false});
    load()})},
 
@@ -7352,7 +7455,7 @@ const HBImg={
     x.fillStyle=s.tx;x.font=this.LF(110);x.fillText(AR(r.i),s.cx,top+118);x.font=this.BF(38);this.fit(x,r.v||'',this.BF,38,pw-30,20);x.fillText(r.v||'',s.cx,top+s.h-34);
     const ny=top-18;x.fillStyle='#fff';this.fit(x,r.n,this.NF,46,pw+60,24);x.fillText(r.n,s.cx,ny);
     let ay=ny-(r.s?146:112);if(r.s){x.fillStyle=T.soft;this.fit(x,r.s,this.NF,30,pw+40,18);x.fillText(r.s,s.cx,ny-52)}
-    x.fillStyle=`hsl(${this.hue(r.n)} 70% 55%)`;x.beginPath();x.arc(s.cx,ay,50,0,7);x.fill();x.strokeStyle=s.c[0];x.lineWidth=6;x.stroke();
+    x.fillStyle=`hsl(${this.hue(r.n)} 70% 55%)`;x.beginPath();x.arc(s.cx,ay,50,0,7);x.fill();x.strokeStyle=r.fc||s.c[0];x.lineWidth=6;x.stroke();
     x.fillStyle='#fff';x.font=this.NF(58);x.fillText(r.a||String(r.n).trim().charAt(0)||'؟',s.cx,ay+20);
     if(r.i===1){x.fillStyle=T.gold;x.beginPath();const cy=ay-62;x.moveTo(s.cx-34,cy+24);x.lineTo(s.cx-40,cy-6);x.lineTo(s.cx-18,cy+8);x.lineTo(s.cx,cy-18);x.lineTo(s.cx+18,cy+8);x.lineTo(s.cx+40,cy-6);x.lineTo(s.cx+34,cy+24);x.closePath();x.fill()}});
    y+=podH}
@@ -7374,7 +7477,62 @@ const HBImg={
   x.fillStyle=T.ink;this.fit(x,o.foot||'',this.NF,34,W-220,20);x.fillText(o.foot||'',W/2,H-96);
   x.fillStyle=T.soft;x.font=this.NF(28);x.fillText('مغامرة النحو والإعراب',W/2,H-56);
   return cv},
+ /* the weekly report card for a student's family (portrait). o: {title, sub, name, line, tiles:[{k,v}], bar:{k,v(0..100)}, msg, foot} */
+ wrap(x,t,F,z,maxW){x.font=F(z);const out=[];let cur='';String(t||'').split(/\s+/).filter(Boolean).forEach(w=>{const n=cur?cur+' '+w:w;if(x.measureText(n).width>maxW&&cur){out.push(cur);cur=w}else cur=n});if(cur)out.push(cur);return out},
+ async card(o){await Cert.fonts();
+  const W=1080,T=this.T,tiles=o.tiles||[],tr=Math.ceil(tiles.length/2),cv=document.createElement('canvas'),x=cv.getContext('2d');x.direction='rtl';
+  const probe=document.createElement('canvas').getContext('2d');probe.direction='rtl';const ml=this.wrap(probe,o.msg||'',this.NF,38,W-260);
+  const H=590+tr*180+(o.bar?150:0)+(ml.length?ml.length*58+110:0)+190;cv.width=W;cv.height=H;x.textBaseline='alphabetic';x.textAlign='center';
+  let g=x.createLinearGradient(0,0,W*.4,H);g.addColorStop(0,T.bg[0]);g.addColorStop(1,T.bg[1]);x.fillStyle=g;x.fillRect(0,0,W,H);
+  let sd=11;const rnd=()=>{sd=(sd*9301+49297)%233280;return sd/233280};x.fillStyle='rgba(255,255,255,.5)';for(let i=0;i<80;i++){x.globalAlpha=.15+rnd()*.5;x.beginPath();x.arc(rnd()*W,rnd()*H,rnd()*2.2+.4,0,7);x.fill()}x.globalAlpha=1;
+  const gl=x.createRadialGradient(W/2,300,20,W/2,300,480);gl.addColorStop(0,'rgba(255,212,59,.2)');gl.addColorStop(1,'rgba(255,212,59,0)');x.fillStyle=gl;x.fillRect(0,0,W,700);
+  x.strokeStyle=T.gold;x.lineWidth=6;this.rr(x,22,22,W-44,H-44,34);x.stroke();x.strokeStyle=T.line;x.lineWidth=2;this.rr(x,40,40,W-80,H-80,26);x.stroke();
+  x.fillStyle=T.gold;x.shadowColor='rgba(0,0,0,.45)';x.shadowBlur=14;this.fit(x,o.title||'تقرير الأسبوع',this.LF,84,W-200,40);x.fillText(o.title||'تقرير الأسبوع',W/2,150);x.shadowBlur=0;
+  x.fillStyle=T.ink;this.fit(x,o.sub||'',this.NF,38,W-200,22);x.fillText(o.sub||'',W/2,208);
+  x.fillStyle=`hsl(${this.hue(o.name)} 70% 55%)`;x.beginPath();x.arc(W/2,330,64,0,7);x.fill();x.strokeStyle=T.gold;x.lineWidth=6;x.stroke();
+  x.fillStyle='#fff';x.font=this.NF(72);x.fillText(String(o.name||'؟').trim().charAt(0)||'؟',W/2,355);
+  x.fillStyle='#fff';this.fit(x,o.name||'',this.NF,70,W-200,34);x.fillText(o.name||'',W/2,456);
+  x.fillStyle=T.soft;this.fit(x,o.line||'',this.NF,36,W-200,20);x.fillText(o.line||'',W/2,508);
+  let y=560;
+  tiles.forEach((t,k)=>{const col=k%2,row=Math.floor(k/2),X=col?70:W/2+15,Y=y+row*180,w=W/2-85;
+   x.fillStyle=T.card;this.rr(x,X,Y,w,152,24);x.fill();x.strokeStyle=T.line;x.lineWidth=2;x.stroke();
+   x.fillStyle=T.soft;this.fit(x,t.k,this.NF,30,w-30,18);x.fillText(t.k,X+w/2,Y+46);
+   x.fillStyle=t.hot?'#7CFFB2':T.gold;this.fit(x,t.v,this.LF,66,w-30,30);x.fillText(t.v,X+w/2,Y+122)});
+  y+=tr*180+10;
+  if(o.bar){x.fillStyle=T.soft;x.font=this.NF(32);x.textAlign='right';x.fillText(o.bar.k,W-100,y+30);x.textAlign='left';x.fillStyle=T.gold;x.font=this.BF(34);x.fillText(AR(Math.round(o.bar.v))+'٪',100,y+32);x.textAlign='center';
+   x.fillStyle='rgba(255,255,255,.14)';this.rr(x,100,y+52,W-200,24,12);x.fill();const bw=Math.max(14,(W-200)*Math.min(100,Math.max(0,o.bar.v))/100);x.fillStyle=T.gold;this.rr(x,W-100-bw,y+52,bw,24,12);x.fill();y+=150}
+  if(ml.length){const bh=ml.length*58+60;x.fillStyle='rgba(255,255,255,.1)';this.rr(x,80,y,W-160,bh,26);x.fill();x.strokeStyle=T.line;x.lineWidth=2;x.stroke();
+   x.fillStyle='#fff';x.font=this.NF(38);ml.forEach((l,i)=>x.fillText(l,W/2,y+62+i*58));y+=bh+50}
+  x.strokeStyle=T.line;x.lineWidth=2;x.beginPath();x.moveTo(140,H-150);x.lineTo(W-140,H-150);x.stroke();
+  x.fillStyle=T.ink;this.fit(x,o.foot||'',this.NF,34,W-220,20);x.fillText(o.foot||'',W/2,H-96);
+  x.fillStyle=T.soft;x.font=this.NF(28);x.fillText('مغامرة النحو والإعراب',W/2,H-56);
+  return cv},
  async save(cv,fn){const blob=await Cert.blob(cv);if(!blob)return'fail';try{const u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=fn;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);return'saved'}catch(e){return'fail'}}};
+
+/* ===== the weekly report card for the family (the student's own, and the teacher's for every student) ===== */
+const WCard={
+ wd:null,lw:null,
+ set(r){if(r&&r.wd!==undefined){this.wd=r.wd;this.lw=r.lw||0}},
+ id(now){return Math.floor((Math.floor(((now||Date.now())+3*36e5)/864e5)-3)/7)},
+ /* the school week: Sunday → Thursday, on the Riyadh/Cairo clock */
+ range(now){const f=(this.id(now)*7+3)*864e5-3*36e5,fmt=t=>new Date(t+3*36e5).toLocaleDateString('ar-EG',{day:'numeric',month:'long',timeZone:'UTC'});return'من '+fmt(f)+' إلى '+fmt(f+4*864e5)},
+ foot(){let d={};try{d=Cert.cfg().d||{}}catch(e){}return[d.teacher||'',d.school||''].filter(Boolean).join('  |  ')||'مغامرة النحو والإعراب'},
+ /* the sentence for the family, from this week and last week */
+ msg(name,wd,lw,note){const fn=String(name||'').trim().split(' ')[0]||'الطالب';let m;
+  if(wd==null)m=`هذه صورة من تقدّم ${fn} في رحلة النحو والإعراب. نشكر متابعتكم ودعمكم.`;
+  else if(wd>0&&wd>lw&&lw>0)m=`تقدّم ${fn} هذا الأسبوع بمقدار ${AR(wd)} نقطة، وهو أفضل من الأسبوع الماضي (${AR(lw)}). نشكر متابعتكم الكريمة.`;
+  else if(wd>0)m=`كسب ${fn} ${AR(wd)} نقطة هذا الأسبوع. نأمل أن يواصل التقدّم، وشكرًا لمتابعتكم.`;
+  else m=`لم يسجّل ${fn} تقدّمًا هذا الأسبوع. نرجو تشجيعه على المذاكرة ١٥ دقيقة يوميًا في التطبيق، وشكرًا لتعاونكم.`;
+  return m+(note?' '+note:'')},
+ /* o: {name, cls, rk, wd, lw, stars, smax, spct, acc, done, total, n, note} */
+ spec(o){const hasW=o.wd!=null;
+  return{title:'تقرير الأسبوع',sub:this.range(),name:o.name,line:[o.cls,RANKS[Math.max(0,Math.min(RANKS.length-1,o.rk|0))].n].filter(Boolean).join(' · '),
+   tiles:[{k:'نقاط هذا الأسبوع',v:hasW?'+'+AR(o.wd):'—',hot:hasW&&o.wd>0},{k:'نقاط الأسبوع الماضي',v:hasW?'+'+AR(o.lw||0):'—'},{k:'النجوم',v:AR(o.stars)+' من '+AR(o.smax)},{k:'دقّة الإجابات',v:AR(o.acc)+'٪'},{k:'الكواكب المكتملة',v:AR(o.done)+' من '+AR(o.total)},{k:'الأسئلة المُجابة',v:AR(o.n)}],
+   bar:{k:'الدرجة الكلية',v:o.spct},msg:this.msg(o.name,hasW?o.wd:null,o.lw||0,o.note),foot:this.foot()}},
+ async save(o,fn){const cv=await HBImg.card(this.spec(o));return HBImg.save(cv,fn)},
+ /* the student's own card */
+ mineData(){const R=REP(),a=(typeof Online!=='undefined'&&Online.acct())||{};return{name:R.name,cls:a.cls||'',rk:Rank.at(R.pts,R.max),wd:this.wd,lw:this.lw,stars:R.stars,smax:R.smax,spct:R.spct,acc:R.acc,done:R.done,total:R.total,n:R.n}},
+ async saveMine(){toast('جارٍ رسم بطاقتك…');const r=await this.save(this.mineData(),'maf3ool-bihi-weekly-card.png');toast(r==='saved'?'حُفظت بطاقتك الأسبوعية ✓ شاركها مع أهلك':'تعذّر حفظ البطاقة.')}};
 
 /* ===== «لوحات الشرف» (teacher dashboard): every class's board with the students' activity, the best-class board (classes compete as teams),
    the board of all students across all classes, and the full management of the three. Each can be saved as a picture. ===== */
@@ -7387,7 +7545,7 @@ Object.assign(Dash,{
  hbAgo(ms){const now=this.now();if(!ms)return'لم يدخل بعد';const d=now-ms;if(d<3600e3)return'الآن تقريبًا';if(d<864e5)return'اليوم';if(d<2*864e5)return'أمس';return'منذ '+AR(Math.floor(d/864e5))+' يومًا'},
  hbOpen(tab,sel){const S=this.S,H=this.HB=this.HB||{tab:'cls',cls:null,m:{},rows:null,bs:{},team:{},all:{}};
   if(tab)H.tab=tab;if(sel)H.cls=sel;if(!H.cls||!S.classes.includes(H.cls))H.cls=S.scope&&S.scope!=='all'&&S.classes.includes(S.scope)?S.scope:S.classes[0];
-  const TABS4=[['cls','لوحات الفصول'],['team','أفضل فصل'],['all','كل الفصول'],['mng','الإدارة']];
+  const TABS4=[['cls','لوحات الفصول'],['team','أفضل فصل'],['all','كل الفصول'],['wk','الأسبوع'],['mu','المتحف'],['mng','الإدارة']];
   this.modal(`<h3>${em('trophy')} لوحات الشرف</h3><p class="dh-sub">لوحة لكل فصل، ولوحة «أفضل فصل» لتنافس الفصول معًا، ولوحة لكل الطلاب على مستوى الفصول. تُحسب تلقائيًا من نتائج الطلاب، ويمكنك حفظ أي لوحة صورةً ونشرها.</p>
    <div class="hb-tabs" role="tablist" aria-label="اللوحات">${TABS4.map(([k,t])=>`<button class="btn ${H.tab===k?'gold':'ghost'} sm" type="button" role="tab" aria-selected="${H.tab===k}" data-hbt="${k}">${t}</button>`).join('')}</div>
    <div id="hbBody"><p class="dh-sub">جارٍ التحميل…</p></div><p class="dh-msg" id="hbMsg" role="status"></p><div class="row"><button class="btn ghost sm" id="hbCl" type="button">إغلاق</button></div>`,m=>{
@@ -7399,7 +7557,7 @@ Object.assign(Dash,{
     sel=(id,o,v)=>`<select id="${id}" class="inp dh-sel">${o.map(([k,t])=>`<option value="${k}"${v===k?' selected':''}>${t}</option>`).join('')}</select>`,
     r1=v=>Math.round(v*10)/10,
     tag=on=>`<span class="cf-st ${on?'':'none'}">${on?'ظاهرة للطلاب':'مغلقة عن الطلاب'}</span>`;
-   const loadRows=async()=>{const j=await Online.api('board?cls=all',undefined,S.key);if(!m.isConnected)return false;if(!j.ok){msg(this.err(j));return false}S.cfg=j.cfg||S.cfg;H.rows=(j.students||[]).map(s=>{try{return this.mkRow(s)}catch(e){return null}}).filter(Boolean);H.bs=j.bs||{};return true};
+   const loadRows=async()=>{const j=await Online.api('board?cls=all',undefined,S.key);if(!m.isConnected)return false;if(!j.ok){msg(this.err(j));return false}S.cfg=j.cfg||S.cfg;H.wkinfo=j.wk||null;H.rows=(j.students||[]).map(s=>{try{return this.mkRow(s)}catch(e){return null}}).filter(Boolean);H.bs=j.bs||{};return true};
    /* the choice shown (a method, or the running season) */
    const mode=(k,def)=>H.m[k]||(season()?'season':def);
    const unit=(by,v,sea,team)=>sea?'+'+AR(r1(v))+' نقطة':by==='pts'||by==='tot'?AR(Math.round(v))+' نقطة':by==='stars'?AR(r1(v))+' نجمة':AR(r1(v))+'٪';
@@ -7442,7 +7600,7 @@ Object.assign(Dash,{
     $('#hbTg',m).onclick=async()=>{if(await post({hb:{team:{on:!on}}},on?'أُغلقت لوحة أفضل فصل ✓':'ظهرت لوحة أفضل فصل للطلاب ✓'))paintTeam()}};
    /* ---- 3. all students of all classes ---- */
    const allSpec=(r,names)=>{const sea=r.mode==='season',L=r.list.slice(0,20),mx=Math.max(1,...L.map(x=>x.v));
-    return{title:r.title||'أبطال المدرسة',sub:`كل الفصول · ${sea?r.season.t:(this.HBM.all.find(x=>x[0]===r.by)||[])[1]||''}`,motto:r.motto||'',foot:foot(),rows:L.map(x=>({i:x.i,n:this.hbName(x.n,names),s:x.c,v:unit(r.by,x.v,sea),bar:x.v}))}};
+    return{title:r.title||'أبطال المدرسة',sub:`كل الفصول · ${sea?r.season.t:(this.HBM.all.find(x=>x[0]===r.by)||[])[1]||''}`,motto:r.motto||'',foot:foot(),rows:L.map(x=>({i:x.i,n:this.hbName(x.n,names),s:x.c+(x.et&&Coll.label(x.et)?' · '+Coll.label(x.et):''),fc:Coll.frame(x.ef)?Coll.frame(x.ef).c[0]:'',v:unit(r.by,x.v,sea),bar:x.v}))}};
    const paintAll=async()=>{body().innerHTML='<p class="dh-sub">جارٍ الحساب…</p>';const k=mode('all',hb().all.by),r=await Online.api('rank',Object.assign({t:1,view:'all'},k==='season'?{mode:'season'}:{mode:'all',by:k}),S.key);if(!m.isConnected)return;if(!r.ok){msg(this.err(r));return}H.all=r;
     const on=hb().all.on,M=['🥇','🥈','🥉'],hide=new Set(g().boardHide||[]),opts=this.HBM.all.concat(season()?[['season',season().t+' (الموسم الجاري)']]:[]),sea=r.mode==='season';
     body().innerHTML=`<div class="dh-set"><b>${em('world_map')} كل الفصول ${tag(on)}</b><small>كل الطلاب على مستوى جميع الفصول في ترتيب واحد. ${on?`يرى الطالب أفضل ${AR(hb().all.top)} ومركزه.`:'مغلقة؛ ما يلي معاينة لك.'}</small>
@@ -7452,6 +7610,53 @@ Object.assign(Dash,{
     $('#hbAm',m).onchange=e=>{H.m.all=e.target.value;paintAll()};
     $('#hbDl',m).onclick=async()=>{msg('جارٍ رسم اللوحة…');const x=await HBImg.draw(allSpec(r,hb().all.names)),q=await HBImg.save(x,'maf3ool-bihi-honor-all-classes.png');msg(q==='saved'?'حُفظت اللوحة صورةً ✓ (الأسماء كما ضبطتها للطلاب).':'تعذّر الحفظ.')};
     $('#hbTg',m).onclick=async()=>{if(await post({hb:{all:{on:!on}}},on?'أُغلقت لوحة كل الفصول ✓':'ظهرت لوحة كل الفصول للطلاب ✓'))paintAll()}};
+
+   /* ---- 5. the week: the stars of the week (a picture to post) and a report card for every student's family ---- */
+   const wkRows=()=>H.rows.filter(r=>!r.empty),clsEnr=c=>H.rows.filter(r=>r.cls===c).length,WB=[['imp','الأكثر تقدّمًا هذا الأسبوع'],['cls','أنشط فصل هذا الأسبوع'],['jmp','قفزة عن الأسبوع الماضي']];
+   const wkList=k=>{const nm=H.wn||'first',rows=wkRows();
+    if(k==='cls'){const L=S.classes.map(c=>{const m=H.rows.filter(r=>r.cls===c),act=m.filter(r=>r.wd>0).length,sum=m.reduce((t,r)=>t+r.wd,0);return{n:c,s:`${AR(act)} من ${AR(m.length)} طالب نشطوا`,x:m.length?sum/m.length:0,raw:sum}}).filter(x=>x.raw>0).sort((a,b)=>b.x-a.x||b.raw-a.raw);
+     return L.map((x,i)=>({i:i+1,n:x.n,a:String(x.n).trim().split(' ').pop().charAt(0),s:x.s,v:'+'+AR(r1(x.x))+' للطالب',bar:x.x}))}
+    const L=rows.map(r=>({r,v:k==='jmp'?r.wd-r.lw:r.wd})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v||b.r.spct-a.r.spct||a.r.name.localeCompare(b.r.name,'ar')).slice(0,10);
+    return L.map((x,i)=>({i:i+1,n:this.hbName(x.r.name,nm),s:x.r.cls,v:'+'+AR(x.v)+(k==='jmp'?'':' نقطة'),bar:x.v}))};
+   const wkText=(k,L)=>`🌟 نجوم الأسبوع · ${WCard.range()}\n${(WB.find(b=>b[0]===k)||[])[1]}:\n`+L.map(x=>`${['🥇','🥈','🥉'][x.i-1]||AR(x.i)+'.'} ${x.n}${k==='cls'?'':' ('+x.s+')'} ${x.v}`).join('\n')+'\n\nبارك الله في جهودكم 🌙 — مغامرة النحو والإعراب';
+   const paintWk=()=>{const cls=H.cls,k=H.wb||'imp',L=wkList(k),mine=H.rows.filter(r=>r.cls===cls),act=wkRows().filter(r=>r.wd>0).length,note=(()=>{try{return localStorage.getItem('mf_wnote')||''}catch(e){return''}})();
+    body().innerHTML=`<div class="dh-set"><b>${em('star')} نجوم الأسبوع <small>${esc(WCard.range())}</small></b><small>${AR(act)} طالبًا كسبوا نقاطًا هذا الأسبوع (يبدأ الأسبوع الأحد). صورة جاهزة للنشر في مجموعة الفصل.</small>
+      <label for="hbWb">اللوحة</label>${sel('hbWb',WB,k)}<label for="hbWn">الأسماء</label>${sel('hbWn',[['first','الاسم الأول'],['initial','الاسم الأول + حرف العائلة'],['full','الاسم الكامل']],H.wn||'first')}
+      ${L.length?`<div class="dh-sc"><table class="dh-tab"><tr><th>#</th><th>${k==='cls'?'الفصل':'الطالب'}</th><th>${k==='cls'?'المشاركة':'الفصل'}</th><th>القيمة</th></tr>${L.map(x=>`<tr><td>${['🥇','🥈','🥉'][x.i-1]||AR(x.i)}</td><td>${esc(x.n)}</td><td>${esc(x.s)}</td><td>${esc(x.v)}</td></tr>`).join('')}</table></div>`:'<p class="dh-sub">لا نقاط مسجّلة هذا الأسبوع بعد؛ تظهر النجوم مع مذاكرة الطلاب.</p>'}
+      <div class="row"><button class="btn gold sm" id="hbWd" type="button"${L.length?'':' disabled'}>${em('star')} حمّل الصورة</button><button class="btn sky sm" id="hbWc" type="button"${L.length?'':' disabled'}>انسخ نصًا للواتساب</button></div></div>
+     <div class="dh-set"><b>${em('sparkles')} بطاقة الأهل الأسبوعية</b><small>بطاقة لكل طالب بتقدّمه هذا الأسبوع وبرسالة مهذّبة للأسرة، جاهزة للإرسال على واتساب.</small>
+      <label for="hbWm">رسالة إضافية منك للأهل (اختياري، تُضاف لكل البطاقات)</label><input class="inp" id="hbWm" maxlength="120" placeholder="مثال: اختبار الوحدة يوم الأحد القادم" value="${esc(note)}">
+      <div class="hb-chips" role="group" aria-label="الفصل">${S.classes.map(c=>`<button class="btn ${c===cls?'gold':'ghost'} sm" type="button" data-hbc="${esc(c)}">${esc(c)}</button>`).join('')}</div>
+      ${mine.length?`<div class="dh-sc"><table class="dh-tab"><tr><th>الطالب</th><th>هذا الأسبوع</th><th>الدرجة</th><th></th></tr>${mine.map(r=>`<tr><td>${esc(r.name)}</td><td>${r.empty?'—':'+'+AR(r.wd)}</td><td>${r.empty?'—':AR(r.spct)+'٪'}</td><td>${r.empty?'':`<button class="btn ghost sm" type="button" data-wk="${esc(r.k)}">بطاقة</button>`}</td></tr>`).join('')}</table></div>
+      <div class="row"><button class="btn sky sm" id="hbWa" type="button">حمّل بطاقات ${esc(cls)} كلها (صورة لكل طالب)</button></div>`:'<p class="dh-sub">لا طلاب مسجّلون في هذا الفصل.</p>'}</div>`;
+    const info=r=>({name:r.name,cls:r.cls,rk:r.rk,wd:r.wd,lw:r.lw,stars:r.stars,smax:r.smax,spct:r.spct,acc:r.acc,done:r.done,total:r.total,n:r.n,note:($('#hbWm',m)||{}).value||''});
+    const fn=r=>`maf3ool-bihi-weekly-${S.classes.indexOf(r.cls)+1}-${mine.indexOf(r)+1}.png`;
+    $('#hbWb',m).onchange=e=>{H.wb=e.target.value;paintWk()};$('#hbWn',m).onchange=e=>{H.wn=e.target.value;paintWk()};
+    $$('[data-hbc]',m).forEach(b=>b.onclick=()=>{H.cls=b.dataset.hbc;paintWk()});
+    $('#hbWm',m).oninput=e=>{try{localStorage.setItem('mf_wnote',e.target.value)}catch(x){}};
+    $('#hbWd',m).onclick=async()=>{msg('جارٍ رسم اللوحة…');const x=await HBImg.draw({title:'نجوم الأسبوع',sub:WCard.range()+' · '+(WB.find(b=>b[0]===k)||[])[1],motto:'بارك الله في جهودكم',foot:foot(),rows:L}),q=await HBImg.save(x,'maf3ool-bihi-stars-of-week.png');msg(q==='saved'?'حُفظت الصورة ✓':'تعذّر الحفظ.')};
+    $('#hbWc',m).onclick=async()=>{const t=wkText(k,L);let okc=false;try{await navigator.clipboard.writeText(t);okc=true}catch(e){}if(!okc){try{const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();okc=document.execCommand('copy');ta.remove()}catch(e){}}msg(okc?'نُسخ النص ✓ الصقه في واتساب.':'تعذّر النسخ؛ حدّد النص يدويًا.')};
+    $$('[data-wk]',m).forEach(b=>b.onclick=async()=>{const r=mine.find(x=>x.k===b.dataset.wk);if(!r)return;msg('جارٍ رسم البطاقة…');const q=await WCard.save(info(r),fn(r));msg(q==='saved'?'حُفظت بطاقة '+r.name+' ✓':'تعذّر الحفظ.')});
+    const ba=$('#hbWa',m);if(ba)ba.onclick=async()=>{let n=0;for(const r of mine.filter(x=>!x.empty)){msg('جارٍ رسم بطاقة '+r.name+'…');await WCard.save(info(r),fn(r));n++;await new Promise(z=>setTimeout(z,450))}msg(n?`حُفظت ${AR(n)} بطاقة ✓ (قد يطلب المتصفح السماح بتنزيل عدة ملفات).`:'لا نتائج في هذا الفصل بعد.')}};
+
+   /* ---- 6. the museum of heroes: every finished season ---- */
+   const paintMu=()=>{const hall=g().boardHall||[],M=['🥇','🥈','🥉'],dt=t=>t?new Date(t).toLocaleDateString('ar-EG',{day:'numeric',month:'long'}):'',nm=H.mn||'first';
+    body().innerHTML=`<div class="dh-set"><b>${em('crown')} متحف الأبطال</b><small>يحفظ كل موسم تُنهيه: أبطال المدرسة وأفضل الفصول وأبطال كل فصل. يراه الطلاب في قاعة الأبطال (حسب اللوحات المفتوحة لهم). أنهِ الموسم من «الإدارة ← إعدادات متقدمة».</small>
+      <label for="hbMn2">شكل الأسماء في الصور</label>${sel('hbMn2',[['first','الاسم الأول'],['initial','الاسم الأول + حرف العائلة'],['full','الاسم الكامل']],nm)}</div>
+     ${hall.length?hall.map(s=>{const tc=Object.keys(s.top||{});return`<div class="dh-set"><b>${esc(s.t)} <small>${esc(dt(s.from))} – ${esc(dt(s.to))}</small></b>
+      ${(s.all||[]).length?`<small>أبطال المدرسة: ${s.all.map((x,i)=>`${M[i]||AR(i+1)+'.'} ${esc(x.n)} (${esc(x.c)}) +${AR(x.sp)}`).join(' · ')}</small>`:''}
+      ${(s.team||[]).length?`<small>أفضل الفصول: ${s.team.map((x,i)=>`${M[i]} ${esc(x.c)}`).join(' · ')}</small>`:''}
+      ${tc.length?`<small>أبطال الفصول: ${tc.map(c=>`${esc(c)}: ${s.top[c].map(x=>esc(this.hbName(x.n,nm))).join('، ')}`).join(' — ')}</small>`:''}
+      ${!(s.all||[]).length&&!(s.team||[]).length?'<small>(موسم قديم: محفوظ فيه أبطال الفصول فقط)</small>':''}
+      <div class="row">${(s.all||[]).length?`<button class="btn gold sm" type="button" data-mi="${esc(s.id)}|all">صورة أبطال المدرسة</button>`:''}${(s.team||[]).length?`<button class="btn gold sm" type="button" data-mi="${esc(s.id)}|team">صورة أفضل الفصول</button>`:''}${tc.length?`<button class="btn sky sm" type="button" data-mi="${esc(s.id)}|cls">صورة لكل فصل</button>`:''}<button class="btn red sm" type="button" data-mh="${esc(s.id)}">احذف الموسم</button></div></div>`}).join(''):'<p class="dh-sub">لا مواسم منتهية بعد. عند إنهاء أول موسم يُحفظ هنا تلقائيًا.</p>'}`;
+    $('#hbMn2',m).onchange=e=>{H.mn=e.target.value;paintMu()};
+    const save=async(sp,fn)=>{const cv=await HBImg.draw(sp);return HBImg.save(cv,fn)};
+    $$('[data-mi]',m).forEach(b=>b.onclick=async()=>{const [id,k]=b.dataset.mi.split('|'),s=hall.find(x=>String(x.id)===id);if(!s)return;msg('جارٍ رسم اللوحة…');const sn=hall.indexOf(s)+1;let r;
+     if(k==='all')r=await save({title:'أبطال المدرسة',sub:s.t,motto:g().hb&&g().hb.all&&g().hb.all.motto||'',foot:foot(),rows:s.all.map((x,i)=>({i:i+1,n:this.hbName(x.n,nm),s:x.c,v:'+'+AR(Math.round(x.sp))+' نقطة',bar:x.sp}))},`maf3ool-bihi-museum-${sn}-school.png`);
+     else if(k==='team')r=await save({title:'أفضل الفصول',sub:s.t,motto:g().hb&&g().hb.team&&g().hb.team.motto||'',foot:foot(),rows:s.team.map((x,i)=>({i:i+1,n:x.c,a:String(x.c).trim().split(' ').pop().charAt(0),s:`${AR(x.n)} من ${AR(x.enr)} طالب`,v:'+'+AR(x.v)+' للطالب',bar:x.v}))},`maf3ool-bihi-museum-${sn}-classes.png`);
+     else{let n=0;for(const c of Object.keys(s.top||{})){await save({title:'أبطال '+c,sub:s.t,foot:foot(),rows:s.top[c].map((x,i)=>({i:i+1,n:this.hbName(x.n,nm),v:'+'+AR(Math.round(x.sp))+' نقطة',bar:x.sp}))},`maf3ool-bihi-museum-${sn}-class-${S.classes.indexOf(c)+1}.png`);n++;await new Promise(z=>setTimeout(z,450))}r=n?'saved':'fail'}
+     msg(r==='saved'?'حُفظت الصورة ✓':'تعذّر الحفظ.')});
+    $$('[data-mh]',m).forEach(b=>b.onclick=async()=>{const r=await Online.api('admin',{op:'hallclear',id:b.dataset.mh},S.key);if(!m.isConnected)return;if(!r.ok){msg(this.err(r));return}S.cfg=r.cfg||S.cfg;msg('حُذف الموسم من المتحف ✓');paintMu()})};
    /* ---- 4. management ---- */
    const paintMng=()=>{const h=hb(),G=g(),OPT=[['inherit','يتبع الإعداد العام'],['off','مغلقة'],['top3','أفضل ٣'],['top5','أفضل ٥'],['top10','أفضل ١٠'],['all','كل طلاب الفصل']],st=c=>{const o=(G.byCls||{})[c];return o&&o.board?o.board:'inherit'};
     body().innerHTML=`<div class="dh-set"><b>${em('trophy')} لوحات الفصول</b><small>لكل فصل لوحته (يرى الطالب فصله فقط). اختر ما يظهر في كل فصل، أو دعه يتبع الإعداد العام.</small>
@@ -7481,6 +7686,8 @@ Object.assign(Dash,{
     $('#hbOn3',m).onclick=async()=>{let ok=await post({board:'top10',hb:{team:{on:true},all:{on:true}}},'');for(const c of S.classes){if(((S.cfg.byCls||{})[c]||{}).board==='off')ok=await post({scope:c,boardReset:true},'')&&ok}if(ok){msg('فُعّلت اللوحات الثلاث ✓ وتصل إلى الطلاب خلال دقيقة تقريبًا.');paintMng()}}};
    const paint=async()=>{$$('[data-hbt]',m).forEach(b=>{const on=b.dataset.hbt===H.tab;b.className='btn '+(on?'gold':'ghost')+' sm';b.setAttribute('aria-selected',String(on))});
     if(H.tab==='mng'){paintMng();return}
+    if(H.tab==='mu'){paintMu();return}
+    if(H.tab==='wk'){if(!H.rows){body().innerHTML='<p class="dh-sub">جارٍ تحميل النتائج…</p>';if(!await loadRows())return}paintWk();return}
     if(H.tab==='cls'){if(!H.rows){body().innerHTML='<p class="dh-sub">جارٍ تحميل النتائج…</p>';if(!await loadRows())return}paintCls();return}
     if(!H.rows&&!await loadRows())return;
     H.tab==='team'?await paintTeam():await paintAll()};
@@ -7647,14 +7854,14 @@ const Online={
   const sg=this.sig();if(!o.force&&sg===this.lastSig)return{ok:true,status:'same'};
   this.busy=1;
   try{try{saveST()}catch(e){}
-   const snap=store.snapshot(),body={aid:a.aid,sk:a.sk,bv:a.bv,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),snap:JSON.stringify(snap),ts:snap.ts||0,code:Code.make(),detail:this.detail(),wk:typeof Week!=='undefined'?Week.report():undefined,crv:CR.v(),cxv:CR.xv(),cr:CR.pend()||undefined};
+   const snap=store.snapshot(),body={aid:a.aid,sk:a.sk,bv:a.bv,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),snap:JSON.stringify(snap),ts:snap.ts||0,code:Code.make(),detail:this.detail(),wk:typeof Week!=='undefined'?Week.report():undefined,eq:typeof Coll!=='undefined'?Coll.eq():undefined,crv:CR.v(),cxv:CR.xv(),cr:CR.pend()||undefined};
    const r=await this.api('sync',body,'',JSON.stringify(body).length<60000);
    if(r.ok){if(r.rst)this.applyReset(r.rst);const a2=this.acct()||a;if(r.rv!==undefined&&a2.bv!==r.rv){a2.bv=r.rv;this.setAcct(a2)}
     if(r.status==='old'&&r.snap){   // another device saved in between: both versions are merged (nothing of either is lost) and the merged one is sent
      try{store.load(store.merge(store.snapshot(),JSON.parse(r.snap)));Prof.rehydrate();toast(em('check_mark_button')+' جمعتُ تقدّمك من جهازك ومن حسابك معًا')}catch(e){}
      this.lastSig='';this.again=1}
     else this.lastSig=sg;
-    this.stat={ok:true,at:Date.now()};if(r.cfg)Ctl.apply(r.cfg);if(r.ce!==undefined&&typeof Cert!=='undefined')Cert.setForced(!!r.ce);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);if(r.wk!==undefined&&typeof Week!=='undefined')Week.set(r.wk);if('cr' in r)CR.take(r.cr);if('cx' in r)CR.takeX(r.cx);
+    this.stat={ok:true,at:Date.now()};if(r.cfg)Ctl.apply(r.cfg);if(r.ce!==undefined&&typeof Cert!=='undefined')Cert.setForced(!!r.ce);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);if(r.wk!==undefined&&typeof Week!=='undefined')Week.set(r.wk);if(typeof WCard!=='undefined')WCard.set(r);if('cr' in r)CR.take(r.cr);if('cx' in r)CR.takeX(r.cx);
     let fin=false;try{fin=Incomplete.list().count===0}catch(e){}
     if(fin&&!a2.fin){a2.fin=1;this.setAcct(a2);toast(em('trophy')+' أكملتَ الرحلة، ووصل تقريرك النهائي إلى معلمك ✓')}
     else if(!a2.first&&!o.quiet){a2.first=1;this.setAcct(a2);toast(em('check_mark_button')+' تقدّمك محفوظ في حسابك ويصل إلى معلمك تلقائيًا')}}
@@ -7667,7 +7874,7 @@ const Online={
  async ping(){if(document.visibilityState!=='visible')return;const a=this.acct();
   if(!a){const r=await this.api('config');if(r.ok&&r.cfg)Ctl.apply(r.cfg);return}
   try{CR.ensure()}catch(e){}
-  const r=await this.api('sync',{aid:a.aid,sk:a.sk,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),wk:typeof Week!=='undefined'?Week.report():undefined,crv:CR.v(),cxv:CR.xv(),cr:CR.pend()||undefined});if(r.ok&&'cr' in r)CR.take(r.cr);if(r.ok&&'cx' in r)CR.takeX(r.cx);if(r.ok&&r.cfg){Ctl.apply(r.cfg);if(r.ce!==undefined&&typeof Cert!=='undefined')Cert.setForced(!!r.ce);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);if(r.wk!==undefined&&typeof Week!=='undefined')Week.set(r.wk);if(r.rst)this.applyReset(r.rst)}else if(r.error==='bad_session'||r.error==='no_account')this.expired()},
+  const r=await this.api('sync',{aid:a.aid,sk:a.sk,cv:(Ctl.cfg&&Ctl.cfg.v)||0,w:this.where(),wk:typeof Week!=='undefined'?Week.report():undefined,eq:typeof Coll!=='undefined'?Coll.eq():undefined,crv:CR.v(),cxv:CR.xv(),cr:CR.pend()||undefined});if(r.ok&&'cr' in r)CR.take(r.cr);if(r.ok&&'cx' in r)CR.takeX(r.cx);if(r.ok&&r.cfg){Ctl.apply(r.cfg);if(r.ce!==undefined&&typeof Cert!=='undefined')Cert.setForced(!!r.ce);if(r.aw&&typeof Awards!=='undefined')Awards.set(r.aw);if(r.wk!==undefined&&typeof Week!=='undefined')Week.set(r.wk);if(typeof WCard!=='undefined')WCard.set(r);if(r.rst)this.applyReset(r.rst)}else if(r.error==='bad_session'||r.error==='no_account')this.expired()},
  /* the teacher reset some parts of this student's progress: apply it once on this device (the same keys as the server's list) */
  RS:{score:['led','pb','dq','ps','gb','fb'],progress:['done','seen','sd','pos','lit','pu'],bonus:['bn','cmb'],daily:['dc','wk','wkh'],badges:['bdg','gift','rk'],stats:['st']},
  applyReset(rst){const a=this.acct();if(!rst||!rst.id||!a||a.rid===rst.id||!Array.isArray(rst.scopes))return false;
@@ -7976,7 +8183,8 @@ const Honor={
  fmt(n){return AR(String(Math.round(n*10)/10).replace('.','٫'))},
  val(r,x){return r.mode==='season'?'+'+this.fmt(x.sp)+' نقطة':r.by==='pts'?this.fmt(x.p)+' نقطة':r.by==='stars'?this.fmt(x.s)+' ★':this.fmt(x.pct)+'٪'},
  hue(n){let h=0;for(const ch of String(n))h=(h*31+ch.charCodeAt(0))%360;return h},
- av(n,c,l){return`<i class="hn-av${c?' '+c:''}" style="--h:${this.hue(n)}" aria-hidden="true">${esc(l||String(n).trim().charAt(0)||'؟')}</i>`},
+ av(n,c,l,x){const f=x&&typeof Coll!=='undefined'?Coll.frame(x.ef):null;return`<i class="hn-av${c?' '+c:''}${f?' fr':''}" style="--h:${this.hue(n)}${f?`;--fa:${f.c[0]};--fb:${f.c[1]}`:''}" aria-hidden="true">${esc(l||String(n).trim().charAt(0)||'؟')}</i>`},
+ ttl(x){const t=x&&x.et&&typeof Coll!=='undefined'?Coll.label(x.et):'';return t?`<em class="hn-tt">${esc(t)}</em>`:''},
  lv(x){try{const r=RANKS[Rank.at(x.p,x.m)];return IMG[r.ic]?`<img class="em hn-lv" src="${IMG[r.ic]}" alt="" title="${esc(r.n)}">`:''}catch(e){return''}},
  aw(x){return x.ic&&IMG[x.ic]?`<img class="em hn-aw" src="${IMG[x.ic]}" alt="" title="${esc(x.at||'')}">`:''},
  async load(force){const a=Online.acct();if(!a||!this.cOn())return null;const k=this.key(),o=this.d[k];
@@ -8002,7 +8210,7 @@ const Honor={
    if(!r||!r.ok||r.off){h.innerHTML=`<button class="hn-card" type="button"><span class="hn-ct">${em('trophy')} لوحة شرف الفصل</span><span class="hn-cs">اضغط لترى ترتيبك بين زملائك</span></button>`;h.firstChild.onclick=()=>Honor.open();return}
    const t3=r.list.filter(x=>x.i<=3).slice(0,3),M=['🥇','🥈','🥉'];
    h.innerHTML=`<button class="hn-card" type="button" aria-label="افتح لوحة الشرف"><span class="hn-ct">${em('trophy')} ${esc(r.title||'قاعة الأبطال')}${r.mode==='season'&&r.season?` <em>${esc(r.season.t)}</em>`:''}</span>
-    <span class="hn-cp">${t3.map(x=>`<span class="hn-cm${x.me?' me':''}"><b>${M[x.i-1]}</b>${this.av(x.n)}<span>${esc(x.n)}</span><small>${this.val(r,x)}</small></span>`).join('')||'<span class="hn-cs">كن أول من يظهر في اللوحة!</span>'}</span>
+    <span class="hn-cp">${t3.map(x=>`<span class="hn-cm${x.me?' me':''}"><b>${M[x.i-1]}</b>${this.av(x.n,'',null,x)}<span>${esc(x.n)}</span><small>${this.val(r,x)}</small></span>`).join('')||'<span class="hn-cs">كن أول من يظهر في اللوحة!</span>'}</span>
     <span class="hn-cs">${r.hidden?'اسمك غير ظاهر في اللوحة':r.pos?`ترتيبك <b>${AR(r.pos)}</b> من ${AR(r.total)} · ${r.pos===1?'أنت في القمة!':r.near?`يفصلك ${this.fmt(r.near.gap)} ${this.unit(r)==='٪'?'٪':this.unit(r)} عن ${esc(r.near.n)}`:''}`:'أكمل بعض الأجزاء لتظهر في الترتيب'}</span></button>`;
    h.firstChild.onclick=()=>Honor.open()})},
  close(){const o=$('#hnHall');if(o){o.remove()}document.body.classList.remove('hn-on');[...document.body.children].forEach(e=>{try{if(e.dataset.hnInert){e.inert=false;delete e.dataset.hnInert}}catch(x){}});try{this.ret&&this.ret.focus()}catch(e){}},
@@ -8018,7 +8226,20 @@ const Honor={
   if(!V.length){B.innerHTML='<p class="hn-wait">أغلق المعلم لوحة الشرف الآن.</p>';this.paintBtn();this.paintMini();return}
   if(!V.includes(this.view))this.view=V[0];
   await (this.view==='team'?this.drawTeam(B,first):this.drawCls(B,first,this.view));
-  if(!$('#hnHall'))return;this.tabs(B,V)},
+  if(!$('#hnHall'))return;this.tabs(B,V);
+  if((Ctl.cfg||{}).mu&&$('.hn-hd',B)&&!$('#hnMu',B)){const w=document.createElement('div');w.className='row hn-mur';w.innerHTML=`<button class="btn ghost sm" type="button" id="hnMu">${em('crown')} متحف الأبطال</button>`;B.appendChild(w);$('#hnMu',w).onclick=()=>{Honor.close();Honor.museum()}}},
+ /* the museum of heroes: every finished season (his class, the best classes and the school's heroes — what the teacher opened) */
+ async museum(){const a=Online.acct();if(!a)return;const d=$('#dlg'),close=()=>{d.hidden=true;d.innerHTML=''},M=['🥇','🥈','🥉'];d.hidden=false;
+  d.innerHTML=`<div class="dlg-card zoom-in hn-mu" role="dialog" aria-modal="true" aria-labelledby="muT"><h2 id="muT">${em('crown')} متحف الأبطال</h2><p class="sub">أسماء من تفوّقوا في كل موسم، تبقى هنا للأبد.</p><div id="muB" class="mu-b"><p class="sub">جارٍ التحميل…</p></div><div class="row dlg-row"><button class="btn ghost" type="button" data-act="x">إغلاق</button></div></div>`;
+  act(d,{x:close});d.onkeydown=e=>{if(e.key==='Escape')close()};setTimeout(()=>{try{$('[data-act=x]',d).focus()}catch(e){}},60);
+  const r=await Online.api('rank',{aid:a.aid,sk:a.sk,view:'museum'}),B=$('#muB',d);if(!B)return;
+  if(!r||!r.ok){B.innerHTML=`<p class="sub">${esc(Online.err(r||{}))}</p>`;return}
+  if(r.off||!r.list.length){B.innerHTML='<p class="sub">لا مواسم منتهية بعد؛ سيمتلئ المتحف بأبطال أول موسم.</p>';return}
+  const dt=t=>t?new Date(t).toLocaleDateString('ar-EG',{day:'numeric',month:'long'}):'';
+  B.innerHTML=r.list.map(s=>`<section class="mu-s"><h3>${em('trophy')} ${esc(s.t)} <small>${esc(dt(s.from))} – ${esc(dt(s.to))}</small></h3>
+   ${s.all.length?`<div class="mu-r"><b>أبطال المدرسة</b><span>${s.all.map((x,i)=>`${M[i]||AR(i+1)+'.'} ${esc(x.n)}${x.c?` <small>${esc(x.c)}</small>`:''} <small>+${AR(x.sp)}</small>`).join(' · ')}</span></div>`:''}
+   ${s.team.length?`<div class="mu-r"><b>أفضل الفصول</b><span>${s.team.map((x,i)=>`${M[i]} ${esc(x.c)}${x.me?' <em>(فصلك)</em>':''}`).join(' · ')}</span></div>`:''}
+   ${s.cls.length?`<div class="mu-r"><b>أبطال فصلك</b><span>${s.cls.map((x,i)=>`${M[i]} ${esc(x.n)} <small>+${AR(x.sp)}</small>`).join(' · ')}</span></div>`:''}</section>`).join('')},
  /* the switch between the boards the teacher opened (only when more than one is open) */
  tabs(B,V){if(V.length<2||!$('.hn-hd',B))return;const t=document.createElement('div');t.className='hn-tg hn-vw';t.setAttribute('role','group');t.setAttribute('aria-label','اللوحة');
   t.innerHTML=V.map(v=>`<button type="button" data-v="${v}" aria-pressed="${this.view===v}">${this.VN[v]}</button>`).join('');B.insertBefore(t,B.firstChild);
@@ -8056,8 +8277,8 @@ const Honor={
   B.innerHTML=`<header class="hn-hd"><span class="hn-cr">${em('trophy','xl')}</span><h2 id="hnT">${esc(r.title||(all?'أبطال المدرسة':'قاعة الأبطال'))}</h2><p class="hn-sub">${esc(all?'كل الفصول':r.cls)} · ${AR(r.total)} ${r.total===1?'طالب':'طلاب'}${r.avg?` · متوسط الفصل ${this.fmt(r.avg)}٪`:''}</p>
     ${(Ctl.cfg||{}).bseason?`<div class="hn-tg hn-ms" role="group" aria-label="نوع الترتيب"><button type="button" data-m="season" aria-pressed="${r.mode==='season'}">${em('fire')} ${esc((Ctl.cfg.bseason.t)||'الموسم')}</button><button type="button" data-m="all" aria-pressed="${r.mode!=='season'}">${em('milky_way')} الإجمالي</button></div>`:''}
     ${r.motto?`<p class="hn-motto">${esc(r.motto)}</p>`:''}</header>
-   ${top3.length?`<div class="hn-pod n${pod.length}">${pod.map(x=>`<div class="hn-p k${x.i}${x.me?' me':''}" style="--d:${x.i===1?3:x.i===2?1:2}">${x.i===1?`<span class="hn-crown">${em('crown')}</span>`:''}${this.av(x.n,'big')}<b class="hn-pn">${esc(x.n)}${x.me?' (أنت)':''}</b>${x.c?`<small class="hn-cl">${esc(x.c)}</small>`:''}<span class="hn-pv">${this.val(r,x)}</span><span class="hn-pi">${this.lv(x)}${this.aw(x)}</span><div class="hn-st"><em>${M[x.i-1]}</em></div></div>`).join('')}</div>`:`<p class="hn-wait">لا توجد نتائج بعد. كن أول من يظهر في اللوحة!</p>`}
-   ${rest.length?`<ol class="hn-l" start="4">${rest.map(x=>`<li class="hn-r${x.me?' me':''}${x.i>r.top&&x.me?' far':''}"><b class="hn-n">${AR(x.i)}</b>${this.av(x.n)}<span class="hn-nm">${esc(x.n)}${x.me?' <em>أنت</em>':''}${this.aw(x)}${x.c?`<small class="hn-cl">${esc(x.c)}</small>`:''}</span>${this.lv(x)}<span class="hn-bar" aria-hidden="true"><i style="width:${Math.max(4,Math.round(x.v/max*100))}%"></i></span><b class="hn-v">${this.val(r,x)}</b></li>`).join('')}</ol>`:''}
+   ${top3.length?`<div class="hn-pod n${pod.length}">${pod.map(x=>`<div class="hn-p k${x.i}${x.me?' me':''}" style="--d:${x.i===1?3:x.i===2?1:2}">${x.i===1?`<span class="hn-crown">${em('crown')}</span>`:''}${this.av(x.n,'big',null,x)}<b class="hn-pn">${esc(x.n)}${x.me?' (أنت)':''}</b>${x.c?`<small class="hn-cl">${esc(x.c)}</small>`:''}<span class="hn-pv">${this.val(r,x)}</span><span class="hn-pi">${this.lv(x)}${this.aw(x)}${this.ttl(x)}</span><div class="hn-st"><em>${M[x.i-1]}</em></div></div>`).join('')}</div>`:`<p class="hn-wait">لا توجد نتائج بعد. كن أول من يظهر في اللوحة!</p>`}
+   ${rest.length?`<ol class="hn-l" start="4">${rest.map(x=>`<li class="hn-r${x.me?' me':''}${x.i>r.top&&x.me?' far':''}"><b class="hn-n">${AR(x.i)}</b>${this.av(x.n,'',null,x)}<span class="hn-nm">${esc(x.n)}${x.me?' <em>أنت</em>':''}${this.aw(x)}${this.ttl(x)}${x.c?`<small class="hn-cl">${esc(x.c)}</small>`:''}</span>${this.lv(x)}<span class="hn-bar" aria-hidden="true"><i style="width:${Math.max(4,Math.round(x.v/max*100))}%"></i></span><b class="hn-v">${this.val(r,x)}</b></li>`).join('')}</ol>`:''}
    ${r.hall&&r.hall.length?`<section class="hn-hall"><h3>${em('crown')} قاعة الأمجاد</h3>${r.hall.map(h=>`<div class="hn-hs"><b>${esc(h.t)}</b><span>${h.top.map((x,i)=>`${M[i]} ${esc(x.n)} <small>${AR(x.sp)}</small>`).join(' · ')}</span></div>`).join('')}</section>`:''}
    <footer class="hn-ft"><div class="hn-me"><span class="hn-pos">${r.pos&&!r.hidden?AR(r.pos):'—'}</span><span class="hn-mt"><b>ترتيبك ${mv}</b><span>${msg}</span></span><button class="btn go sm" type="button" id="hnGo">${r.pos===1?'ابقَ في القمة ←':'ارتقِ بالترتيب ←'}</button></div></footer>`;
   $$('.hn-ms button',B).forEach(b=>b.onclick=()=>{Honor.mode=b.dataset.m;Honor.d={};B.innerHTML='<p class="hn-wait">…</p>';Honor.draw()});
