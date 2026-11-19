@@ -211,8 +211,8 @@ main{max-width:1180px;margin:0 auto}
 
 /* ---------- effects layer ---------- */
 #fx{position:fixed;inset:0;pointer-events:none;z-index:200;overflow:hidden}
-.pt{position:fixed;width:.75rem;height:.75rem;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--c);animation:pt .85s cubic-bezier(.2,.8,.3,1) forwards;font-size:1rem;line-height:1;text-align:center}
-@keyframes pt{from{transform:translate(-50%,-50%) scale(var(--s));opacity:1}to{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy) + 46px)) scale(0);opacity:0}}
+.fxp{position:fixed;width:.75rem;height:.75rem;border-radius:50%;background:var(--c);box-shadow:0 0 10px var(--c);animation:fxp .85s cubic-bezier(.2,.8,.3,1) forwards;font-size:1rem;line-height:1;text-align:center}
+@keyframes fxp{from{transform:translate(-50%,-50%) scale(var(--s));opacity:1}to{transform:translate(calc(-50% + var(--dx)),calc(-50% + var(--dy) + 46px)) scale(0);opacity:0}}
 .fl{position:fixed;font:400 2.2rem/1 var(--f-display);transform:translate(-50%,-50%);white-space:nowrap;text-shadow:0 3px 10px #000a,0 0 18px currentColor;animation:fl 1.2s ease-out forwards}
 .fl.g{color:#86efac}.fl.b{color:#fda4af}
 @keyframes fl{0%{opacity:0;transform:translate(-50%,-20%) scale(.5)}15%{opacity:1;transform:translate(-50%,-60%) scale(1.25)}100%{opacity:0;transform:translate(-50%,-260%) scale(1)}}
@@ -2193,7 +2193,7 @@ const FX={
  /* particles flying out of a point */
  burst(x,y,{n=16,colors=['#ffd43b','#4ade80','#7dd3fc','#f472b6'],spread=120,glyph=''}={}){
   if(RM)n=Math.min(n,5);const L=FX.layer();
-  for(let i=0;i<n;i++){const p=document.createElement('i');p.className='pt';const a=Math.random()*6.283,d=rnd(spread*.45,spread);
+  for(let i=0;i<n;i++){const p=document.createElement('i');p.className='fxp';const a=Math.random()*6.283,d=rnd(spread*.45,spread);
    p.style.cssText=`left:${x}px;top:${y}px;--dx:${Math.cos(a)*d}px;--dy:${Math.sin(a)*d-20}px;--c:${colors[i%colors.length]};--s:${rnd(.6,1.3)}`;
    if(glyph)p.textContent=glyph;p.addEventListener('animationend',()=>p.remove());L.appendChild(p)}},
  /* floating "+10" / "−1" label */
