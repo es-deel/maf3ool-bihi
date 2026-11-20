@@ -4,7 +4,7 @@ const { redis, pipeline, send, body, cfg, eff, same, classRows, rankRows, boardN
    POST {aid, sk, mode:'season'|'all'} → {ok, cls, title, motto, by, mode, season, total, pos, me, near, list[], avg, hall[], hidden}
    POST {aid, sk, view:'team'|'all', mode} → the board of the best class / of every student of every class (only when the teacher turned it on).
    POST {t:1, view:'team'|'all', by?, mode?, min?} with the teacher's token → the same boards in full (every class, every student, whatever their settings), for the dashboard. */
-const eqOf = j => { try { return cleanEq(JSON.parse(j || '{}')); } catch (e) { return { t: '', f: '' }; } };
+const eqOf = (j, g, teacher) => { if (!teacher && g && g.cmp && g.cmp.titles === false) return { t: '', f: '' }; try { return cleanEq(JSON.parse(j || '{}')); } catch (e) { return { t: '', f: '' }; } };
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return send(res, 405, { error: 'method' });
   const b = await body(req), aid = String(b.aid || '').slice(0, 200), view = b.view === 'team' || b.view === 'all' || b.view === 'museum' ? b.view : 'cls';
@@ -15,7 +15,7 @@ module.exports = async (req, res) => {
       else { const [c, sk] = await redis(['HMGET', 'mf:acc:' + aid, 'cls', 'sk']); if (!c || !sk || !same(b.sk || '', sk)) return send(res, 401, { error: 'bad_session' }); cls = c; }
       const g = await cfg(true), h = hbOf(g);
       if (view === 'museum') {   // the museum of heroes: every finished season (the student sees his own class, and the best classes / the school's heroes only if the teacher opened those boards)
-        const c = eff(g, cls), ok = teacher || c.board !== 'off' || h.team.on || h.all.on; if (!ok) return send(res, 200, { ok: true, off: true, view });
+        const c = eff(g, cls), ok = teacher || (c.cmp.museum && (c.board !== 'off' || h.team.on || h.all.on)); if (!ok) return send(res, 200, { ok: true, off: true, view });
         const list = (g.boardHall || []).map(s => ({ id: s.id, t: s.t, from: s.from, to: s.to,
           cls: teacher ? s.top || {} : ((s.top || {})[cls] || []).slice(0, 3).map(x => ({ n: boardName(x.n, c.boardNames), sp: x.sp })),
           team: teacher || h.team.on ? (s.team || []).map(x => Object.assign({}, x, { me: x.c === cls })) : [],
@@ -36,7 +36,7 @@ module.exports = async (req, res) => {
       const hide = new Set(teacher ? [] : g.boardHide || []), R = allBoard(data, by, !!season, base, hide), top = teacher ? 600 : conf.top, pos = R.findIndex(x => x.k === aid) + 1;
       const shown = R.slice(0, top); if (pos > top) shown.push(R[pos - 1]);
       const aw = await pipeline(shown.map(x => ['HMGET', 'mf:acc:' + x.k, teacher ? 'eq' : 'aw', 'eq']));
-      const names = teacher ? 'full' : conf.names, list = shown.map((x, i) => { let ic = '', at = ''; const q = eqOf(aw[i] && aw[i][1]); if (!teacher) try { const a = JSON.parse((aw[i] && aw[i][0]) || '[]')[0]; if (a) { ic = a.ic; at = a.t; } } catch (e) { } return { et: q.t, ef: q.f, i: R.indexOf(x) + 1, n: boardName(x.n, names), c: teacher || conf.cls ? x.c : '', p: x.p, m: x.m, s: x.s, v: x.v, pct: x.pct, sp: x.sp, me: x.k === aid, ic, at, k: teacher ? x.k : undefined }; });
+      const names = teacher ? 'full' : conf.names, list = shown.map((x, i) => { let ic = '', at = ''; const q = eqOf(aw[i] && aw[i][1], g, teacher); if (!teacher) try { const a = JSON.parse((aw[i] && aw[i][0]) || '[]')[0]; if (a) { ic = a.ic; at = a.t; } } catch (e) { } return { et: q.t, ef: q.f, i: R.indexOf(x) + 1, n: boardName(x.n, names), c: teacher || conf.cls ? x.c : '', p: x.p, m: x.m, s: x.s, v: x.v, pct: x.pct, sp: x.sp, me: x.k === aid, ic, at, k: teacher ? x.k : undefined }; });
       const near = pos > 1 ? { n: boardName(R[pos - 2].n, names), gap: Math.max(0.1, Math.ceil((R[pos - 2].v - R[pos - 1].v) * 10) / 10), i: pos - 1 } : null;
       return send(res, 200, { ok: true, view, title: conf.title, motto: conf.motto, by, on: !!conf.on, mode: season ? 'season' : 'all', season: sinfo, top, total: R.length, pos, near, list, hidden: !teacher && (g.boardHide || []).includes(aid), showCls: !!conf.cls, my: cls });
     }
@@ -49,7 +49,7 @@ module.exports = async (req, res) => {
     const top = BOARD_TOP[c.board] || 5, pos = R.findIndex(x => x.k === aid) + 1;
     const shown = R.slice(0, top); if (pos > top) shown.push(R[pos - 1]);
     const aw = await pipeline(shown.map(x => ['HMGET', 'mf:acc:' + x.k, 'aw', 'eq']));
-    const row = (x, i) => { let ic = '', at = ''; const q = eqOf(aw[i] && aw[i][1]); try { const a = JSON.parse((aw[i] && aw[i][0]) || '[]')[0]; if (a) { ic = a.ic; at = a.t; } } catch (e) { } return { et: q.t, ef: q.f, i: R.indexOf(x) + 1, n: boardName(x.n, c.boardNames), p: x.p, m: x.m, s: x.s, v: x.v, pct: x.pct, sp: x.sp, me: x.k === aid, ic, at }; };
+    const row = (x, i) => { let ic = '', at = ''; const q = eqOf(aw[i] && aw[i][1], g, false); try { const a = JSON.parse((aw[i] && aw[i][0]) || '[]')[0]; if (a) { ic = a.ic; at = a.t; } } catch (e) { } return { et: q.t, ef: q.f, i: R.indexOf(x) + 1, n: boardName(x.n, c.boardNames), p: x.p, m: x.m, s: x.s, v: x.v, pct: x.pct, sp: x.sp, me: x.k === aid, ic, at }; };
     const list = shown.map(row), me = pos ? list.find(x => x.me) : null;
     const near = pos > 1 ? { n: boardName(R[pos - 2].n, c.boardNames), gap: Math.max(0.1, Math.ceil((R[pos - 2].v - R[pos - 1].v) * 10) / 10), i: pos - 1 } : null;
     const avg = R.length ? Math.round(R.reduce((t, x) => t + x.pct, 0) / R.length * 10) / 10 : 0;

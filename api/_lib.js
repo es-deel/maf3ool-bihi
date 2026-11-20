@@ -107,6 +107,7 @@ function cleanCfg(b, old) {
     else { if (Object.keys(c.byCls).length >= 20 && !c.byCls[scope]) return c; const o = Object.assign({}, c.byCls[scope]); if (b.boardReset) ['board', 'boardBy', 'boardNames', 'boardTitle', 'boardMotto'].forEach(k => { delete o[k]; }); c.byCls[scope] = cleanScoped(b, o); }
   } else cleanScoped(b, c);
   ['reg', 'hints', 'sound', 'fx'].forEach(k => { if (k in b) c[k] = !!b[k]; });
+  if (b.cmp && typeof b.cmp === 'object') c.cmp = { cards: b.cmp.cards !== false, titles: b.cmp.titles !== false, museum: b.cmp.museum !== false, wcard: b.cmp.wcard !== false };   // the rewards that can be switched off: collectible cards, titles and frames, the museum, the weekly card
   if (b.win && typeof b.win === 'object') { const hm = x => /^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(String(x)) ? String(x) : null; c.win = { on: !!b.win.on, from: hm(b.win.from) || '08:00', to: hm(b.win.to) || '14:00' }; }
   if (b.rep && typeof b.rep === 'object') c.rep = cleanRep(b.rep, c.rep);
   if (Array.isArray(b.boardHide)) c.boardHide = [...new Set(b.boardHide.map(x => String(x || '').slice(0, 200)).filter(Boolean))].slice(0, 300);
@@ -189,11 +190,11 @@ function cleanRep(b, old) {
 }
 /* what one student's page receives: the global values with his class's overrides on top */
 function eff(c, cls) {
-  const o = c.byCls && cls ? c.byCls[cls] || {} : {}, r = { v: c.v, reg: c.reg !== false, hints: c.hints !== false, sound: c.sound !== false, fx: c.fx !== false, win: c.win || CFG0.win, rep: c.rep || {}, ct: c.ct || 0, sc: c.sc || { x: true }, cert: c.cert || null };
+  const o = c.byCls && cls ? c.byCls[cls] || {} : {}, r = { v: c.v, reg: c.reg !== false, hints: c.hints !== false, sound: c.sound !== false, fx: c.fx !== false, win: c.win || CFG0.win, rep: c.rep || {}, ct: c.ct || 0, sc: c.sc || { x: true }, cert: c.cert || null, cmp: Object.assign({ cards: true, titles: true, museum: true, wcard: true }, c.cmp) };
   SCOPED.forEach(k => { r[k] = k in o ? o[k] : c[k]; });
   r.board = r.board || 'off'; r.boardBy = r.boardBy || 'pct'; r.boardNames = r.boardNames || 'first'; r.boardTitle = r.boardTitle || ''; r.boardMotto = r.boardMotto || '';
   { const h = hbOf(c); r.hb = { t: !!h.team.on, a: !!h.all.on }; }   // which of the extra boards the students may open
-  r.mu = !!(c.boardHall && c.boardHall.length);   // the museum has something to show
+  r.mu = !!(c.boardHall && c.boardHall.length) && r.cmp.museum;   // the museum has something to show
   r.bseason = c.boardSeason && c.boardSeason.id ? { id: c.boardSeason.id, t: c.boardSeason.t, from: c.boardSeason.from } : null;
   if ((o.cheerAt || 0) < (c.cheerAt || 0)) { r.cheer = c.cheer; r.cheerAt = c.cheerAt; }
   { const w = c.wk; if (w && w.id && w.end > Date.now() && (!w.cls || !w.cls.length || !cls || w.cls.includes(cls))) r.wk = { id: w.id, t: w.t, goal: w.goal, end: w.end, boss: w.boss || null, rw: w.rw || '' }; }

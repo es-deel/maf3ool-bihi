@@ -5005,6 +5005,7 @@ const FRAMES=[
  {id:'royal',n:'ملكي',c:['#c084fc','#7c3aed'],ok:()=>!!Bdg.have().conq,d:'وسام «فاتح الكواكب»'},
  {id:'gem',n:'جوهري',c:['#5eead4','#14b8a6'],ok:()=>!!Bdg.have().gem,d:'وسام «جوهرة»'}];
 const Coll={
+ on(k){const m=(typeof Ctl!=='undefined'&&Ctl.cfg&&Ctl.cfg.cmp)||{};return m[k]!==false},
  /* percent of a planet's lesson points the student has earned */
  pct(id){let g=0,m=0;LQ.forEach(q=>{if(q.tab===id){m+=q.pts;g+=LED[q.key]||0}});return m?Math.round(g/m*100):80},
  rar(id){const p=this.pct(id);return RAR.find(r=>p>=r.min)||RAR[RAR.length-1]},
@@ -5015,34 +5016,35 @@ const Coll={
   Pg.list().forEach(p=>L.push({id:'pg:'+p.id,t:p.t,on:Pg.got(p.id),g:'كوكب'}));
   BADGES.forEach(b=>L.push({id:'bd:'+b.id,t:b.n,on:!!have[b.id],g:'وسام'}));return L},
  /* the words of a title, whoever owns it (for boards) / only if I own it (what I may wear) */
- label(id){const t=this.titles().find(x=>x.id===id);return t?t.t:''},
+ label(id){if(!this.on('titles'))return'';const t=this.titles().find(x=>x.id===id);return t?t.t:''},
  titleText(id){const t=this.titles().find(x=>x.id===id);return t&&t.on?t.t:''},
- frame(id){const f=FRAMES.find(x=>x.id===id);return f&&f.c?f:null},
+ frame(id){if(!this.on('titles'))return null;const f=FRAMES.find(x=>x.id===id);return f&&f.c?f:null},
  get(){const o=store.get('eq',null)||{};return{t:String(o.t||''),f:String(o.f||'')}},
  /* what he actually wears (an item he no longer qualifies for is dropped) */
- eq(){const o=this.get(),f=FRAMES.find(x=>x.id===o.f);return{t:o.t&&this.titleText(o.t)?o.t:'',f:f&&f.ok()?f.id:''}},
+ eq(){if(!this.on('titles'))return{t:'',f:''};const o=this.get(),f=FRAMES.find(x=>x.id===o.f);return{t:o.t&&this.titleText(o.t)?o.t:'',f:f&&f.ok()?f.id:''}},
  set(k,v){const o=Object.assign(this.get(),{[k]:v});store.set('eq',o);Rank.paint();try{Online.ping()}catch(e){}},
  /* the header: the title replaces the rank's words, the frame rings the rank's icon */
  apply(){const e=this.eq(),tx=$('#rankTxt'),ic=$('#rankIc');if(tx&&e.t)tx.textContent=this.titleText(e.t);
   if(ic){const f=this.frame(e.f);ic.style.boxShadow=f?`0 0 0 2px ${f.c[0]},0 0 10px ${f.c[1]}`:'';ic.style.borderRadius=f?'50%':''}},
  /* a quiet notice when something new unlocks (the first run only records what is already his) */
  keys(){return this.titles().filter(x=>x.on).map(x=>x.id).concat(FRAMES.filter(f=>f.id!=='none'&&f.ok()).map(f=>'f:'+f.id)).concat(this.cards().filter(c=>c.got).map(c=>'c:'+c.id+':'+c.r.k))},
- check(){const have=store.get('cu',null),now=this.keys();if(have===null){store.set('cu',now);return}
+ check(){if(!this.on('cards')&&!this.on('titles'))return;const have=store.get('cu',null),now=this.keys();if(have===null){store.set('cu',now);return}
   const nw=now.filter(k=>!have.includes(k));if(!nw.length)return;store.set('cu',now);
   const cd=nw.filter(k=>k[0]==='c')[0],fr=nw.filter(k=>k[0]==='f')[0],tt=nw.filter(k=>k[0]!=='c'&&k[0]!=='f')[0];
   try{if(cd){const c=this.cards().find(x=>x.id===cd.split(':')[1]);Banner.show({ic:c.ic,k:'بطاقة جديدة في مجموعتك!',t:c.t,s:`بطاقة ${c.r.n} · ${AR(c.pct)}٪ من نقاط الكوكب`,sfx:'win',conf:30,cls:'badge',b:['خزانتي',()=>Cab.open()]})}
    else if(fr){const f=FRAMES.find(x=>x.id===fr.slice(2));toast(`${em('gem_stone')} إطار جديد: ${f.n}. غيّره من خزانتي`)}
    else if(tt)toast(`${em('crown')} لقب جديد: ${this.titleText(tt)}. اختره من خزانتي`)}catch(e){}},
- html(){const cs=this.cards(),got=cs.filter(c=>c.got).length,e=this.eq(),T=this.titles();
+ html(){if(!this.on('cards')&&!this.on('titles'))return'';const cs=this.cards(),got=cs.filter(c=>c.got).length,e=this.eq(),T=this.titles();
   const card=c=>c.got?`<div class="hc ${c.r.k}" style="--ca:${c.r.c[0]};--cb:${c.r.c[1]}" title="${esc(c.planet)}"><span class="hc-r">${c.r.n}</span>${em(c.ic,'lg')}<b>${esc(c.t)}</b><small>${esc(c.planet)}</small><small>${AR(c.pct)}٪ من النقاط</small></div>`
    :`<div class="hc lock">${em('locked','lg')}<b>بطاقة ${AR(c.n)}</b><small>تُفتح بإنجاز الكوكب</small></div>`;
-  return`<h3>بطاقاتي <small>${AR(got)} من ${AR(cs.length)}</small></h3>
+  const cardsH=`<h3>بطاقاتي <small>${AR(got)} من ${AR(cs.length)}</small></h3>
    <p class="sub">كل كوكب تُنجزه يمنحك بطاقة بطل. كلما حصلتَ على نقاط أكثر في الكوكب صارت بطاقتك أندر: عادية ثم نادرة ثم ملحمية ثم أسطورية.</p>
-   <div class="hc-g">${cs.map(card).join('')}</div>
-   <h3>لقبي <small>يظهر بجانب اسمك في لوحات الشرف</small></h3>
+   <div class="hc-g">${cs.map(card).join('')}</div>`,
+   eqH=`<h3>لقبي <small>يظهر بجانب اسمك في لوحات الشرف</small></h3>
    <div class="cab-ttl" role="group" aria-label="اختر لقبك"><button type="button" data-act="eqt" data-id="" aria-pressed="${!e.t}">بدون لقب</button>${T.map(x=>`<button type="button" data-act="eqt" data-id="${x.id}" aria-pressed="${e.t===x.id}"${x.on?'':' disabled'} title="${x.on?esc(x.g):'لم يُفتح بعد'}">${x.on?'':'🔒 '}${esc(x.t)}</button>`).join('')}</div>
    <h3>إطاري <small>حلقة حول صورتك في اللوحات</small></h3>
-   <div class="cab-fr" role="group" aria-label="اختر إطارك">${FRAMES.map(f=>{const ok=f.ok();return`<button type="button" data-act="eqf" data-id="${f.id==='none'?'':f.id}" aria-pressed="${e.f===(f.id==='none'?'':f.id)}"${ok?'':' disabled'} title="${ok?'':esc('يُفتح بـ '+f.d)}"><i style="${f.c?`--fa:${f.c[0]};--fb:${f.c[1]}`:''}"></i>${f.n}${ok?'':'<small>🔒</small>'}</button>`}).join('')}</div>`}};
+   <div class="cab-fr" role="group" aria-label="اختر إطارك">${FRAMES.map(f=>{const ok=f.ok();return`<button type="button" data-act="eqf" data-id="${f.id==='none'?'':f.id}" aria-pressed="${e.f===(f.id==='none'?'':f.id)}"${ok?'':' disabled'} title="${ok?'':esc('يُفتح بـ '+f.d)}"><i style="${f.c?`--fa:${f.c[0]};--fb:${f.c[1]}`:''}"></i>${f.n}${ok?'':'<small>🔒</small>'}</button>`}).join('')}</div>`;
+  return(this.on('cards')?cardsH:'')+(this.on('titles')?eqH:'')}};
 Eng.sh.push(()=>Coll.check());Eng.ah.push(()=>Coll.check());Eng.mh.push(()=>Coll.check());Eng.dh.push(()=>Coll.check());
 Eng.ih.push(()=>{Coll.check();Coll.apply()});REHYD.push(()=>{Coll.check();Coll.apply()});
 
@@ -5617,7 +5619,7 @@ const Mine={
       <div class="mn-t">${em('closed_book')}<b>${fa(A.pages,A.pagesT)}</b><small>صفحات الكتاب</small></div><div class="mn-t">${em('1st_place_medal')}<b>${fa(A.nb,A.nbT)}</b><small>الأوسمة</small></div></div>
      <p class="mn-k">من أين جاءت درجتك؟ ${partsTxt(R)}. والنجوم تُحسب من هذا المجموع الكلي.</p>
      <div class="row"><button class="btn ghost sm" type="button" data-act="cab">${em('crown')} افتح خزانتي</button>${gf?`<button class="btn pink sm" type="button" data-act="rg">${GIFT(20)} ${giftTxt(gf)}</button>`:''}</div></section>
-    ${typeof WCard!=='undefined'&&typeof Online!=='undefined'&&Online.acct()?`<section class="mn-c"><h3>${em('sparkles')} بطاقتي الأسبوعية</h3><p>${WCard.wd==null?'بطاقة جميلة بتقدّمك لتريها لأهلك.':`كسبتَ هذا الأسبوع <b>${AR(WCard.wd)}</b> نقطة${WCard.lw?` (الأسبوع الماضي ${AR(WCard.lw)})`:''}. احفظ بطاقتك وأرِها لأهلك!`}</p><div class="row"><button class="btn gold sm" type="button" data-act="wcd">${em('star')} احفظ بطاقتي صورة</button></div></section>`:''}
+    ${typeof WCard!=='undefined'&&typeof Online!=='undefined'&&Online.acct()&&((Ctl.cfg||{}).cmp||{}).wcard!==false?`<section class="mn-c"><h3>${em('sparkles')} بطاقتي الأسبوعية</h3><p>${WCard.wd==null?'بطاقة جميلة بتقدّمك لتريها لأهلك.':`كسبتَ هذا الأسبوع <b>${AR(WCard.wd)}</b> نقطة${WCard.lw?` (الأسبوع الماضي ${AR(WCard.lw)})`:''}. احفظ بطاقتك وأرِها لأهلك!`}</p><div class="row"><button class="btn gold sm" type="button" data-act="wcd">${em('star')} احفظ بطاقتي صورة</button></div></section>`:''}
     <section class="mn-c mn-cr"><h3>${em('trophy')} شهاداتي</h3><div id="mnCr" class="cr-box"></div></section>
     <section class="mn-c mn-bn"><h3>${em('sparkles')} التقييم الإضافي (البونص)</h3>
      <p>تقييم <b>منفصل</b> عن درجتك ونجومك: تكسبه عندما تُعيد الحل أو تحقّق سلسلة إجابات صحيحة متتالية.</p>
@@ -6362,7 +6364,7 @@ const Dash={
   const multi=S.scope==='all',sec=S.sec||'over',now=this.now();
   const scopeSel=`<label class="sr" for="dhSc">اختر الفصل</label><select id="dhSc" class="inp dh-sel"><option value="all"${multi?' selected':''}>كل الفصول</option>${S.classes.map(c=>`<option value="${esc(c)}"${S.scope===c?' selected':''}>${esc(c)}</option>`).join('')}</select>`;
   const top=`<div class="dh-top"><b>${em('man_teacher')} لوحة المعلم</b><span>${scopeSel}<button class="btn ghost sm" id="dhR" type="button">تحديث</button><button class="btn ghost sm" id="dhX" type="button">إغلاق</button></span></div>
-   <div class="dh-nav2"><button class="btn gold sm" id="dhG" type="button">${em('bullseye')} التحكم باللعبة</button><button class="btn gold sm" id="dhCt" type="button">${em('books')} مركز المحتوى</button><button class="btn gold sm" id="dhWk" type="button">${em('trophy')} تحدّي الأسبوع</button><button class="btn sky sm" id="dhCf" type="button">${em('books')} ملف الفصل</button><button class="btn gold sm" id="dhHo" type="button">${em('1st_place_medal')} لوحات الشرف</button><button class="btn sky sm" id="dhRd" type="button">${em('closed_book')} تصميم التقارير</button><button class="btn gold sm" id="dhCe" type="button">${em('1st_place_medal')} الشهادة</button><button class="btn ghost sm" id="dhM2" type="button">إدارة الفصول</button><button class="btn ghost sm" id="dhCm" type="button">وضع الحصة</button><button class="btn ghost sm" id="dhAc" type="button">حسابي</button><button class="btn red sm" id="dhLo" type="button">تسجيل الخروج</button></div>`;
+   <div class="dh-nav2"><button class="btn gold sm" id="dhG" type="button">${em('bullseye')} التحكم باللعبة</button><button class="btn gold sm" id="dhCt" type="button">${em('books')} مركز المحتوى</button><button class="btn gold sm" id="dhWk" type="button">${em('trophy')} تحدّي الأسبوع ووحش الأخطاء</button><button class="btn sky sm" id="dhCf" type="button">${em('books')} ملف الفصل</button><button class="btn gold sm" id="dhHo" type="button">${em('1st_place_medal')} لوحات الشرف</button><button class="btn sky sm" id="dhRd" type="button">${em('closed_book')} تصميم التقارير</button><button class="btn gold sm" id="dhCe" type="button">${em('1st_place_medal')} الشهادة</button><button class="btn ghost sm" id="dhM2" type="button">إدارة الفصول</button><button class="btn ghost sm" id="dhCm" type="button">وضع الحصة</button><button class="btn ghost sm" id="dhAc" type="button">حسابي</button><button class="btn red sm" id="dhLo" type="button">تسجيل الخروج</button></div>`;
   const bind=()=>{$('#dhX',d).onclick=()=>this.close();
    $('#dhR',d).onclick=async()=>{const r=await this.load();if(r.ok)this.classView(d)};
    $('#dhSc',d).onchange=async e=>{S.scope=e.target.value;S.q='';S.sel=new Set();const r=await this.load();if(r.ok)this.classView(d)};
@@ -6488,6 +6490,12 @@ const Dash={
     <small id="dhRc">${live.length?`استلم الإعدادات الحالية ${AR(got)} من ${AR(live.length)} طالبًا متصلًا الآن.`:'لا طلاب متصلون الآن؛ ستصل الإعدادات عند فتحهم الصفحة.'} <button class="dh-x" id="dhRf" type="button">تحديث</button></small></div>
    <div class="dh-set"><b>رسالة للطلاب (شريط أعلى الصفحة)</b><label class="sr" for="dhNt">نص الرسالة</label><input id="dhNt" class="inp" maxlength="200" placeholder="مثال: افتحوا كوكب «المفعول به» الآن" value="${esc(val('notice',''))}"><small>اتركها فارغة لإخفاء الشريط.</small></div>
    <div class="dh-set"><b>إيقاف الحل مؤقتًا</b><label class="dh-sw"><input type="checkbox" id="dhPs"${val('pause',false)?' checked':''}> أوقِف الطلاب (تظهر لهم شاشة انتظار)</label><label class="sr" for="dhPm">رسالة الإيقاف</label><input id="dhPm" class="inp" maxlength="120" placeholder="مثال: انتبهوا إلى الشرح" value="${esc(val('pauseMsg',''))}"></div>
+   ${cl?'':`<div class="dh-set"><b>${em('trophy')} التنافس والمكافآت</b><small>تحكّم في ما يظهر للطلاب من إضافات التنافس.</small>
+    <label class="dh-sw"><input type="checkbox" id="dhCmC"${(c.cmp&&c.cmp.cards===false)?'':' checked'}> بطاقات التجميع (بطاقة لكل كوكب يُنجز)</label>
+    <label class="dh-sw"><input type="checkbox" id="dhCmT"${(c.cmp&&c.cmp.titles===false)?'':' checked'}> الألقاب والإطارات (تظهر بجانب الاسم في لوحات الشرف)</label>
+    <label class="dh-sw"><input type="checkbox" id="dhCmM"${(c.cmp&&c.cmp.museum===false)?'':' checked'}> متحف الأبطال للطلاب</label>
+    <label class="dh-sw"><input type="checkbox" id="dhCmW"${(c.cmp&&c.cmp.wcard===false)?'':' checked'}> البطاقة الأسبوعية في «لوحتي»</label>
+    <div class="row"><button class="btn gold sm" id="dhCmK" type="button">${em('trophy')} تحدّي الأسبوع ووحش الأخطاء</button><button class="btn gold sm" id="dhCmH" type="button">${em('1st_place_medal')} لوحات الشرف والمتحف</button></div></div>`}
    <div class="dh-set"><b>الكواكب (الدروس)</b><small>«مغلق»: يظهر للطالب بقفل ولا يفتحه. «مخفي»: يختفي من الشريط والخريطة والتقرير والخرائط واللوحات، وتُستبعد معه درجاته وتدريباته وألعابه وأسئلته من التقييم ومن الأسئلة العشوائية حتى تُظهره. لا يُحذف شيء: نتائج الطالب تعود إلى درجته فور الإظهار.</small>
     <div class="dh-sum" id="dhSum" role="status"></div>
     <div class="dh-up"><b>التقدّم التدريجي</b><span>افتح الدروس حتى</span><select id="dhUp" class="inp dh-sel" aria-label="افتح الدروس حتى">${lessons.map(t=>`<option value="${t.id}">${esc(t.title)}</option>`).join('')}</select><span>وما بعده</span><select id="dhRest" class="inp dh-sel" aria-label="حالة الدروس التالية"><option value="lock">مغلق</option><option value="hide">مخفي</option></select><button class="btn gold sm" id="dhUpB" type="button">طبّق</button></div>
@@ -6501,6 +6509,7 @@ const Dash={
    <p class="dh-msg" id="dhGm" role="status"></p>
    <div class="row"><button class="btn go sm" id="dhGs" type="button">حفظ التغييرات</button>${cl&&has?'<button class="btn ghost sm" id="dhGr" type="button">إلغاء إعدادات هذا الفصل</button>':''}<button class="btn ghost sm" id="dhGx" type="button">إغلاق</button></div>`,m=>{
    const bo=$('#dhBdO',m);if(bo)bo.onclick=()=>this.honorAdmin();
+   const ck=$('#dhCmK',m),ch=$('#dhCmH',m);if(ck)ck.onclick=()=>this.week();if(ch)ch.onclick=()=>this.hbOpen();
    const msg=t=>{$('#dhGm',m).textContent=t},sels=()=>$$('[data-tb]',m);
    $('#dhGx',m).onclick=()=>this.modal();
    const paintLs=()=>{const cnt={open:0,lock:0,hide:0},hid=new Set();sels().forEach(b=>{cnt[b.value]++;if(b.value==='hide')hid.add(b.dataset.tb);const r=b.closest('.dh-tr');if(r)r.className='dh-tr dh-s-'+b.value});
@@ -6514,7 +6523,7 @@ const Dash={
    $('#dhSco',m).onchange=e=>this.ctl(e.target.value);
    $('#dhRf',m).onclick=async()=>{await this.load();this.ctl(scope)};
    const post=async cfg=>{msg('جارٍ الحفظ…');const r=await Online.api('config',{cfg},S.key);if(!r.ok){msg(this.err(r));if(r.error==='login'){this.close();Online.teacherForget();Online.teacherAsk(Online.why.login)}return false}S.cfg=r.cfg;this.afterCfg();return true};
-   const fields=extra=>Object.assign({scope,notice:$('#dhNt',m).value,pause:$('#dhPs',m).checked,pauseMsg:$('#dhPm',m).value,lock:sels().filter(b=>b.value==='lock').map(b=>b.dataset.tb),hide:sels().filter(b=>b.value==='hide').map(b=>b.dataset.tb),gamesOff:$$('[data-gm]',m).filter(b=>!b.checked).map(b=>b.dataset.gm)},cl?{}:{reg:$('#dhRg',m).checked,sc:{x:$('#dhSx',m).checked},hints:$('#dhHn',m).checked,sound:$('#dhSn',m).checked,fx:$('#dhFx',m).checked,win:{on:$('#dhWn',m).checked,from:$('#dhWf',m).value||'08:00',to:$('#dhWt',m).value||'14:00'}},extra||{});
+   const fields=extra=>Object.assign({scope,notice:$('#dhNt',m).value,pause:$('#dhPs',m).checked,pauseMsg:$('#dhPm',m).value,lock:sels().filter(b=>b.value==='lock').map(b=>b.dataset.tb),hide:sels().filter(b=>b.value==='hide').map(b=>b.dataset.tb),gamesOff:$$('[data-gm]',m).filter(b=>!b.checked).map(b=>b.dataset.gm)},cl?{}:{reg:$('#dhRg',m).checked,sc:{x:$('#dhSx',m).checked},cmp:{cards:$('#dhCmC',m).checked,titles:$('#dhCmT',m).checked,museum:$('#dhCmM',m).checked,wcard:$('#dhCmW',m).checked},hints:$('#dhHn',m).checked,sound:$('#dhSn',m).checked,fx:$('#dhFx',m).checked,win:{on:$('#dhWn',m).checked,from:$('#dhWf',m).value||'08:00',to:$('#dhWt',m).value||'14:00'}},extra||{});
    const ov=$('#dhOv',m);
    $('#dhGs',m).onclick=async()=>{if(cl&&ov&&!ov.checked){if(has&&await post({scope,reset:true}))msg('عاد الفصل إلى إعدادات «كل الفصول» ✓');else if(!has)msg('فعّل «إعدادات خاصة بهذا الفصل» أولًا.');return}
     if(await post(fields())){msg('حُفظت ✓ — تصل إلى الطلاب خلال نحو نصف دقيقة.');await this.load()}};
@@ -8227,7 +8236,7 @@ const Honor={
   if(!V.includes(this.view))this.view=V[0];
   await (this.view==='team'?this.drawTeam(B,first):this.drawCls(B,first,this.view));
   if(!$('#hnHall'))return;this.tabs(B,V);
-  if((Ctl.cfg||{}).mu&&$('.hn-hd',B)&&!$('#hnMu',B)){const w=document.createElement('div');w.className='row hn-mur';w.innerHTML=`<button class="btn ghost sm" type="button" id="hnMu">${em('crown')} متحف الأبطال</button>`;B.appendChild(w);$('#hnMu',w).onclick=()=>{Honor.close();Honor.museum()}}},
+  if((Ctl.cfg||{}).mu&&(Ctl.cfg.cmp||{}).museum!==false&&$('.hn-hd',B)&&!$('#hnMu',B)){const w=document.createElement('div');w.className='row hn-mur';w.innerHTML=`<button class="btn ghost sm" type="button" id="hnMu">${em('crown')} متحف الأبطال</button>`;B.appendChild(w);$('#hnMu',w).onclick=()=>{Honor.close();Honor.museum()}}},
  /* the museum of heroes: every finished season (his class, the best classes and the school's heroes — what the teacher opened) */
  async museum(){const a=Online.acct();if(!a)return;const d=$('#dlg'),close=()=>{d.hidden=true;d.innerHTML=''},M=['🥇','🥈','🥉'];d.hidden=false;
   d.innerHTML=`<div class="dlg-card zoom-in hn-mu" role="dialog" aria-modal="true" aria-labelledby="muT"><h2 id="muT">${em('crown')} متحف الأبطال</h2><p class="sub">أسماء من تفوّقوا في كل موسم، تبقى هنا للأبد.</p><div id="muB" class="mu-b"><p class="sub">جارٍ التحميل…</p></div><div class="row dlg-row"><button class="btn ghost" type="button" data-act="x">إغلاق</button></div></div>`;
